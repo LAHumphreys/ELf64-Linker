@@ -146,8 +146,11 @@ class Segment(Base):
         self.constructors = [str, Hex, Hex, self.SegmentFlags, int2hex]
         self.ProcessLine(line)
         self.data = ""
-        self.offset = Hex("0")
         self.fillToken = Byte("0","0")
+        # segment in out file this segment is "moved" to
+        self.destination = self
+	# Offset within that segment 
+        self.offset = Hex("0")
         self.CalcNextNeighbour()
 
     def CalcNextNeighbour(self):
@@ -219,6 +222,13 @@ class Segment(Base):
         if len(data) > 0 : new.SetData(data)
         return new
 
+    # This is painful - TODO: return and do this nicely
+    def append(self,other):
+        ref = self + other
+        for f in self.fields:
+           self[f] = ref[f]
+        self.CalcNextNeighbour()
+
 
 
 class Symbol(Base):
@@ -267,6 +277,9 @@ class Symbol(Base):
 	   # When we come to want an address we're gong to want the one defined
 	   # symbol has been mapped to
 	   self.sourceFile = sym.sourceFile
+    def GetSegment(self):
+           sidx = self['seg']
+           return self.sourceFile.segments[sidx]
     def __repr__(self):
          return "Symbol"
             
@@ -366,6 +379,8 @@ class Container(object):
           return self.evalKey(key[self.nameField])
        else:
           return self.evalKey(self.itemMap[key])
+    def GetIdx(self,name):
+        return self.itemMap[name]
     def __getitem__(self,key):
        key = self.evalKey(key)
        return self.items[key]

@@ -38,7 +38,7 @@ class ObjectFile(object):
          # Add a reference to this parsed file to our stack
          f = MappedFile(parsedFile)
          for segment in f.segments:
-             if int(segment['size']) >0: self.AddSegment(segment)
+             if int(segment['size']) >0 or segment['name']=='.bss': self.AddSegment(segment)
          for symbol in f.symTable:
               if symbol.commonBlock:
                  self.AddCommonBlock(symbol)
@@ -89,9 +89,11 @@ class ObjectFile(object):
                e += "exists with flags %s" % catMap[name]
                raise Exception(e)
          if segment not in self.segments:
-             # Force a deep copy
+             # Force a deep copy (the ugly way)
              self.segments[name] = Segment(str(segment))
+
              segment.offset = Hex("0")
+             segment.destination = self.segments[name]
              if segment.hasData():
                  self.segments[name].SetData(segment.GetData())
          else:
@@ -103,7 +105,8 @@ class ObjectFile(object):
              else:
                  # Internally this is a deep copy, data including data
                  segment.offset = self.segments[name].nextNeighbour
-                 self.segments[name] = self.segments[name] + segment
+                 self.segments[name].append(segment)
+                 segment.destination = self.segments[name]
 
      def ClassifySegment(self,segment):
          flags = str(segment['flags'].FromSet("APRW"))
@@ -126,15 +129,25 @@ class ObjectFile(object):
              new += buf[cat]
          # we have a new list of items - now install new container
          self.segments=Container(new)
+
          return buf
 
-         
+     def RealignSymbols(self):
+         for s in self.symbols:
+             sourceSegment = s.GetSegment()
+             destinationSegment = sourceSegment.destination
+             addr = destinationSegment['address'] + sourceSegment.offset + s['value']
+             print s['name'], destinationSegment['address'] , sourceSegment.offset , s['value'], addr
+             #update the address
+             s['value'] = addr
+             s['seg'] = self.segments.GetIdx(destinationSegment['name'])
+ 
      def AllocateCateogry(self,category,offset):
          first = True
          for segment in category:
              if not segment['flags']['allocate']: continue
              if not first:
-                offset = offset.nextBoundrary(self.wordSize)
+                offset = offset.nextBoundrary(segment['alignment'])
              else: first = False
              segment['address'] = offset
              offset = segment['address'] + segment['size'] + Hex("-1")
@@ -157,6 +170,9 @@ class ObjectFile(object):
          # BSS etc
          offset = offset.nextBoundrary(self.wordSize)
          offset=self.AllocateCateogry(categories['ARW'],offset)
+
+         # now update the symbol addresses
+         self.RealignSymbols()
 
      def ObjectFile(self):
          file = "LINK\n"
