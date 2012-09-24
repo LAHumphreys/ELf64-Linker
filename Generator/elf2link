@@ -72,6 +72,7 @@ function processSymbolTable {
 
    exec 5<>$headerFile
    readarray -u 5 lines
+   rm $headerFile
    nlines=${#lines[*]}
    for (( i=0; i<$nlines; i++)); do
       line=(${lines[$i]}) 
@@ -212,7 +213,7 @@ function getSegHeaders {
 function getSymbolTable {
     elffile=$1
     headerFile=$2
-    readelf -s $elffile  | awk '/ +[0-9]/ {printf ">%s< %s %s %s %s\n" , $8 , $2,  $7, $4, $5}' > $headerFile
+    readelf -s $elffile  | awk '/^ +[0-9]/ {printf ">%s< %s %s %s %s\n" , $8 , $2,  $7, $4, $5}' > $headerFile
     
 }
 
