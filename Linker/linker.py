@@ -58,6 +58,10 @@ class Flags(object):
             if self[f]:
                foundFlags += f
         return foundFlags
+    def Add(self,flag,alias=""):
+        if not self[f]:
+           self.flags.append(flag)
+           self.icflags.append(flag.upper())
     def __getitem__(self,key):
         if self.ignoreCase:
            key = key.upper()
@@ -185,7 +189,7 @@ class Segment(Base):
            return ''
     def CompatibleWith(self,other):
         return self['name']       == other['name'] and \
-               str(self['flags']) == str(other['flags'])
+               str(self['flags'].known) == str(other['flags'].known)
     def __add__(self,other):
         if not self.CompatibleWith(other):
            err =  "Trying to add two non compatible segments \n"
@@ -220,20 +224,53 @@ class Segment(Base):
 class Symbol(Base):
     class SymbolFlags(Flags):
         def __init__(self,token):
-            aliases = {"Defined": "D", "Undefined": "U"}
+            aliases = {"Defined": "D", "Undefined": "U", \
+                       "Global" : "G", "Local"   :  "L", \
+                       "File"  :  "F", "Section" :  "S", \
+                       "Object":  "O", "Func"    :  "P" }
             ic = True
             super(type(self),self).__init__(token,aliases,ic)
-    def __init__(self,line):
+               
+    def __init__(self,line,parentFile):
         self.title = "Symbol definition"
-        self.expectedFormat = "name value segmentIndex type"
-        self.mandatoryTokens = 4
-        self.maxTokens = 4
-        self.fields = ["name", "value", "seg" , "type"]
-        self.constructors = [str, Hex, int, self.SymbolFlags]
+        self.expectedFormat = "name value segmentIndex type scope"
+        self.mandatoryTokens = 5
+        self.maxTokens = 5
+        self.fields = ["name", "value", "seg" , "type", "scope"]
+        self.constructors = [str, Hex, int, self.SymbolFlags, self.SymbolFlags]
         self.ProcessLine(line)
-        if self['type']['Undefined'] and self['value'] != 0:
+        self.sourceFile=parentFile
+
+        if self['type']['Undefined'] and int(self['value']) != 0:
             self.commonBlock = True
         else: self.commonBlock = False
+
+        if not self['type']['Undefined']: self.resolvesTo=self
+
+    def ResolveSymbol(self,sym):
+        if sym['name'] != self['name']:
+           err = "Can not resolve symbols with different names\n"
+           err += "%s\n" %sym
+           err += "%s" %self
+           raise Exception(err)
+        else: 
+           if self.commonBlock:
+               err = "Error: attempted  to resolve a common block"
+               err += "%s\n" %sym
+               err += "%s" %self
+	       raise Exception(err)
+		    
+	   # This is a bit disgusting - but, by setting a couple of pointers
+	   # we've "resolved" the symbol
+           self.resolvesTo = sym
+	   self.Map = sym.Map
+	   # When we come to want an address we're gong to want the one defined
+	   # symbol has been mapped to
+	   self.sourceFile = sym.sourceFile
+    def __repr__(self):
+         return "Symbol"
+            
+
 
 class Relocation(Base):
     def __init__(self,line):
@@ -260,6 +297,41 @@ class Iter(object):
              i = self.items[self.index]
              self.index += 1
              return i
+
+
+class Reader:
+    def __init__(self,fname):
+        self.fname = fname
+        self.lines = open(fname,"r").readlines()
+        self.seeker = 0
+    
+    def GetNextLine(self):
+        linkValid = False
+        while not linkValid:
+            if self.seeker >= len(self.lines) :
+                raise EOF
+            code = self.CleanLine(self.lines[self.seeker])
+            linkValid = self.ValidateLine(code)
+            self.seeker+=1
+        return code
+
+    def Read(self,count):
+        for i in range(count):
+            yield self.GetNextLine()
+    def ReadLines(self):
+        while 1 :
+            try:
+                yield self.GetNextLine()
+            except EOF, e:
+                break
+
+    def CleanLine (self, line):
+        return line.strip()
+    def ValidateLine(self,line):
+        if len(line) > 0:
+            return line[0] != "#"
+        else:
+            return 0
 # Homogenous data container
 class Container(object):
     # Customise the itterator to deal with our indexes going 1-> end +1
@@ -268,15 +340,21 @@ class Container(object):
             super(type(self),self).__init__(items)
             self.index = 1
             self.length +=1
-    def __init__(self, items=[],nameField='name'):
+    def __init__(self, items=[],nameField='name',dataType=None):
          if len(items) > 0: self.itemType = type(items[0])
-         self.items = items
+         else:              self.itemType = dataType
+         self.items = []
          self.itemMap = {}
          self.nameField = nameField
-         for i in range(len(self.items)):
-             iname = self.items[i][self.nameField]
-             # table count starts at 1
-             self.itemMap[iname] = i+1
+         for i in items:
+            self._addItem(i)
+
+    def _addItem(self, item):
+        iname = item[self.nameField]
+        self.items.append(item)
+        ind = len(self.items)-1
+        # table count starts at 1
+        self.itemMap[iname] = ind+1
     def __len__(self):
        return len(self.items)
     def __iter__(self):
@@ -284,6 +362,8 @@ class Container(object):
     def evalKey(self,key):
        if type(key) == type(0):
           return key-1
+       elif type(key) == self.itemType:
+          return self.evalKey(key[self.nameField])
        else:
           return self.evalKey(self.itemMap[key])
     def __getitem__(self,key):
@@ -319,6 +399,41 @@ class Container(object):
            return ''.join(lines)[:-1]
         else:
            return ""
+
+class Many21Container(Container):
+    def _addItem(self, item):
+        iname = item[self.nameField]
+        self.items.append(item)
+        ind = len(self.items)-1
+        # table count starts at 1
+        if iname in self.itemMap: self.itemMap[iname] += [ind+1]
+        else:                self.itemMap[iname]  = [ind+1]
+    def evalKey(self,key):
+       if type(key) == type(0):
+          return [key-1]
+       elif type(key) == type([0]):
+          return [k-1 for k in key] 
+       elif type(key) == self.itemType:
+          return self.evalKey(key[self.nameField])
+       else:
+          return self.evalKey(self.itemMap[key])
+    def __getitem__(self,key):
+       if type(key) == type(0):
+           key = self.evalKey(key)[0]
+           return self.items[key]
+       else:
+	   #If we're doing list indexing, returning an empty list is valid
+           try:
+               key = self.evalKey(key)
+               return [ self.items[i] for i in key]
+	   except KeyError, e:
+	       return []
+    def __setitem__(self,key,item):
+       raise Exception('setter has no meaning for a many21 container')
+    def append(self,item):
+       self._addItem(item)
+    def __repr__(self):
+        return 'Many21 Container'
 
 class Reader:
     def __init__(self,fname):
@@ -373,8 +488,8 @@ class Parser:
 
      def ReadSymTable(self):
          expectedDefs = self.header['nsyms']
-         symbols = [ Symbol(l) for l in self.reader.Read(expectedDefs)]
-         self.symTable = Container(symbols)
+         symbols = [ Symbol(l,self) for l in self.reader.Read(expectedDefs)]
+         self.symTable = Many21Container(items=symbols)
 
      def ReadRelocationTable(self):
          expectedDefs = self.header['nrels']

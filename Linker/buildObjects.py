@@ -7,6 +7,11 @@ class MappedFile(Parser):
         self.source  = parsedFile
         self.segments = copy.deepcopy(parsedFile.segments)
         self.symTable = copy.deepcopy(parsedFile.symTable)
+        self.undefinedSymbols = Many21Container(dataType=type(Symbol))
+        # Update the file pointer
+        for sym in self.symTable: 
+            sym.sourceFile = self
+            if sym['type']['Undefined']: self.undefinedSymbols.append(sym)
 
         
 # for LINK version
@@ -25,6 +30,7 @@ class ObjectFile(object):
          self.start += self.headerSize
          self.wordSize = Hex(hex(4))
          self.files = []
+         self.symbols = Many21Container(dataType=type(Symbol))
 
      
      def LinkInFile(self,parsedFile):
@@ -36,16 +42,36 @@ class ObjectFile(object):
          for symbol in f.symTable:
               if symbol.commonBlock:
                  self.AddCommonBlock(symbol)
+              elif not symbol['type']['Undefined']:
+                 self.DefineSymbol(symbol)
+         self.files.append(f)
+                 
+     def DefineSymbol(self, symbol):
+         # Look for any matching undefined symbols and define them
+         if self.SymbolIsUseful(symbol):
+            self.symbols.append(symbol)
+            for f in self.files:
+                for sym in f.undefinedSymbols[symbol]:
+                    sym.ResolveSymbol(symbol)
+        
+     def SymbolIsUseful(self,symbol):
+        if not symbol['scope']['Global']:
+            return False
+        usefulTypes = ["Object", "Func"]
+        flags = symbol['type']
+        for t in usefulTypes:
+            if flags[t]: return True
+        return False
      def AddCommonBlock(self, symbol):
         if (not symbol['type']['undefined']) or symbol['value'] == 0:
-           e =  "Can not add commob block from ths symbol"
+           e =  "Can not add common block from ths symbol"
            e += "\n%s\n" % (symbol)
            e += "Symbol is not a common block"
            raise Exception(e)
         name = "__common__.%s" % symbol['name']
         addr = 0
         size = symbol['value']
-        flags = "RW" # add to .bss
+        flags = "ARW" # add to .bss
         seg = "%s %s %s %s" % (name, addr, size, flags)
         self.AddSegment(Segment(seg))
          
@@ -136,6 +162,7 @@ class ObjectFile(object):
          file = "LINK\n"
          file += "%s\n" %self.GetHeader()
          file += "%s\n" %self.segments
+         file += "%s\n" %self.symbols
          file += "%s\n" %self.GetData()
          return file
 
