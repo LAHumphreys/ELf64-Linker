@@ -137,7 +137,6 @@ class ObjectFile(object):
              sourceSegment = s.GetSegment()
              destinationSegment = sourceSegment.destination
              addr = destinationSegment['address'] + sourceSegment.offset + s['value']
-             print s['name'], destinationSegment['address'] , sourceSegment.offset , s['value'], addr
              #update the address
              s['value'] = addr
              s['seg'] = self.segments.GetIdx(destinationSegment['name'])
@@ -184,8 +183,8 @@ class ObjectFile(object):
 
      def GetHeader(self):
         nsegs = len(self.segments)
-        nrelocs = 0 
-        nsyms = 0
+        nsyms = len(self.symbols) 
+        nrelocs = 0
         header = "%s %s %s" % (nsegs, nsyms, nrelocs) 
         return Header(header)
 
