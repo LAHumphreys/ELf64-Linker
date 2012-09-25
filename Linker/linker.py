@@ -1,9 +1,13 @@
-#!/usr/bin/python 
+#
+# copyright Luke Humphreys september 2012
+#
 
 class EOF(Exception): pass
 
 def int2hex(i):
     return Hex(hex(int(i)))
+# Helper object to wrap around python's int (which is perfectly capable of
+# handling base 16). String representation doesn't display the "0x" prefix
 class Hex(object):
     def __init__(self,token):
         self.value = int(token,16)
@@ -22,6 +26,7 @@ class Hex(object):
         s =  hex(self.value)
         return s[2:]
 
+# A byte is represented by to Hex digits
 class Byte(object):
     def __init__(self,ltoken,rtoken):
         if type(ltoken) != type(Hex('0')):
@@ -41,6 +46,8 @@ class Byte(object):
         return str(self.value).zfill(2)
 
 
+# The LINK format uses several different types of flags. This defines a common
+# container for reading and managing these (single letter) flags
 class Flags(object):
     def __init__(self,token,aliases={},ic=True):
         self.ignoreCase = ic
@@ -84,6 +91,15 @@ class Flags(object):
         return ''.join(sorted(flags))
 
 
+# The task of reading in and managing the different tables / sections from the
+# LINK file is largely common. This base class is extended into a Symtable,
+# segment etc
+#
+# To use the child class defines its fields, and constructors and the count of
+# tokens it expects. Then passing in a single line string the base class using
+# the constructors to perform validation and to store the objects
+#
+# See the Header object for an example
 class Base(object):
     def ProcessLine(self,line):
         tokens = line.split()
@@ -122,12 +138,21 @@ class Base(object):
 
 class Header(Base):
     def __init__(self,line):
+        # Base uses these to print helpful error messages
         self.title = "Header block"
         self.expectedFormat = "#segs #syms #relocs"
+
+        # The first # of tokes in fields that must be constructed or an error is thrown
         self.mandatoryTokens = 3
+	# Sometimes additional information we don't care about might be
+	# present, extra tokens up to # maxTokens will be stored and printed 
         self.maxTokens = 3
+        # Field names - indexing the class will retrieve / set the values
         self.fields = ["nsegs", "nsyms", "nrels"]
+        # How to construct each field from string token (should be callable)
         self.constructors = [int, int, int]
+
+        # Call the base class to do the hard work
         self.ProcessLine(line)
 
 class Segment(Base):
@@ -138,6 +163,7 @@ class Segment(Base):
             super(type(self),self).__init__(token,aliases,ic)
         
     def __init__(self,line):
+        # Configure the base
         self.title = "Segment definition"
         self.expectedFormat = ".name address size flags"
         self.mandatoryTokens = 5
@@ -145,12 +171,20 @@ class Segment(Base):
         self.fields = ["name", "address", "size" , "flags", "alignment"]
         self.constructors = [str, Hex, Hex, self.SegmentFlags, int2hex]
         self.ProcessLine(line)
+         
+        # Add additional members
+	
+        # binary data to be stored here
         self.data = ""
+	# Token to pad data with (e.g when aligning a new segment)
         self.fillToken = Byte("0","0")
-        # segment in out file this segment is "moved" to
+        # Where this segment was written added to
         self.destination = self
 	# Offset within that segment 
         self.offset = Hex("0")
+	
+	# Based on the configured alignment calc the address a new segment will
+	# be written to
         self.CalcNextNeighbour()
 
     def CalcNextNeighbour(self):
@@ -165,6 +199,9 @@ class Segment(Base):
             
     def hasData(self): 
         return self['flags']['present'] and int(self['size']) > 0
+    
+    # Set the binary data for this segment. Make sure it conforms to the values
+    # configured in the header
     def SetData(self,line):
         try:
           tokens = [Hex(t) for t in line]
@@ -185,11 +222,13 @@ class Segment(Base):
 
         self.bytes = [Byte(tokens[i],tokens[i+1]) for i in range(0,len(tokens),2)]
 
+    # String repr of the data
     def GetData(self):
         if self.hasData():
            return ''.join([str(b) for b in self.bytes])
         else:
            return ''
+    # Is it possible to add another segment?
     def CompatibleWith(self,other):
         return self['name']       == other['name'] and \
                str(self['flags'].known) == str(other['flags'].known)
@@ -205,7 +244,7 @@ class Segment(Base):
         align   = self['alignment']
         oalign  = other['alignment']
         if align != oalign:
-           err =   "Trying to add two non compatible segments \n"
+           err =   "Trying to add two incompatible segments \n"
            err +=  "( alignments do not match )\n"
            err += "self: %s \n other: %s" % (self, other)
         seg = "%s %s %s %s %s" %(name, address, size, flags, align)

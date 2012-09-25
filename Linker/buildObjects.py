@@ -1,3 +1,4 @@
+# copyright Luke Humphreys September 2012
 from linker import *
 import copy
 
