@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Luke Humphreys September 2012
+# Copyright Luke Humphreys September 2012
 #
 # For simplicity the various functions load the results into a set of global
 # variables. 
