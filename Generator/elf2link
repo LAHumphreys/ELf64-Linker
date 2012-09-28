@@ -13,24 +13,30 @@
 # Flags / options
 verboseLINK=1
 file=$1
-
+arch=x86_64
 # Constants
 blankMarker="__blank__"
+relocParser="$(dirname $0)/reloc.$arch.awk"
 
 #Global Variables to populate
 declare -a segmentHeaders
 declare -a segmentData
 declare -a symbolTable
+declare -a relocTable
 
 function main {
     pushd . >/dev/null || exit  
     cp $file /tmp || exit
+    cp $relocParser /tmp || exit
     cd /tmp || exit
     file=$(basename $file)
     processSegmentHeaders $file
     processSymbolTable $file
+    processRelocTable $file
     printLINKFile
+    cd /tmp # just to make sure
     rm $file
+    rm $(basename $relocParser)
 }
 
 # Awk's does the messy bit and extracts the raw data from objdump, we then
@@ -99,6 +105,17 @@ function processSymbolTable {
    done
 }
 
+# awk's does all the work here  - just read the result into the relocTable
+function processRelocTable {
+   fileName=$1
+   headerFile="$fileName.headers"
+   getRelocTable $fileName $headerFile
+
+   exec 5<>$headerFile
+   readarray -u 5 relocTable
+   rm $headerFile
+}
+
 # We need some convention to handle blank symbol names
 # arg1: name
 function extractSymbolName {
@@ -138,7 +155,7 @@ function printLINKFile {
     printHeader
     printSegmentHeaders
     printSymbolTable
-    printLINKComments "relocation table has not been copied"
+    printRelocTable
     printDataTable
 }
 
@@ -217,10 +234,20 @@ function getSymbolTable {
     
 }
 
+
+# Here we have no choice but to dig into the arch. specific ABI. call an
+# external awk file and we can easily switch it for different archs (if we had
+# the right script). 
+function getRelocTable {
+    elffile=$1
+    headerFile=$2
+    readelf -ra $elffile  | awk -f $relocParser > $headerFile || exit
+}
+
 function printHeader {
    nsegs="${#segmentHeaders[*]}"
    nsyms="${#symbolTable[*]}"
-   nrelocs="0"
+   nrelocs="${#relocTable[*]}"
    printLINKComments "#file header:"
    printLINKComments "nsegs nsyms nrels"
    echo "$nsegs $nsyms $nrelocs"
@@ -247,6 +274,13 @@ function printSymbolTable {
     printLINKComments "name value segmentIndex type scope"
     for (( i=0; i<${#symbolTable[*]}; i++)); do
         echo ${symbolTable[$i]}
+    done
+}
+function printRelocTable {
+    printLINKComments "Reloc Table"
+    printLINKComments "name value segmentIndex type scope"
+    for (( i=0; i<${#relocTable[*]}; i++)); do
+        echo ${relocTable[$i]}
     done
 }
 
