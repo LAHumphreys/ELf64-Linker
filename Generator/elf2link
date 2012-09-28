@@ -23,6 +23,7 @@ declare -a segmentHeaders
 declare -a segmentData
 declare -a symbolTable
 declare -a relocTable
+fileFlags=$(readelf -h $1  | grep Data: | awk '/2.s complement/ {printf "%s" ,2} /little endian/ {printf "%s", "L"} /big endian/ {printf "%s", "B"} END {printf "\n"}')
 
 function main {
     pushd . >/dev/null || exit  
@@ -249,8 +250,8 @@ function printHeader {
    nsyms="${#symbolTable[*]}"
    nrelocs="${#relocTable[*]}"
    printLINKComments "#file header:"
-   printLINKComments "nsegs nsyms nrels"
-   echo "$nsegs $nsyms $nrelocs"
+   printLINKComments "nsegs nsyms nrels flags"
+   echo "$nsegs $nsyms $nrelocs $fileFlags"
 }
 
 function printSegmentHeaders {

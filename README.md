@@ -1,10 +1,12 @@
-
-
-
 Given the messy nature of dealing with "real" object files it has been necessary to expand the format definition from the book. Changes are listed here:
 
 Symbols:
 Some convention for empty symbol names is required. "__blank__" has been chosen
+
+The file header has an extra field, flags,  which tells the linker how to handle the file. Flags
+     2: Negative numbers are represented as a 2's compliment of a number
+     L: addresses are little endian
+     B: addresses are big endian
 
 The symbol definition has an extra flag: "scope" tacked on to the end:
      G: Global
