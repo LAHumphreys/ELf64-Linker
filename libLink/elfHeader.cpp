@@ -1,6 +1,7 @@
 #include <cstring>
 #include <string>
 #include <sstream>
+#include <fstream>
 #ifndef ELFHEADERX86_64
    #include "elfHeader.h"
 #endif
@@ -11,6 +12,7 @@ ElfHeaderX86_64::ElfHeaderX86_64 (string linkHeader)
     if ( false )  { // regex validation of linkHeader to prevent nastyness
         throw "Invalid LINK header: " + linkHeader;
     }
+    readPtr = (char * ) & data;
     stringstream s(linkHeader);
     s >> nsections;
     s >> nsyms;
@@ -59,4 +61,8 @@ void ElfHeaderX86_64::PopulateIdentity() {
     data.e_ident[6] = EV_CURRENT;
 
     memset(data.e_ident+7,0,EI_NIDENT - 7);
+}
+
+void ElfHeaderX86_64::Write(ofstream &file) {
+    file.write(readPtr,sizeof(data));
 }

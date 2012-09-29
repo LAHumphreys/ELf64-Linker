@@ -7,12 +7,8 @@
 
 using namespace std;
 
-void LinkReader::test () {
-    string l = GetNextLine();
-    cout << l << endl;
-}
 LinkReader::LinkReader(string fname): 
-     commentLine(" *#.*"), emptyLine(" *")
+     commentLine(" *#.*"), emptyLine(" *") //Miraculously this tiny bit of regex actually works on gcc
 {
     f.open(fname);
 }

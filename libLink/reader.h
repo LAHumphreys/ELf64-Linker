@@ -18,7 +18,6 @@ using namespace std;
 */
 class LinkReader {
 public:
-    void test();
     /**
         \fn      LinkReader
         \brief   LinkReader constructor

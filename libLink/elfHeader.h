@@ -14,9 +14,11 @@ using namespace std;
 enum Endian { LitleEndian, BigEndian};
 
 class ElfHeaderX86_64 {
+    friend class X86Parser;
 public:
     ElfHeaderX86_64 (string linkHeader);
     void PopulateIdentity();
+    void Write(ofstream &file);
 
 private:
     Elf64_Ehdr data;
@@ -26,4 +28,5 @@ private:
     int nprog;
     int nsyms;
     int nrelocs;
+    char * readPtr;
 };
