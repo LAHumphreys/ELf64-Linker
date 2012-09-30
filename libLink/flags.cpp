@@ -1,7 +1,7 @@
 #ifndef FLAGS_H
    #include "flags.h"
 #endif
-#include <string>
+#include <sstream>
 Flags::Flags (string flags) {
     flagCount=0;
     for (auto flag: flags ) {
@@ -83,13 +83,15 @@ void Flags::SetFlag(string flag, bool newStatus) {
             auto invertedMask = ~flagMask;
             mask &=invertedMask;
         }
+    } else {
+        throw "Add the flag first you moron";
     }
 }
 
 string Flags::LinkMask() {
-    string mask = "";
+    ostringstream mask;
     for (auto flag: flags) {
-        if (this->operator[](flag.first)) mask+=flag.second;
+        if (this->operator[](flag.first)) mask << flag.first;
     }
-    return mask;
+    return mask.str();
 }

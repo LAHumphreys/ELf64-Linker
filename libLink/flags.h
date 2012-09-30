@@ -2,7 +2,6 @@
 #include <string>
 #ifndef FLAGS_H
    #define FLAGS_H
-#endif
 
 using namespace std;
 
@@ -41,3 +40,4 @@ private:
     unsigned long mask;
     short flagCount;
 };
+#endif

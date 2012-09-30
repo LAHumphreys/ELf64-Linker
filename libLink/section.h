@@ -32,6 +32,10 @@ public:
     // Data
     Elf64_Off& DataStart() { return elfHeader.sh_offset; }
     uint64_t& DataSize() { return elfHeader.sh_size; }
+    uint64_t& ItemSize() { return elfHeader.sh_entsize; }
+
+    // Calculated Properties
+    uint64_t NumItems() { return DataSize() / ItemSize(); }
 
 
 
