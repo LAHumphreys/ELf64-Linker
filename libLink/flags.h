@@ -30,6 +30,10 @@ public:
 
     // Test flag exists
     bool operator[](const string &flag);
+    bool operator[](char flag);
+
+    // Masks
+    string LinkMask();
 
 private:
     std::map<char, long> flags;

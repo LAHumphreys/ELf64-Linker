@@ -1,7 +1,7 @@
 INCLUDE_FLAGS="-I linux"
 DEBUG_FLAGS="-ggdb"
-elf2Link: elf2Link.cpp elfReader.o elfParser.o elfHeader.o section.o flags.o stringTable.o
-	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -std=c++0x -o elf2Link elf2Link.cpp elfParser.o elfReader.o elfHeader.o section.o flags.o stringTable.o
+elf2Link: elf2Link.cpp elfReader.o elfParser.o elfHeader.o section.o flags.o stringTable.o symbol.o
+	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -std=c++0x -o elf2Link elf2Link.cpp elfParser.o elfReader.o elfHeader.o section.o flags.o stringTable.o symbol.o
 
 main: main.cpp reader.o Makefile elfHeader.o x86Parser.o section.o stringTable.o flags.o elf2LINK
 	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -std=c++0x -o main main.cpp x86Parser.o reader.o elfHeader.o section.o stringTable.o flags.o
@@ -29,6 +29,8 @@ elfReader.o: elfReader.h elfReader.cpp
 
 elfParser.o: elfParser.h elfParser.cpp
 	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -c -std=c++0x -o elfParser.o elfParser.cpp
+symbol.o: symbol.cpp symbol.cpp
+	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -c -std=c++0x -o symbol.o symbol.cpp
 
 clean: 
 	rm *.o main elf2Link

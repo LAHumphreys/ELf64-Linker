@@ -18,12 +18,18 @@ public:
     ~Section ();
     Elf64_Xword GetFlags();
 
-    // Data
+    // attributes
     size_t Size() {return sizeof(Elf64_Shdr);}
     Elf64_Addr& Address() { return elfHeader.sh_addr; }
+
+    // properties
     bool Writeable() { return elfHeader.sh_flags & SHF_WRITE; }
     bool Allocate() { return elfHeader.sh_flags &  SHF_ALLOC; }
-    bool Executable(){ return elfHeader.sh_flags &SHF_EXECINSTR; }
+    bool Executable(){ return elfHeader.sh_flags & SHF_EXECINSTR; }
+    bool IsSymTable() { return elfHeader.sh_type &  SHT_SYMTAB; }
+    string Name() { return name; }
+
+    // Data
     Elf64_Off& DataStart() { return elfHeader.sh_offset; }
     uint64_t& DataSize() { return elfHeader.sh_size; }
 

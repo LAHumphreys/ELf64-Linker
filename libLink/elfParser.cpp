@@ -5,9 +5,13 @@
 using namespace std;
 
 ElfParser::ElfParser(const string &fname) : reader(fname) {
-    header = new ElfHeaderX86_64(reader,0);
-    sections.resize(header->Sections());
     long stringTable;
+
+    // Load the header from file
+    header = new ElfHeaderX86_64(reader,0);
+
+    // Declare an array to hold the sections
+    sections.resize(header->Sections());
 
     // Read in the section constants
     int readAddr = header->SectionTableStart();
@@ -25,6 +29,9 @@ ElfParser::ElfParser(const string &fname) : reader(fname) {
     for ( int i=0; i<header->Sections(); ++i) {
         sections[i] = new Section(reader, readAddr,
                                           stringTable);
+        if (sections[i]->Name() == ".symtab" ) {
+            // load the sym table
+        }
         readAddr += hdrSize;
     }
 }

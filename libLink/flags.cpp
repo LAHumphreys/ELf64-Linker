@@ -44,6 +44,9 @@ bool Flags::AddName(const char flag, const string &name ) {
     return true;
 }
 
+bool Flags::operator[] (char flag) {
+    return flags[flag] & mask;
+}
 bool Flags::operator[] (const string &flag) {
     char cflag;
     if ( names.count(flag) ) {
@@ -81,4 +84,12 @@ void Flags::SetFlag(string flag, bool newStatus) {
             mask &=invertedMask;
         }
     }
+}
+
+string Flags::LinkMask() {
+    string mask = "";
+    for (auto flag: flags) {
+        if (this->operator[](flag.first)) mask+=flag.second;
+    }
+    return mask;
 }
