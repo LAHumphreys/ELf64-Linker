@@ -21,8 +21,8 @@ In the books definition a symbol has two types, D and U, but the other types ret
      
 
 
-Segment Headers:
-An alignment value (int) has been tacked on to the end of the segment header. Value is in bytes
+Section  Headers:
+An alignment value (int) has been tacked on to the end of the section header. Value is in bytes
 
 There are now a whole bunch of extra flags. Here is the mapping from objdump to LINK:
      P: CONTENTS
@@ -32,6 +32,21 @@ There are now a whole bunch of extra flags. Here is the mapping from objdump to 
      D: DATA
      C: CODE
 
+Program Headers:
+Elf distinguishes between section and program blocks. Sections are used by linkers / debuggers to fiddle with the object file. Program headers tell the Kernel what bits of of the file to load into memorry.
+
+So, all the code sections for an object file will be in consecutive blocks of memory and a single program header directs the Kernel to load it as a segment into memory.
+
+Format
+addr size(file) size(mem) align type flags 
+
+addr: Hex (virtual) address data is to be loaded into
+size: Hex size of the image in memory, and in the file. 
+align: data will be paded to this boundrary
+flags: Executable: E, Readable: R, Writeable: W
+type:  Load: L, Dynamic Loading: D, Note (comment): N, 
+
+For more information see the elf.h man page...
 Relocation:
 
 whie the output of readelf and the huge output table in [1] are somewhat intimidating, it seems like this mess of information can actually be reduced right down. 
@@ -39,8 +54,8 @@ whie the output of readelf and the huge output table in [1] are somewhat intimid
 loc seg ref type x86_type add 
 
 loc: HEX offset within the segment seg to place the result
-seg: Segment to place the result
-ref: Where to find the input data. Depending on type this either a segment index (Name) or symbol (name)
+seg: section to place the result
+ref: Where to find the input data. Depending on type this either a section index (Name) or symbol (name)
 type: How to handle this relocation entry, see below
 x86_type: Type of relocation readelf reports this as. This is ignored by the linker, but may be used by link2elf to recover type information
 add: Addendum to add to the value of symbol( Signed Hex)
