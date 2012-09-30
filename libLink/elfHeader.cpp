@@ -7,16 +7,26 @@
 #endif
 
 using namespace std;
+ElfHeaderX86_64::ElfHeaderX86_64 (ElfReader &reader, int offset)
+{
+    // over write the data in our data POD 
+    reader.Read(0,&data,this->Size());
+}
 ElfHeaderX86_64::ElfHeaderX86_64 (string linkHeader)
      /*:validate("^ *[0-9]+ +[0-9]+ +[0-9]+$") */ {
     if ( false )  { // regex validation of linkHeader to prevent nastyness
         throw "Invalid LINK header: " + linkHeader;
     }
+    int nsections;
+    int nprog;
+    int nsyms;
+    int nrelocs;
     readPtr = (char * ) & data;
     stringstream s(linkHeader);
     s >> nsections;
     s >> nsyms;
     s >> nrelocs;
+
 
     endian = LitleEndian;
     PopulateIdentity();
@@ -65,4 +75,7 @@ void ElfHeaderX86_64::PopulateIdentity() {
 
 void ElfHeaderX86_64::Write(ofstream &file) {
     file.write(readPtr,sizeof(data));
+}
+size_t ElfHeaderX86_64::Size() {
+    return sizeof(Elf64_Ehdr);
 }

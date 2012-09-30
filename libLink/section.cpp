@@ -3,9 +3,25 @@
 #endif
 #include <sstream>
 #include "stringTable.h"
+#include "elfReader.h"
+
+Section::Section(ElfReader &reader, int offset, int stable): sh_flags(""), data(NULL) {
+    // over write the data in our data POD 
+    reader.Read(offset,&elfHeader,this->Size());
+    // Get our name
+    reader.ReadString( stable + elfHeader.sh_name, name);
+
+    // Get our data
+    data = new char[DataSize()];
+    reader.Read(DataStart(),data,DataSize());
+}
+
+Section::~Section () {
+    if (data) delete [] data;
+}
 
 Section::Section(string header, StringTable * stable)
-    : sh_flags("") {
+    : sh_flags(""), data(NULL) {
     sh_flags.AddFlag('W', "SHF_WRITE");
     sh_flags.AddFlag('A', "SHF_ALLOC");
     sh_flags.AddFlag('C', "SHF_EXECINSTR");
@@ -13,7 +29,6 @@ Section::Section(string header, StringTable * stable)
 
     // Build the flags
     stringstream s(header);
-    string name;
     string flags;
     Elf64_Addr addr;
     Elf64_Xword size;
