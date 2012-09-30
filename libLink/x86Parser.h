@@ -1,5 +1,7 @@
 #include "reader.h"
 #include "elfHeader.h"
+#include "section.h"
+#include "stringTable.h"
 #ifndef X86_64Parser
     #define X86_64Parser
 #endif
@@ -13,5 +15,6 @@ public:
 private:
    LinkReader reader;
    ElfHeaderX86_64 *header;
+   StringTable stringTable;
     /* data */
 };

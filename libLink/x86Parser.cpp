@@ -1,3 +1,4 @@
+#include <iostream>
 #ifndef X86_64Parser
     #include "x86Parser.h"
 #endif
@@ -16,6 +17,7 @@ X86Parser::X86Parser (string fname ) : reader(fname) {
     /*if ( header->nprog == 0 ) {
         throw "Invlaid LINK header line in LINK file";
     }*/
+    Section *s = new Section(reader.GetNextLine(),&stringTable);
 }
 
 void X86Parser::Write(string fname) {
