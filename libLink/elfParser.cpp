@@ -9,11 +9,21 @@ using namespace std;
 
 ElfParser::ElfParser(const string &fname) : reader(fname) {
 
+    // if we try to index with these before they are set we want an error to
+    // happen
     symidx=-1;
     stridx=-1;
+
     // Load the header from file
     header = new ElfHeaderX86_64(reader,0);
 
+    ReadSections();
+
+    ReadSymbols();
+
+}
+
+void ElfParser::ReadSections() {
     // Declare an array to hold the sections
     sections.resize(header->Sections());
 
@@ -38,8 +48,6 @@ ElfParser::ElfParser(const string &fname) : reader(fname) {
        readAddr += hdrSize;
     }
     stringTable = sections[stridx]->DataStart();
-    ReadSymbols();
-
 }
 
 ElfParser::~ElfParser () {

@@ -13,8 +13,10 @@
 class ElfParser {
 public:
     ElfParser (const string &fname);
-    void ReadSymbols();
     virtual ~ElfParser ();
+protected:
+    void ReadSymbols();
+    void ReadSections();
 
 private:
     long stringTable;
