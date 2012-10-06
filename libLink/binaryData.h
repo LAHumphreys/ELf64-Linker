@@ -3,12 +3,12 @@
 
 #include "symbol.h"
 #include <sstream>
-#include "elfReader.h"
+#include "binaryReader.h"
 using namespace std;
 
 class Data {
     public:
-        Data (ElfReader &reader, long offset, long stable);
+        Data (const BinaryPosition& p, long size);
         ~Data();
 
         const unsigned char * Raw() { return data; }

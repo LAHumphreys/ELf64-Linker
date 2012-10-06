@@ -6,22 +6,18 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
-
-
-#include <iostream>
+#include "elfReader.h"
 
 using namespace std;
 
-#ifndef ElfReader_H
-   #include "elfReader.h"
-#endif
 
 
-ElfReader::ElfReader ( const string &fname ):file(NULL) {
+ElfFileReader::ElfFileReader ( const string &fname ):file(NULL) {
     OpenFile(fname);
+    this->fname = fname;
 }
 
-void ElfReader::OpenFile ( const string &fname ) {
+void ElfFileReader::OpenFile ( const string &fname ) {
 
     // kill the old file
     if (file) {
@@ -40,17 +36,25 @@ void ElfReader::OpenFile ( const string &fname ) {
     fclose(fh);
 }
 
-ElfReader::~ElfReader () {
+ElfFileReader::~ElfFileReader () {
     // kill the old file
     if (file) {
        munmap(file,statBlock.st_size);
     }
 }
 
-void ElfReader::ReadString(long offset, string &dest) {
+void ElfFileReader::ReadString(long offset, string &dest) const {
     const char * str = this->sptr + offset;
     dest += str;
 }
-void ElfReader::Read(long offset, void *dest, size_t size) {
+void ElfFileReader::Read(long offset, void *dest, long size) const {
     memcpy(dest,sptr + offset,size);
+}
+
+SimpleBinaryPosition ElfFileReader::Begin() const {
+    return SimpleBinaryPosition(*this,0);
+}
+
+SimpleBinaryPosition ElfFileReader::Pos(long offset) const {
+    return SimpleBinaryPosition(*this,offset) ;
 }

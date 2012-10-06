@@ -2,15 +2,16 @@
 #include <vector>
 #include "flags.h"
 #include "elf.h"
-#include "elfReader.h"
 using namespace std;
 #ifndef ProgramX86_64
 #define ProgramX86_64
 
 class Section;
+class BinaryPosition;
 class ProgramHeader {
 public:
-    ProgramHeader (ElfReader& , long , vector< Section *>& );
+    ProgramHeader ( const BinaryPosition&, 
+                    const vector< Section *>& sections );
     virtual ~ProgramHeader (){};
 
     // Methods

@@ -5,11 +5,10 @@
 #include <string>
 #include <vector>
 #include "section.h"
-#include "elfReader.h"
+#include "binaryReader.h"
 
 #ifndef ELFHEADERX86_64
-   #define ELFHEADERX86_64 1
-#endif
+#define ELFHEADERX86_64 1
 
 using namespace std;
 
@@ -19,7 +18,7 @@ class ElfHeaderX86_64 {
     friend class X86Parser;
 public:
     ElfHeaderX86_64 (string linkHeader);
-    ElfHeaderX86_64 (ElfReader &reader, long offset);
+    ElfHeaderX86_64 (const BinaryPosition &reader);
     void PopulateIdentity();
     void Write(ofstream &file);
 
@@ -43,3 +42,4 @@ private:
     char * readPtr;
     std::vector<Section*> sections;
 };
+#endif

@@ -1,9 +1,9 @@
-#include "data.h"
+#include "binaryData.h"
 #include <sstream>
 
-Data::Data (ElfReader &reader, long offset, long size) {
+Data::Data (const BinaryPosition &p, long size) {
     data = new unsigned char[size];
-    reader.Read(offset,data,size);
+    p.Read(data,size);
     this->size = size;
 }
 

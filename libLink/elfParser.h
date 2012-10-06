@@ -6,14 +6,13 @@
 #include "reader.h"
 #include <forward_list>
 #include "reloc.h"
-#ifndef ElfParser_H
-   #define ElfParser_H
-#endif
+
 /**
     \class   ElfParser
     \brief   Read a valid ELF file into friendly libLink objects
     \details  Description of the class
 */
+template< class ReaderType>
 class ElfParser {
 public:
     // C'tor / D'tor
@@ -34,11 +33,14 @@ protected:
     void ReadSections();
 
 private:
-    long stringTable;
-    long headerStringTable;
-    ElfReader reader;
-    ElfHeaderX86_64 *header;
+    typedef SimpleBinaryPosition Pos;
+    ReaderType reader;
+
+    Pos stringTable;
+    Pos headerStrings;
+
     /* data */
+    ElfHeaderX86_64 *header;
     std::vector<Section *> sections;
     std::vector<ProgramHeader *> progHeaders;
     std::vector<Symbol *> symbols;
@@ -49,3 +51,5 @@ private:
     int stridx;
     string filename;
 };
+
+#include "elfParser.hpp"

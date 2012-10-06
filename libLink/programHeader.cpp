@@ -1,15 +1,15 @@
 #include "programHeader.h"
 #include "section.h"
 #include <sstream>
+#include "binaryReader.h"
 
 using namespace std;
 
-ProgramHeader::ProgramHeader ( ElfReader& reader, 
-                              long offset,
-                              vector<Section *>& sections) 
-                :flags("")
+ProgramHeader::ProgramHeader ( const BinaryPosition& reader, 
+                               const vector<Section *>& sections ) 
+    :flags("")
 {
-    reader.Read(offset,&data,Size());
+    reader.Read(&data,Size());
     sectionNames = "";
     // While this isn't terribly efficient, there's only going to
     // be 20-30 sections a file...

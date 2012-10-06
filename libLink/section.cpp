@@ -3,16 +3,20 @@
 #endif
 #include <sstream>
 #include "stringTable.h"
-#include "elfReader.h"
+#include "binaryReader.h"
 
-Section::Section(ElfReader &reader, long offset, long stable): sh_flags(""){
+Section::Section( const BinaryPosition& headerPos, 
+                  const BinaryPosition& strings ) 
+    : sh_flags("")
+{
     // over write the data in our data POD 
-    reader.Read(offset,&elfHeader,this->Size());
+    headerPos.Read(&elfHeader,Size());
     // Get our name
-    reader.ReadString( stable + elfHeader.sh_name, name);
+    name = (strings + elfHeader.sh_name).ReadString();
 
     // Get our data
-    data = new Data(reader,DataStart(), DataSize());
+    data = new Data(headerPos.Reader().Begin() + DataStart() ,
+                    DataSize());
 
 }
 

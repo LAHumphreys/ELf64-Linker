@@ -1,6 +1,3 @@
-#ifndef ElfParser_H
-   #include "elfParser.h"
-#endif
 using namespace std;
 
 
@@ -8,8 +5,13 @@ using namespace std;
 #include <iostream>
 #include <sstream>
 
-ElfParser::ElfParser(const string &fname) : reader(fname) {
+template<>
+ElfParser<ElfFileReader>::ElfParser(const string &fname) 
+  : reader(fname),
+    stringTable(reader, 0 ),
+    headerStrings(reader, 0)
 
+{
     // if we try to index with these before they are set we want an error to
     // happen
     symidx=-1;
@@ -19,7 +21,8 @@ ElfParser::ElfParser(const string &fname) : reader(fname) {
     this->filename = fname;
 
     // Load the header from file
-    header = new ElfHeaderX86_64(reader,0);
+    const BinaryPosition& r = reader.Begin();
+    header = new ElfHeaderX86_64(r);
 
     ReadSections();
     ReadProgramHeaders();
@@ -28,68 +31,73 @@ ElfParser::ElfParser(const string &fname) : reader(fname) {
 
 }
 
-void ElfParser::ReadSections() {
+template<class T>
+void ElfParser<T>::ReadSections() {
     // Declare an array to hold the sections
     sections.resize(header->Sections());
 
     // Read in the section constants
-    long readAddr = header->SectionTableStart();
     long hdrSize = header->SectionHeaderSize();
+    Pos tableStart = reader.Begin() + header->SectionTableStart();
 
-    // Which section holds the string table?
+    // Which section holds the (header) string table?
     long sidx = header->StringTableIndex();
 
     // We need the address of the string table
     Elf64_Shdr stableHeader;
-    reader.Read(sidx*hdrSize +readAddr, &stableHeader, 
-                                         hdrSize);
-    headerStringTable = stableHeader.sh_offset;
+    Pos stringTablePos = tableStart + sidx*hdrSize;
+    stringTablePos.Read(&stableHeader, hdrSize);
+
+    headerStrings =  stableHeader.sh_offset;
+    Pos readPos = tableStart;
 
     for ( int i=0; i<header->Sections(); ++i) {
-       sections[i] = new Section(reader, readAddr,
-                                         headerStringTable);
+       sections[i] = new Section(readPos, headerStrings);
        if (sections[i]->Name() == ".symtab" ) symidx = i;
        if (sections[i]->Name() == ".strtab" ) stridx = i;
-       readAddr += hdrSize;
+       readPos += hdrSize;
     }
     stringTable = sections[stridx]->DataStart();
 }
 
-void ElfParser::ReadProgramHeaders() {
+template<class T>
+void ElfParser<T>::ReadProgramHeaders() {
     // Declare an array to hold the sections
     progHeaders.resize(header->ProgramHeaders());
 
     // Read in the section constants
-    long readAddr = header->ProgramHeadersStart();
-    long hdrSize = header->ProgramHeaderSize();
+    Pos readPos = reader.Begin() + header->ProgramHeadersStart();
+    long hdrSize =  header->ProgramHeaderSize();
 
     for ( int i=0; i<header->ProgramHeaders(); ++i) {
-       progHeaders[i] = new ProgramHeader( reader, 
-                                           readAddr,
-                                           sections);
-       readAddr += hdrSize;
-       cout << progHeaders[i]->WriteLink() << endl;
+       progHeaders[i] = new ProgramHeader( readPos, sections);
+       readPos += hdrSize;
     }
 }
 
-void ElfParser::ReadSymbols() {
+template<class T>
+void ElfParser<T>::ReadSymbols() {
     Section * symTable = sections[symidx];
     symbols.resize(symTable->NumItems());
-    long readAddr = symTable->DataStart();
+
+    Pos readPos = reader.Begin() + symTable->DataStart();
+
     for ( int i=0; i < symTable->NumItems(); ++i) {
-        symbols[i] = new Symbol(reader,readAddr,stringTable);
-        readAddr += symTable->ItemSize();
+        symbols[i] = new Symbol(readPos,stringTable);
+        readPos += symTable->ItemSize();
     }
 }
 
-ElfParser::~ElfParser () {
+template<class T>
+ElfParser<T>::~ElfParser () {
     delete header;
     for ( auto ptr : sections ) delete ptr;
     for ( auto ptr : symbols ) delete ptr;
     for ( auto ptr : progHeaders ) delete ptr;
 }
 
-string ElfParser::PrintLink() {
+template<class T>
+string ElfParser<T>::PrintLink() {
     ostringstream link;
     link << "# LINK formated file created from " << FileName();
     link << " by elf2link" << endl;

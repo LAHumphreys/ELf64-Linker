@@ -2,15 +2,13 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#ifndef ELFHEADERX86_64
-   #include "elfHeader.h"
-#endif
+#include "elfHeader.h"
 
 using namespace std;
-ElfHeaderX86_64::ElfHeaderX86_64 (ElfReader &reader, long offset)
+ElfHeaderX86_64::ElfHeaderX86_64 (const BinaryPosition &reader)
 {
     // over write the data in our data POD 
-    reader.Read(0,&data,this->Size());
+    reader.Read(&data,this->Size());
 }
 ElfHeaderX86_64::ElfHeaderX86_64 (string linkHeader)
      /*:validate("^ *[0-9]+ +[0-9]+ +[0-9]+$") */ {

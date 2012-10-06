@@ -1,7 +1,7 @@
 INCLUDE_FLAGS="-I linux"
 DEBUG_FLAGS="-ggdb"
-elf2Link: elf2Link.cpp elfReader.o elfParser.o elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o data.o
-	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -std=c++0x -o elf2Link elf2Link.cpp elfParser.o elfReader.o elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o data.o
+elf2Link: elf2Link.cpp elfReader.o elfParser.h elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o binaryData.o binaryReader.o 
+	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -std=c++0x -o elf2Link elf2Link.cpp elfParser.h elfReader.o elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o binaryData.o binaryReader.o
 main: main.cpp reader.o Makefile elfHeader.o x86Parser.o section.o stringTable.o flags.o elf2LINK
 	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -std=c++0x -o main main.cpp x86Parser.o reader.o elfHeader.o section.o stringTable.o flags.o
 
@@ -23,11 +23,8 @@ stringTable.o: stringTable.h stringTable.cpp
 flags.o: flags.h flags.cpp
 	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -c -std=c++0x -o flags.o flags.cpp
 
-elfReader.o: elfReader.h elfReader.cpp
+elfReader.o: elfReader.h elfReader.cpp binaryReader.o
 	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -c -std=c++0x -o elfReader.o elfReader.cpp
-
-elfParser.o: elfParser.h elfParser.cpp
-	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -c -std=c++0x -o elfParser.o elfParser.cpp
 
 symbol.o: symbol.cpp symbol.cpp
 	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -c -std=c++0x -o symbol.o symbol.cpp
@@ -38,8 +35,11 @@ programHeader.o: programHeader.cpp programHeader.h
 reloc.o: reloc.cpp reloc.h
 	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -c -std=c++0x -o reloc.o reloc.cpp
 
-data.o: data.h data.cpp
-	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -c -std=c++0x -o data.o data.cpp
+binaryData.o: binaryData.h binaryData.cpp
+	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -c -std=c++0x -o binaryData.o binaryData.cpp
+
+binaryReader.o: binaryReader.cpp binaryReader.h
+	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -c -std=c++0x -o binaryReader.o binaryReader.cpp
   
 
 

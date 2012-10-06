@@ -2,18 +2,17 @@
 #include <vector>
 #include "flags.h"
 #include "elf.h"
-#include "elfReader.h"
-using namespace std;
-#ifndef RELOCATION_H
-   #include "reloc.h"
-#endif
+#include "binaryReader.h"
+#include "reloc.h"
 
-Relocation::Relocation (ElfReader &reader, long offset, 
-                                           string section)
+using namespace std;
+
+Relocation::Relocation ( const BinaryPosition &reader, 
+                         const string section)
     : type("")
 {
     ConfigureFlags();
-    reader.Read(offset, &reloc, Size());
+    reader.Read(&reloc, Size());
     this->section = section;
 }
 

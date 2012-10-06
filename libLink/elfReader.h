@@ -1,29 +1,36 @@
-#ifndef ElfReader_H
-#define ElfReader_H
+#ifndef ElfFileReader_H
+#define ElfFileReader_H
 
-#include <string>
 #include <sys/stat.h>
+#include "binaryReader.h"
+
+
 using namespace std;
 
 /**
-    \class   ElfReader
+    \class   ElfFileReader
     \brief   Read an Elf class
     \details Provides an abstraction of the process of mem-mapping
              the ELF file, and guarantees a call to munmap
 */
-class ElfReader {
+class ElfFileReader: public BinaryReader {
 public:
-    ElfReader (const string &fname);
+    ElfFileReader (const string &fname);
+    virtual ~ElfFileReader();
+
+    virtual void Read(long offset, void *dest, long size) const;
+    virtual void ReadString(long offset, string& dest) const;
+
+    typedef SimpleBinaryPosition PositionType;
+
+    virtual PositionType Begin() const;
+    virtual PositionType Pos(long offset) const;
+
+    string fname;
+    private:
     void OpenFile(const string &fname);
-    void Read(long offset, void *dest, size_t size);
-    void ReadString(long offset, string& dest);
-    virtual ~ElfReader();
-
-
-
-private:
-   void *file;
-   const char * sptr;
-   struct stat statBlock;
+    void *file;
+    const char * sptr;
+    struct stat statBlock;
 };
 #endif

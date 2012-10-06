@@ -2,11 +2,12 @@
    #define RELOCATION_H
 #include "flags.h"
 #include "elf.h"
-class ElfReader;
+class BinaryPosition;
 
 class Relocation {
 public:
-    Relocation (ElfReader &reader, long offset, string section);
+    Relocation ( const BinaryPosition& reader, 
+                 const string section);
 
     // atributes
     string& Section() { return section; }

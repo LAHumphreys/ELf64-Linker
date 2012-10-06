@@ -1,15 +1,16 @@
 #include "symbol.h"
 #include <sstream>
-#include "elfReader.h"
+#include "binaryReader.h"
 using namespace std;
 
 
-Symbol::Symbol (ElfReader &reader, long offset, long stable)
+Symbol::Symbol ( const BinaryPosition& reader,
+                 const BinaryPosition& stable )
 : type(""), scope(""){ 
     ConfigureFlags();
-    reader.Read(offset,&symbol,this->Size());
-    // Get our name
-    reader.ReadString( stable + symbol.st_name, name);
+    reader.Read(&symbol,Size());
+    // pull our name out of the string table
+    name = (stable + symbol.st_name).ReadString();
     UpdateFlags();
 
 }
