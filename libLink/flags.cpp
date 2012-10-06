@@ -85,8 +85,6 @@ void Flags::SetFlag(string flag, bool newStatus) {
             auto invertedMask = ~flagMask;
             mask &=invertedMask;
         }
-    } else {
-        throw "Add the flag first you moron";
     }
 }
 
