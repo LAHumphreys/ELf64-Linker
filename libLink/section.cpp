@@ -5,19 +5,19 @@
 #include "stringTable.h"
 #include "elfReader.h"
 
-Section::Section(ElfReader &reader, int offset, int stable): sh_flags(""), data(NULL) {
+Section::Section(ElfReader &reader, long offset, long stable): sh_flags(""){
     // over write the data in our data POD 
     reader.Read(offset,&elfHeader,this->Size());
     // Get our name
     reader.ReadString( stable + elfHeader.sh_name, name);
 
     // Get our data
-    data = new char[DataSize()];
-    reader.Read(DataStart(),data,DataSize());
+    data = new Data(reader,DataStart(), DataSize());
+
 }
 
 Section::~Section () {
-    if (data) delete [] data;
+    if (data) delete data;
 }
 
 Section::Section(string header, StringTable * stable)
@@ -66,4 +66,31 @@ Elf64_Xword Section::GetFlags() {
     if ( sh_flags["SHF_ALLOC"] ) result |= SHF_ALLOC;
     if ( sh_flags["SHF_EXECINSTR"] ) result |= SHF_EXECINSTR;
     return result;
+}
+
+// Expected format: "name value segmentIndex type scope"
+//"name", "address", "size" , "flags", "alignment"
+string Section::WriteLinkHeader() {
+    ostringstream link;
+    link << name << " ";
+    link << hex << Address() << " ";
+    link << hex << DataSize() << " ";
+    link << GetLinkFlags() << " ";
+    link << dec << Alignment() << " ";
+    return link.str();
+}
+
+string Section::WriteLinkData() {
+    ostringstream linkdata;
+    linkdata << "# Data for section " << name << endl;
+    linkdata << data->HexCode() ;
+    return linkdata.str();
+}
+
+string Section::GetLinkFlags() {
+    string flags = sh_flags.LinkMask();
+    if ( HasFileData() ) {
+        flags += "P";
+    }
+    return flags;
 }

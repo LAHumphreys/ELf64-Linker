@@ -33,6 +33,7 @@ public:
 
     // Masks
     string LinkMask();
+    void FromMask(unsigned long omask) { mask = omask; }
 
 private:
     std::map<char, long> flags;

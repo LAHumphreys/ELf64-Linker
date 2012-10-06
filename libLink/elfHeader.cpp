@@ -7,7 +7,7 @@
 #endif
 
 using namespace std;
-ElfHeaderX86_64::ElfHeaderX86_64 (ElfReader &reader, int offset)
+ElfHeaderX86_64::ElfHeaderX86_64 (ElfReader &reader, long offset)
 {
     // over write the data in our data POD 
     reader.Read(0,&data,this->Size());
@@ -17,10 +17,10 @@ ElfHeaderX86_64::ElfHeaderX86_64 (string linkHeader)
     if ( false )  { // regex validation of linkHeader to prevent nastyness
         throw "Invalid LINK header: " + linkHeader;
     }
-    int nsections;
-    int nprog;
-    int nsyms;
-    int nrelocs;
+    long nsections;
+    long nprog;
+    long nsyms;
+    long nrelocs;
     readPtr = (char * ) & data;
     stringstream s(linkHeader);
     s >> nsections;

@@ -47,10 +47,10 @@ ElfReader::~ElfReader () {
     }
 }
 
-void ElfReader::ReadString(int offset, string &dest) {
+void ElfReader::ReadString(long offset, string &dest) {
     const char * str = this->sptr + offset;
     dest += str;
 }
-void ElfReader::Read(int offset, void *dest, size_t size) {
+void ElfReader::Read(long offset, void *dest, size_t size) {
     memcpy(dest,sptr + offset,size);
 }

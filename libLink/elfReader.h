@@ -15,8 +15,8 @@ class ElfReader {
 public:
     ElfReader (const string &fname);
     void OpenFile(const string &fname);
-    void Read(int offset, void *dest, size_t size);
-    void ReadString(int offset, string& dest);
+    void Read(long offset, void *dest, size_t size);
+    void ReadString(long offset, string& dest);
     virtual ~ElfReader();
 
 

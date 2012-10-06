@@ -2,10 +2,12 @@
    #include "flags.h"
 #endif
 #include <sstream>
+#include <iostream>
 Flags::Flags (string flags) {
     flagCount=0;
     for (auto flag: flags ) {
         AddFlag(flag);
+        //cout << "processing" << flag << endl;
     }
 }
 Flags::Flags (string flags, std::map<string,char> &nameMap)
@@ -22,7 +24,7 @@ Flags::Flags (string flags, std::map<string,char> &nameMap)
 
 bool Flags::AddFlag(const char flag) {
     if  (flagCount < 63) {
-        long base = 0x1;
+        unsigned long base = 0x1;
         flags[flag] = base << flagCount;
         ++flagCount;
         return true;

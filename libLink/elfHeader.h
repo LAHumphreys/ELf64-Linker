@@ -19,7 +19,7 @@ class ElfHeaderX86_64 {
     friend class X86Parser;
 public:
     ElfHeaderX86_64 (string linkHeader);
-    ElfHeaderX86_64 (ElfReader &reader, int offset);
+    ElfHeaderX86_64 (ElfReader &reader, long offset);
     void PopulateIdentity();
     void Write(ofstream &file);
 
@@ -27,6 +27,9 @@ public:
     size_t Size();
 
     // Data
+    uint16_t& ProgramHeaders() { return data.e_phnum; }
+    Elf64_Off& ProgramHeadersStart() { return data.e_phoff; }
+    uint16_t&  ProgramHeaderSize() { return data.e_phentsize; }
     uint16_t& Sections() { return data.e_shnum; }
     Elf64_Off& SectionTableStart() { return data.e_shoff; }
     uint16_t& SectionHeaderSize() { return data.e_shentsize; }

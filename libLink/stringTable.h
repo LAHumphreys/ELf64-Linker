@@ -8,8 +8,8 @@ class StringTable {
         struct ElfString {
         public: 
             char * str;
-            int size;
-            int offset;
+            long size;
+            long offset;
         };
         /**
             \fn      AddString
@@ -20,8 +20,8 @@ class StringTable {
         
         StringTable();
         ~StringTable();
-        int AddString(const char * str);
+        long AddString(const char * str);
     private:
         std::vector<ElfString *> strings;
-        int writePtr;
+        long writePtr;
 };

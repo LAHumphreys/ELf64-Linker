@@ -6,7 +6,7 @@ class ElfReader;
 
 class Symbol {
 public:
-    Symbol (ElfReader &reader, int offset, int stable);
+    Symbol (ElfReader &reader, long offset, long stable);
     size_t Size() { return sizeof(Elf64_Sym); }
     Elf64_Addr& Value() { return symbol.st_value; }
     uint16_t& SegmentIdx() { return symbol.st_shndx; }

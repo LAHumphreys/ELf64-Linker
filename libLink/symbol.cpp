@@ -4,7 +4,7 @@
 using namespace std;
 
 
-Symbol::Symbol (ElfReader &reader, int offset, int stable)
+Symbol::Symbol (ElfReader &reader, long offset, long stable)
 : type(""), scope(""){ 
     ConfigureFlags();
     reader.Read(offset,&symbol,this->Size());

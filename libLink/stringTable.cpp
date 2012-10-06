@@ -17,7 +17,7 @@ StringTable::~StringTable ( ) {
     }
 }
 
-int StringTable::AddString(const char * str) {
+long StringTable::AddString(const char * str) {
     StringTable::ElfString *string = new StringTable::ElfString;
 
     // Build the ElfString
