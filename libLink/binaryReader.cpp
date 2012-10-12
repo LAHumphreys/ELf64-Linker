@@ -91,10 +91,10 @@ void SubReader::ReadString(long offset, std::string& dest)const {
 }
 
 SimpleBinaryPosition SubReader::Begin() const {
-    return pos_;
+    return SimpleBinaryPosition(*this,0);
 }
 
 SimpleBinaryPosition SubReader::Pos(long offset) const {
-    return pos_ + offset;
+    return SimpleBinaryPosition(*this,offset);
 }
 
