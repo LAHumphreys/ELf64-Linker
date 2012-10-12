@@ -22,7 +22,6 @@ public:
     void PopulateIdentity();
     void Write(ofstream &file);
 
-    // Proivde a pointer that a new header may be read into
     size_t Size();
 
     // Data
@@ -33,6 +32,9 @@ public:
     Elf64_Off& SectionTableStart() { return data.e_shoff; }
     uint16_t& SectionHeaderSize() { return data.e_shentsize; }
     uint16_t& StringTableIndex() { return data.e_shstrndx; }
+
+    // Calculated Flags
+    string LinkFlags();
 
 
 
