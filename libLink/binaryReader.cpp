@@ -30,22 +30,56 @@ SimpleBinaryPosition::SimpleBinaryPosition(
 }
  
 // Create a new BinaryPosition
-SimpleBinaryPosition SimpleBinaryPosition::operator+(long additionalOffset) const {
+SimpleBinaryPosition SimpleBinaryPosition::operator+(
+                                 long additionalOffset) const 
+{
     return SimpleBinaryPosition(reader, offset + additionalOffset);
 }
 
-SimpleBinaryPosition SimpleBinaryPosition::operator-(long additionalOffset) const {
+SimpleBinaryPosition SimpleBinaryPosition::operator+(
+                                    const BinaryPosition& p) const
+{
+    return SimpleBinaryPosition(reader, offset + p.Offset());
+}
+
+SimpleBinaryPosition SimpleBinaryPosition::operator-(
+                                 long additionalOffset) const 
+{
     return SimpleBinaryPosition(reader, offset - additionalOffset);
 }
 
+SimpleBinaryPosition SimpleBinaryPosition::operator-(
+                                    const BinaryPosition& p) const
+{
+    return SimpleBinaryPosition(reader, offset - p.Offset());
+}
+
 // Reposition the pointer
-SimpleBinaryPosition& SimpleBinaryPosition::operator+=(long additionalOffset) {
+SimpleBinaryPosition& SimpleBinaryPosition::operator+=(
+                                    long additionalOffset) 
+{
     offset += additionalOffset;
     return *this;
 }
 
-SimpleBinaryPosition& SimpleBinaryPosition::operator-=(long additionalOffset) {
+SimpleBinaryPosition& SimpleBinaryPosition::operator+=(
+                                    const BinaryPosition& p) 
+{
+    offset += p.Offset();
+    return *this;
+}
+
+SimpleBinaryPosition& SimpleBinaryPosition::operator-=(
+                                    long additionalOffset) 
+{
     offset -= additionalOffset;
+    return *this;
+}
+
+SimpleBinaryPosition& SimpleBinaryPosition::operator-=(
+                                    const BinaryPosition& p) 
+{
+    offset -= p.Offset();
     return *this;
 }
 

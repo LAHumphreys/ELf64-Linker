@@ -29,72 +29,82 @@ class BinaryReader {
 // that any implementation behaves sensibly if given another
 // BinaryPosition as a single constructor argument
 class BinaryPosition {
-    public:
-        // Access data
-        virtual void Read(void *dest, long size) const =0;
-        virtual void ReadString(std::string& dest) const =0;
-        virtual std::string ReadString() const =0;
-        virtual void AppendString(std::string& dest) const =0;
-        virtual unsigned char * Dup(long size) const =0; 
-        // (it is the responsibility of the caller to delete this
-        // memory)
+public:
+    // Access data
+    virtual void Read(void *dest, long size) const =0;
+    virtual void ReadString(std::string& dest) const =0;
+    virtual std::string ReadString() const =0;
+    virtual void AppendString(std::string& dest) const =0;
+    virtual unsigned char * Dup(long size) const =0; 
+    // (it is the responsibility of the caller to delete this
+    // memory)
 
-        // Create a new BinaryPosition
+    // Create a new BinaryPosition
 
-        virtual SimpleBinaryPosition operator+
-                                  (long additionalOffset) const =0;
-        virtual SimpleBinaryPosition operator-
-                                  (long additionalOffset) const =0;
-        // Reposition the pointer
-        virtual BinaryPosition& operator+=(long additionalOffset)
-                                                               =0;
-        virtual BinaryPosition& operator-=(long additionalOffset)
-                                                               =0;
-        // This is the position from the beging on the file
-        virtual BinaryPosition& operator=(long position)=0;
+    virtual SimpleBinaryPosition operator+
+                              (long additionalOffset) const =0;
+    virtual SimpleBinaryPosition operator+
+                              (const BinaryPosition& p) const =0;
+    virtual SimpleBinaryPosition operator-
+                              (long additionalOffset) const =0;
+    virtual SimpleBinaryPosition operator-
+                              (const BinaryPosition& p)const =0;
+    // Reposition the pointer
+    virtual BinaryPosition& operator+=(long additionalOffset) =0;
+    virtual BinaryPosition& operator+=(const BinaryPosition&) =0;
+    virtual BinaryPosition& operator-=(long additionalOffset) =0;
+    virtual BinaryPosition& operator-=(const BinaryPosition&) =0;
+    // This is the position from the begining on the file
+    virtual BinaryPosition& operator=(long position)=0;
 
-        virtual const BinaryReader& Reader() const =0;
-        virtual long Offset() const =0;
+
+    virtual const BinaryReader& Reader() const =0;
+    virtual long Offset() const =0;
 };
 
 // Since all of the demands of BinaryPosition can be met by the
 // interface required of BinaryReader, create a simple
 // implementation.
 class SimpleBinaryPosition: public BinaryPosition {
-    public:
-        friend class BinaryReader; // see below
-        SimpleBinaryPosition(const BinaryReader& r, long offset);
-        SimpleBinaryPosition(const BinaryPosition &other);
-        // We don't care if its a temporary ref, we're only going
-        // to copy data anyway
-        SimpleBinaryPosition(BinaryPosition &&other);
+public:
+    friend class BinaryReader; // see below
+    SimpleBinaryPosition(const BinaryReader& r, long offset);
+    SimpleBinaryPosition(const BinaryPosition &other);
+    // We don't care if its a temporary ref, we're only going
+    // to copy data anyway
+    SimpleBinaryPosition(BinaryPosition &&other);
 
-        // Access data
-        virtual void Read(void *dest, long size) const;
-        virtual unsigned char * Dup(long size) const;
-        virtual void ReadString(std::string& dest) const;
-        virtual std::string ReadString() const;
-        virtual void AppendString(std::string& dest) const;
+    // Access data
+    virtual void Read(void *dest, long size) const;
+    virtual unsigned char * Dup(long size) const;
+    virtual void ReadString(std::string& dest) const;
+    virtual std::string ReadString() const;
+    virtual void AppendString(std::string& dest) const;
 
-        // Create a new BinaryPosition
-        virtual SimpleBinaryPosition operator+
-                                  (long additionalOffset) const;
-        virtual SimpleBinaryPosition operator-
-                                  (long additionalOffset) const;
+    // Create a new BinaryPosition
+    virtual SimpleBinaryPosition operator+
+                                 (long additionalOffset) const;
+    virtual SimpleBinaryPosition operator+
+                                 (const BinaryPosition& p) const;
+    virtual SimpleBinaryPosition operator-
+                                 (long additionalOffset) const;
+    virtual SimpleBinaryPosition operator-
+                                 (const BinaryPosition& p) const;
 
-        // Reposition the pointer
-        virtual SimpleBinaryPosition& operator+=
-                                         (long additionalOffset);
-        virtual SimpleBinaryPosition& operator-=
-                                         (long additionalOffset);
-        virtual SimpleBinaryPosition& operator=(long offset);
+    // Reposition the pointer
+    virtual SimpleBinaryPosition& operator+=(long additionalOffset);
+    virtual SimpleBinaryPosition& operator+=(const BinaryPosition&);
+    virtual SimpleBinaryPosition& operator-=(long additionalOffset);
+    virtual SimpleBinaryPosition& operator-=(const BinaryPosition&);
 
-        // atributes
-        virtual const BinaryReader& Reader() const {return reader;}
-        virtual long Offset() const {return offset;}
-    private: 
-        const BinaryReader& reader;
-        long offset;
+    virtual SimpleBinaryPosition& operator=(long offset);
+
+    // atributes
+    virtual const BinaryReader& Reader() const {return reader;}
+    virtual long Offset() const {return offset;}
+private: 
+    const BinaryReader& reader;
+    long offset;
 };
 
 class SubReader: public BinaryReader {
