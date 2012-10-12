@@ -1,7 +1,5 @@
 using namespace std;
 
-
-
 #include <iostream>
 #include <sstream>
 
@@ -12,8 +10,9 @@ ElfParser<ElfFileReader>::ElfParser(const string &fname)
     headerStrings(reader, 0)
 
 {
-    // if we try to index with these before they are set we want an error to
-    // happen
+    linkSections=0;
+    // if we try to index with these before they are set we want an
+    // error to happen
     symidx=-1;
     stridx=-1;
 
@@ -55,6 +54,7 @@ void ElfParser<T>::ReadSections() {
        sections[i] = new Section(readPos, headerStrings);
        if (sections[i]->Name() == ".symtab" ) symidx = i;
        if (sections[i]->Name() == ".strtab" ) stridx = i;
+       if (sections[i]->IsLInkSection() ) ++linkSections;
        readPos += hdrSize;
     }
     stringTable = sections[stridx]->DataStart();
@@ -84,6 +84,7 @@ void ElfParser<T>::ReadSymbols() {
 
     for ( int i=0; i < symTable->NumItems(); ++i) {
         symbols[i] = new Symbol(readPos,stringTable);
+        if ( symbols[i]->IsLinkSymbol() ) ++linkSymbols;
         readPos += symTable->ItemSize();
     }
 }
@@ -103,23 +104,26 @@ string ElfParser<T>::PrintLink() {
     link << " by elf2link" << endl;
     link << "LINK" << endl;
 
-    link << "# Header: nsegs, nsyms, nrels" << endl;
-    link << SegmentCount() << " " << SymbolCount() << " ";
-    link << RelocCount() << endl;
+    link << "# Header: nsegs, nsyms, nrels flags" << endl;
+    link << LinkSections() << " " << LinkSymbols() << " ";
+    link << RelocCount() << " " << header->LinkFlags() << endl;
 
     link << "# Section headers" << endl;
     for ( auto section: sections ) {
-        link << section->WriteLinkHeader() << endl;;
+        if ( section->IsLInkSection() )
+            link << section->WriteLinkHeader() << endl;
     }
 
     link << "# Symbol Table" << endl;
     for ( auto symbol: symbols ) {
-        link << symbol->LinkFormat() << endl;
+        if ( symbol->IsLinkSymbol() ) 
+            link << symbol->LinkFormat() << endl;
     }
 
     link << "# section data" << endl;
     for ( auto section: sections ) {
-        link << section->WriteLinkData() << endl;
+        if ( section->IsLInkSection() )
+            link << section->WriteLinkData() << endl;
     }
     return link.str();
 }

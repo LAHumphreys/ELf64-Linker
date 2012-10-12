@@ -16,8 +16,6 @@ class BinaryReader {
                                                          const =0;
         virtual void ReadString(long offset, std::string& dest) 
                                                          const =0;
-        virtual string AppendString(long offset) const =0;
-
         virtual SimpleBinaryPosition Begin() const =0;
         virtual SimpleBinaryPosition Pos(long offset) const =0;
 };
@@ -35,6 +33,7 @@ class BinaryPosition {
         virtual void Read(void *dest, long size) const =0;
         virtual void ReadString(std::string& dest) const =0;
         virtual std::string ReadString() const =0;
+        virtual void AppendString(std::string& dest) const =0;
         virtual unsigned char * Dup(long size) const =0; 
         // (it is the responsibility of the caller to delete this
         // memory)
@@ -74,6 +73,7 @@ class SimpleBinaryPosition: public BinaryPosition {
         virtual unsigned char * Dup(long size) const;
         virtual void ReadString(std::string& dest) const;
         virtual std::string ReadString() const;
+        virtual void AppendString(std::string& dest) const;
 
         // Create a new BinaryPosition
         virtual SimpleBinaryPosition operator+

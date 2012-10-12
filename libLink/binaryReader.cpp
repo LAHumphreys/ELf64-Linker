@@ -69,7 +69,9 @@ void SimpleBinaryPosition::ReadString(string& dest) const{
 }
 
 void SimpleBinaryPosition::AppendString(string& dest) const{
-    reader.AppendString(offset,dest);
+    string s;
+    reader.ReadString(offset,s);
+    dest+=s;
 }
 
 string SimpleBinaryPosition::ReadString() const {

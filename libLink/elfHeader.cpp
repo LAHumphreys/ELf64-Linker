@@ -71,9 +71,17 @@ void ElfHeaderX86_64::PopulateIdentity() {
     memset(data.e_ident+7,0,EI_NIDENT - 7);
 }
 
+string ElfHeaderX86_64::LinkFlags() {
+    string flags = "";
+    if (data.e_ident[5] == ELFDATA2LSB) flags = "2L";
+    if (data.e_ident[5] == ELFDATA2MSB) flags = "2B";
+    return flags;
+}
+
 void ElfHeaderX86_64::Write(ofstream &file) {
     file.write(readPtr,sizeof(data));
 }
+
 size_t ElfHeaderX86_64::Size() {
     return sizeof(Elf64_Ehdr);
 }

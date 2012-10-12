@@ -53,3 +53,7 @@ string Symbol::LinkFormat() {
     line << type.LinkMask() << " " << scope.LinkMask();
     return line.str();
 }
+
+bool Symbol::IsLinkSymbol () {
+    return name != "";
+}

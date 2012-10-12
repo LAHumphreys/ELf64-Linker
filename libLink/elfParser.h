@@ -25,7 +25,9 @@ public:
     // Properties
     string FileName() { return filename; }
     int SegmentCount() { return sections.size(); }
+    int LinkSections() { return linkSections; }
     int SymbolCount() { return sections.size(); }
+    int LinkSymbols() { return linkSymbols; }
     int RelocCount() { return 0; /*not yet implemented */}
 protected:
     void ReadSymbols();
@@ -49,6 +51,8 @@ private:
     std::forward_list<Relocation *> relocations;
     int symidx;
     int stridx;
+    int linkSections;
+    int linkSymbols;
     string filename;
 };
 
