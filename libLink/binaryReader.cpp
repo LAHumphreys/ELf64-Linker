@@ -79,3 +79,22 @@ string SimpleBinaryPosition::ReadString() const {
     reader.ReadString(offset,s);
     return s;
 }
+
+SubReader::SubReader(const BinaryPosition &p) :pos_(p) { }
+
+void SubReader::Read(long offset, void *dest, long size) const {
+    pos_.Reader().Read( pos_.Offset()+offset, dest, size);
+}
+
+void SubReader::ReadString(long offset, std::string& dest)const {
+    pos_.Reader().ReadString( pos_.Offset()+offset, dest);
+}
+
+SimpleBinaryPosition SubReader::Begin() const {
+    return pos_;
+}
+
+SimpleBinaryPosition SubReader::Pos(long offset) const {
+    return pos_ + offset;
+}
+

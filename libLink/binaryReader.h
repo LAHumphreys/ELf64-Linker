@@ -20,6 +20,7 @@ class BinaryReader {
         virtual SimpleBinaryPosition Pos(long offset) const =0;
 };
 
+
 // Interface for a binary position, a reader object should either
 // be compatible with the CommonPosition object, or define a custom
 // implementation
@@ -90,10 +91,21 @@ class SimpleBinaryPosition: public BinaryPosition {
 
         // atributes
         virtual const BinaryReader& Reader() const {return reader;}
-    protected:
         virtual long Offset() const {return offset;}
     private: 
         const BinaryReader& reader;
         long offset;
+};
+
+class SubReader: public BinaryReader {
+public:
+    SubReader(const BinaryPosition &p);
+    typedef BinaryPosition PositionType;
+    virtual void Read(long offset, void *dest, long size) const ;
+    virtual void ReadString(long offset, std::string& dest)const;
+    virtual SimpleBinaryPosition Begin() const =0;
+    virtual SimpleBinaryPosition Pos(long offset) const =0;
+private:
+    SimpleBinaryPosition pos_;
 };
 #endif
