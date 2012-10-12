@@ -45,7 +45,7 @@ ElfFileReader::~ElfFileReader () {
 
 void ElfFileReader::ReadString(long offset, string &dest) const {
     const char * str = this->sptr + offset;
-    dest += str;
+    dest = str;
 }
 void ElfFileReader::Read(long offset, void *dest, long size) const {
     memcpy(dest,sptr + offset,size);

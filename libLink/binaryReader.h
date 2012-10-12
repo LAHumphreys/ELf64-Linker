@@ -16,6 +16,7 @@ class BinaryReader {
                                                          const =0;
         virtual void ReadString(long offset, std::string& dest) 
                                                          const =0;
+        virtual string AppendString(long offset) const =0;
 
         virtual SimpleBinaryPosition Begin() const =0;
         virtual SimpleBinaryPosition Pos(long offset) const =0;
