@@ -18,6 +18,24 @@ Section::Section( const BinaryPosition& headerPos,
     data = new Data(headerPos.Reader().Begin() + DataStart() ,
                     DataSize());
 
+    ConfigureFlags();
+    SetFlags();
+}
+
+
+void Section::ConfigureFlags() {
+    sh_flags.AddFlag('W', "SHF_WRITE");
+    sh_flags.AddFlag('A', "SHF_ALLOC");
+    sh_flags.AddFlag('C', "SHF_EXECINSTR");
+}
+
+void Section::SetFlags() {
+    if ( elfHeader.sh_flags & SHF_WRITE) 
+        sh_flags.SetFlag("SHF_WRITE",true);
+    if ( elfHeader.sh_flags & SHF_ALLOC) 
+        sh_flags.SetFlag("SHF_ALLOC",true);
+    if ( elfHeader.sh_flags & SHF_EXECINSTR) 
+        sh_flags.SetFlag("SHF_EXECINSTR",true);
 }
 
 Section::~Section () {
@@ -26,10 +44,8 @@ Section::~Section () {
 
 Section::Section(string header, StringTable * stable)
     : sh_flags(""), data(NULL) {
-    sh_flags.AddFlag('W', "SHF_WRITE");
-    sh_flags.AddFlag('A', "SHF_ALLOC");
-    sh_flags.AddFlag('C', "SHF_EXECINSTR");
     this->stringTable = stable;
+    ConfigureFlags();
 
     // Build the flags
     stringstream s(header);
@@ -96,5 +112,11 @@ string Section::GetLinkFlags() {
     if ( HasFileData() ) {
         flags += "P";
     }
+    flags += "R"; // everything is readable
     return flags;
+}
+
+bool Section::IsLInkSection() {
+    return not (IsSymTable() || IsStringTable() || IsRelocTable() 
+                || name == "");
 }

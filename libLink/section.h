@@ -33,6 +33,9 @@ public:
     bool Allocate() { return elfHeader.sh_flags &  SHF_ALLOC; }
     bool Executable(){ return elfHeader.sh_flags & SHF_EXECINSTR; }
     bool IsSymTable() { return elfHeader.sh_type ==  SHT_SYMTAB; }
+    bool IsStringTable() {return elfHeader.sh_type ==  SHT_STRTAB; }
+    bool IsRelocTable() {return elfHeader.sh_type ==  SHT_RELA; }
+    bool IsLInkSection();
     string Name() { return name; }
     Elf64_Xword& Alignment() { return elfHeader.sh_addralign; }
 
@@ -51,6 +54,9 @@ public:
 
 
 
+protected:
+    void ConfigureFlags();
+    void SetFlags();
 private:
     Data * data;
     Elf64_Shdr elfHeader;
