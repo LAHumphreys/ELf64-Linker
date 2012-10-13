@@ -24,16 +24,21 @@ public:
     public:
         Member (const BinaryPosition &p);
         virtual ~Member();
-        string Name() const { return string(header.name); }
-        long   Size() const { return atol(header.size); }
+        string Name() const { return string(name); }
+        long   Size() const { 
+            return fileSize + sizeof(header);
+        }
+        long   FileSize() const { return fileSize; }
         const BinaryReader& File() const { return *file; }
     private:
         Archive::MemberHeader header;
+        char name[17];
+        long fileSize;
         SubReader *file;
     };
 
     Archive (const BinaryPosition& file);
-    const Archive::Member& operator[](int idx) const;
+    const Archive::Member& operator[](long idx) const;
     const Archive::Member& operator[](const string& name) const;
     bool ValidateFile(const BinaryPosition &file) const ;
     long Count() const { return items; }
