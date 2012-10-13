@@ -1,4 +1,4 @@
-#include "arch.h"
+#include "arc.h"
 Archive::Archive(const BinaryPosition& file) {
     headerStringFormat = string("!<arch>\n");
     items =0;
