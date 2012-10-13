@@ -17,6 +17,7 @@ class BinaryReader {
         virtual void ReadString(long offset, std::string& dest) 
                                                          const =0;
         virtual SimpleBinaryPosition Begin() const =0;
+        virtual SimpleBinaryPosition End() const =0;
         virtual SimpleBinaryPosition Pos(long offset) const =0;
 };
 
@@ -56,6 +57,12 @@ public:
     virtual BinaryPosition& operator-=(const BinaryPosition&) =0;
     // This is the position from the begining on the file
     virtual BinaryPosition& operator=(long position)=0;
+
+    virtual bool operator <(const BinaryPosition& other) const =0;
+    virtual bool operator >(const BinaryPosition& other) const =0;
+    virtual bool operator <=(const BinaryPosition& other) const =0;
+    virtual bool operator >=(const BinaryPosition& other) const =0;
+    virtual bool operator ==(const BinaryPosition& other) const =0;
 
 
     virtual const BinaryReader& Reader() const =0;
@@ -99,6 +106,13 @@ public:
 
     virtual SimpleBinaryPosition& operator=(long offset);
 
+    // Comparision of offset
+    virtual bool operator <(const BinaryPosition& other) const;
+    virtual bool operator >(const BinaryPosition& other) const;
+    virtual bool operator <=(const BinaryPosition& other) const;
+    virtual bool operator >=(const BinaryPosition& other) const;
+    virtual bool operator ==(const BinaryPosition& other) const;
+
     // atributes
     virtual const BinaryReader& Reader() const {return reader;}
     virtual long Offset() const {return offset;}
@@ -109,13 +123,15 @@ private:
 
 class SubReader: public BinaryReader {
 public:
-    SubReader(const BinaryPosition &p);
+    SubReader(const BinaryPosition &p, long size);
     typedef BinaryPosition PositionType;
     virtual void Read(long offset, void *dest, long size) const ;
     virtual void ReadString(long offset, std::string& dest)const;
-    virtual SimpleBinaryPosition Begin() const =0;
-    virtual SimpleBinaryPosition Pos(long offset) const =0;
+    virtual SimpleBinaryPosition Begin() const;
+    virtual SimpleBinaryPosition End() const;
+    virtual SimpleBinaryPosition Pos(long offset) const;
 private:
     SimpleBinaryPosition pos_;
+    long size;
 };
 #endif

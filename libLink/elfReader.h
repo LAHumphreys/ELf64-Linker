@@ -1,7 +1,6 @@
 #ifndef ElfFileReader_H
 #define ElfFileReader_H
 
-#include <sys/stat.h>
 #include "binaryReader.h"
 
 
@@ -24,13 +23,13 @@ public:
     typedef SimpleBinaryPosition PositionType;
 
     virtual PositionType Begin() const;
+    virtual PositionType End() const;
     virtual PositionType Pos(long offset) const;
 
-    string fname;
-    private:
+private:
     void OpenFile(const string &fname);
     void *file;
     const char * sptr;
-    struct stat statBlock;
+    long size;
 };
 #endif

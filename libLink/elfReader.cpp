@@ -14,24 +14,24 @@ using namespace std;
 
 ElfFileReader::ElfFileReader ( const string &fname ):file(NULL) {
     OpenFile(fname);
-    this->fname = fname;
 }
 
 void ElfFileReader::OpenFile ( const string &fname ) {
 
     // kill the old file
     if (file) {
-       munmap(file,statBlock.st_size);
+       munmap(file,size);
        file = NULL;
+       this->size = 0;
     }
 
     // Lets briefly pretend we're c programers
+    struct stat statBlock;
     stat (fname.c_str(), &statBlock);
+    size=statBlock.st_size;
+
     FILE *fh = fopen(fname.c_str(),"rb");
-    file = mmap(NULL,statBlock.st_size, PROT_READ, 
-                                        MAP_PRIVATE,
-                                        fileno(fh),
-                                        0);
+    file = mmap(NULL,size, PROT_READ, MAP_PRIVATE, fileno(fh), 0);
     sptr = reinterpret_cast<const char *>(file);
     fclose(fh);
 }
@@ -39,7 +39,7 @@ void ElfFileReader::OpenFile ( const string &fname ) {
 ElfFileReader::~ElfFileReader () {
     // kill the old file
     if (file) {
-       munmap(file,statBlock.st_size);
+       munmap(file,size);
     }
 }
 
@@ -53,6 +53,9 @@ void ElfFileReader::Read(long offset, void *dest, long size) const {
 
 SimpleBinaryPosition ElfFileReader::Begin() const {
     return SimpleBinaryPosition(*this,0);
+}
+SimpleBinaryPosition ElfFileReader::End() const {
+    return SimpleBinaryPosition(*this,size);
 }
 
 SimpleBinaryPosition ElfFileReader::Pos(long offset) const {

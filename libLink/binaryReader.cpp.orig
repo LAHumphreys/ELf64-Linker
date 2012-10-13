@@ -30,56 +30,22 @@ SimpleBinaryPosition::SimpleBinaryPosition(
 }
  
 // Create a new BinaryPosition
-SimpleBinaryPosition SimpleBinaryPosition::operator+(
-                                 long additionalOffset) const 
-{
+SimpleBinaryPosition SimpleBinaryPosition::operator+(long additionalOffset) const {
     return SimpleBinaryPosition(reader, offset + additionalOffset);
 }
 
-SimpleBinaryPosition SimpleBinaryPosition::operator+(
-                                    const BinaryPosition& p) const
-{
-    return SimpleBinaryPosition(reader, offset + p.Offset());
-}
-
-SimpleBinaryPosition SimpleBinaryPosition::operator-(
-                                 long additionalOffset) const 
-{
+SimpleBinaryPosition SimpleBinaryPosition::operator-(long additionalOffset) const {
     return SimpleBinaryPosition(reader, offset - additionalOffset);
 }
 
-SimpleBinaryPosition SimpleBinaryPosition::operator-(
-                                    const BinaryPosition& p) const
-{
-    return SimpleBinaryPosition(reader, offset - p.Offset());
-}
-
 // Reposition the pointer
-SimpleBinaryPosition& SimpleBinaryPosition::operator+=(
-                                    long additionalOffset) 
-{
+SimpleBinaryPosition& SimpleBinaryPosition::operator+=(long additionalOffset) {
     offset += additionalOffset;
     return *this;
 }
 
-SimpleBinaryPosition& SimpleBinaryPosition::operator+=(
-                                    const BinaryPosition& p) 
-{
-    offset += p.Offset();
-    return *this;
-}
-
-SimpleBinaryPosition& SimpleBinaryPosition::operator-=(
-                                    long additionalOffset) 
-{
+SimpleBinaryPosition& SimpleBinaryPosition::operator-=(long additionalOffset) {
     offset -= additionalOffset;
-    return *this;
-}
-
-SimpleBinaryPosition& SimpleBinaryPosition::operator-=(
-                                    const BinaryPosition& p) 
-{
-    offset -= p.Offset();
     return *this;
 }
 
@@ -114,38 +80,7 @@ string SimpleBinaryPosition::ReadString() const {
     return s;
 }
 
-//Comparision operators
-bool SimpleBinaryPosition::operator==
-                           (const BinaryPosition & other) const 
-{
-    return offset == other.Offset();
-}
-bool SimpleBinaryPosition::operator<=
-                           (const BinaryPosition & other) const 
-{
-    return offset <= other.Offset();
-}
-bool SimpleBinaryPosition::operator>=
-                           (const BinaryPosition & other) const 
-{
-    return offset >= other.Offset();
-}
-bool SimpleBinaryPosition::operator>
-                           (const BinaryPosition & other) const 
-{
-    return offset > other.Offset();
-}
-bool SimpleBinaryPosition::operator<
-                           (const BinaryPosition & other) const 
-{
-    return offset < other.Offset();
-}
-
-SubReader::SubReader(const BinaryPosition &p, long size)
-    :pos_(p) 
-{
-    this->size = size;
-}
+SubReader::SubReader(const BinaryPosition &p) :pos_(p) { }
 
 void SubReader::Read(long offset, void *dest, long size) const {
     pos_.Reader().Read( pos_.Offset()+offset, dest, size);
@@ -158,11 +93,12 @@ void SubReader::ReadString(long offset, std::string& dest)const {
 SimpleBinaryPosition SubReader::Begin() const {
     return SimpleBinaryPosition(*this,0);
 }
-SimpleBinaryPosition SubReader::End() const {
-    return SimpleBinaryPosition(*this,size);
-}
 
 SimpleBinaryPosition SubReader::Pos(long offset) const {
+<<<<<<< Updated upstream
     return SimpleBinaryPosition(*this,offset);
+=======
+    return SimpleBinaryPosition(*this,offset) ;
+>>>>>>> Stashed changes
 }
 
