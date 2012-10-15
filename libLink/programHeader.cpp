@@ -5,7 +5,7 @@
 
 using namespace std;
 
-ProgramHeader::ProgramHeader ( const BinaryPosition& reader, 
+ProgramHeader::ProgramHeader ( const BinaryReader& reader, 
                                const vector<Section *>& sections ) 
     :flags("")
 {

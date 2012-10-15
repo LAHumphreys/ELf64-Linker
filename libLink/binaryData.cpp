@@ -3,7 +3,7 @@
 #include <iomanip>
 
 
-Data::Data (const BinaryPosition &p, long size) {
+Data::Data (const BinaryReader &p, long size) {
     data = new unsigned char[size];
     p.Read(data,size);
     this->size = size;

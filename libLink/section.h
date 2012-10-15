@@ -8,13 +8,13 @@ using namespace std;
 #define SectionX86_64
 
 class StringTable;
-class BinaryPosition;
+class BinaryReader;
 
 class Section {
     friend class X86Parser;
 public:
-    Section( const BinaryPosition& headerPos, 
-             const BinaryPosition &strings );
+    Section( const BinaryReader& headerPos, 
+             const BinaryReader &strings );
     Section (string header, StringTable* );
     ~Section ();
     Elf64_Xword GetFlags();

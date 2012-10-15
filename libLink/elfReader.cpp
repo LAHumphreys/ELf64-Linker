@@ -51,13 +51,22 @@ void ElfFileReader::Read(long offset, void *dest, long size) const {
     memcpy(dest,sptr + offset,size);
 }
 
-SimpleBinaryPosition ElfFileReader::Begin() const {
-    return SimpleBinaryPosition(*this,0);
-}
-SimpleBinaryPosition ElfFileReader::End() const {
-    return SimpleBinaryPosition(*this,size);
+long ElfFileReader::Size() const {
+    return size;
 }
 
-SimpleBinaryPosition ElfFileReader::Pos(long offset) const {
-    return SimpleBinaryPosition(*this,offset) ;
+long ElfFileReader::Next( long offset, unsigned char c) const
+{
+    for (long i = offset; i < size; ++i) {
+        if ( c == sptr[i]) return i;
+    }
+    return Size();
+}
+
+long ElfFileReader::Last( long offset, unsigned char c) const
+{
+    for (long i = offset; i > 0; --i) {
+        if ( c == sptr[i]) return i;
+    }
+    return 0;
 }

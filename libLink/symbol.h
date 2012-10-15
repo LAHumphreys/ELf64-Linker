@@ -2,12 +2,12 @@
    #define SYMBOL_H
 #include "flags.h"
 #include "elf.h"
-class BinaryPosition;
+class BinaryReader;
 
 class Symbol {
 public:
-    Symbol ( const BinaryPosition& reader, 
-             const BinaryPosition& stable );
+    Symbol ( const BinaryReader& reader, 
+             const BinaryReader& stable );
     size_t Size() { return sizeof(Elf64_Sym); }
     Elf64_Addr& Value() { return symbol.st_value; }
     uint16_t& SegmentIdx() { return symbol.st_shndx; }

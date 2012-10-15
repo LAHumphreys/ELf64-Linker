@@ -3,7 +3,6 @@
 
 #include "binaryReader.h"
 
-
 using namespace std;
 
 /**
@@ -12,7 +11,7 @@ using namespace std;
     \details Provides an abstraction of the process of mem-mapping
              the ELF file, and guarantees a call to munmap
 */
-class ElfFileReader: public BinaryReader {
+class ElfFileReader: public FileLikeObject {
 public:
     ElfFileReader (const string &fname);
     virtual ~ElfFileReader();
@@ -20,11 +19,10 @@ public:
     virtual void Read(long offset, void *dest, long size) const;
     virtual void ReadString(long offset, string& dest) const;
 
-    typedef SimpleBinaryPosition PositionType;
+    virtual long Size() const;
+    virtual long Next( long offset, unsigned char c) const;
+    virtual long Last( long offset, unsigned char c) const;
 
-    virtual PositionType Begin() const;
-    virtual PositionType End() const;
-    virtual PositionType Pos(long offset) const;
 
 private:
     void OpenFile(const string &fname);

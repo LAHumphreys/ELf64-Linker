@@ -5,8 +5,8 @@
 #include "stringTable.h"
 #include "binaryReader.h"
 
-Section::Section( const BinaryPosition& headerPos, 
-                  const BinaryPosition& strings ) 
+Section::Section( const BinaryReader& headerPos, 
+                  const BinaryReader& strings ) 
     : sh_flags("")
 {
     // over write the data in our data POD 
@@ -15,8 +15,7 @@ Section::Section( const BinaryPosition& headerPos,
     name = (strings + elfHeader.sh_name).ReadString();
 
     // Get our data
-    data = new Data(headerPos.Reader().Begin() + DataStart() ,
-                    DataSize());
+    data = new Data(headerPos.Begin() + DataStart() , DataSize());
 
     ConfigureFlags();
     SetFlags();

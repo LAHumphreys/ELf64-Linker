@@ -7,7 +7,7 @@
 
 using namespace std;
 
-Relocation::Relocation ( const BinaryPosition &reader, 
+Relocation::Relocation ( const BinaryReader &reader, 
                          const string section)
     : type("")
 {

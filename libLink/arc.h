@@ -22,14 +22,16 @@ public:
 
     class Member {
     public:
-        Member (const BinaryPosition &p);
+        Member (const BinaryReader &p);
         virtual ~Member();
         string Name() const { return string(name); }
-        long   Size() const { 
+        long Size() const { 
             return fileSize + sizeof(header);
         }
-        long   FileSize() const { return fileSize; }
-        const BinaryReader& File() const { return *file; }
+        long  FileSize() const { return fileSize; }
+        const BinaryReader File() const { 
+            return file->Begin(); 
+        }
     private:
         Archive::MemberHeader header;
         char name[17];
@@ -37,10 +39,10 @@ public:
         SubReader *file;
     };
 
-    Archive (const BinaryPosition& file);
+    Archive (const BinaryReader& file);
     const Archive::Member& operator[](long idx) const;
     const Archive::Member& operator[](const string& name) const;
-    bool ValidateFile(const BinaryPosition &file) const ;
+    bool ValidateFile(const BinaryReader &file) const ;
     long Count() const { return items; }
     virtual ~Archive ();
 

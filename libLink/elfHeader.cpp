@@ -5,7 +5,7 @@
 #include "elfHeader.h"
 
 using namespace std;
-ElfHeaderX86_64::ElfHeaderX86_64 (const BinaryPosition &reader)
+ElfHeaderX86_64::ElfHeaderX86_64 (const BinaryReader &reader)
 {
     // over write the data in our data POD 
     reader.Read(&data,this->Size());

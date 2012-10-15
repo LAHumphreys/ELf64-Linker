@@ -2,11 +2,11 @@
    #define RELOCATION_H
 #include "flags.h"
 #include "elf.h"
-class BinaryPosition;
+class BinaryReader;
 
 class Relocation {
 public:
-    Relocation ( const BinaryPosition& reader, 
+    Relocation ( const BinaryReader& reader, 
                  const string section);
 
     // atributes

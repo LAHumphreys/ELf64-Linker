@@ -4,8 +4,8 @@
 using namespace std;
 
 
-Symbol::Symbol ( const BinaryPosition& reader,
-                 const BinaryPosition& stable )
+Symbol::Symbol ( const BinaryReader& reader,
+                 const BinaryReader& stable )
 : type(""), scope(""){ 
     ConfigureFlags();
     reader.Read(&symbol,Size());

@@ -4,15 +4,14 @@
 #include <algorithm>
 
 using namespace std;
-Archive::Archive(const BinaryPosition& file) {
+Archive::Archive(const BinaryReader &file) {
     headerStringFormat = string("!<arch>\n");
     items =0;
     if (!ValidateFile(file))
         throw "Invalid archive file";
 
-    SimpleBinaryPosition nextMember = file + 
-                                      headerStringFormat.size();
-    while (nextMember < file.Reader().End()) {
+    BinaryReader nextMember = file + headerStringFormat.size();
+    while (nextMember < file.End()) {
         ++items;
         Archive::Member* member = new Archive::Member(nextMember);
         members.insert(members.end(),member);
@@ -23,7 +22,7 @@ Archive::Archive(const BinaryPosition& file) {
     }
 }
 
-bool Archive::ValidateFile(const BinaryPosition &file) const {
+bool Archive::ValidateFile(const BinaryReader &file) const {
     char *fileHeader = (char *) file.Dup(headerStringFormat.size());
     bool valid = (headerStringFormat == string(fileHeader));
     delete fileHeader;
@@ -47,9 +46,9 @@ const Archive::Member& Archive::operator[](const string& name)const
         throw "Invalid index of archive: " + name;
 }
 
-Archive::Member::Member(const BinaryPosition& p): file(NULL) {
-    p.Read(&header,sizeof(header));
-    file = new SubReader(p, Size());
+Archive::Member::Member(const BinaryReader& r): file(NULL) {
+    r.Read(&header,sizeof(header));
+    file = new SubReader(r, Size());
 
     char sizebuf[11];
     sizebuf[11] = name[16] = '\0';

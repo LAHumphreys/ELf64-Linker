@@ -8,7 +8,7 @@ using namespace std;
 
 class Data {
     public:
-        Data (const BinaryPosition& p, long size);
+        Data (const BinaryReader& p, long size);
         ~Data();
 
         const unsigned char * Raw() { return data; }

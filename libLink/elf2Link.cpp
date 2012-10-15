@@ -4,7 +4,8 @@
 using namespace std;
 int main(int argc, const char *argv[])
 {
-    ElfParser<ElfFileReader> p(argv[1]);
+    ElfFileReader f(argv[1]);
+    ElfParser p(f);
     cout << p.PrintLink() << endl;
     return 0;
 }

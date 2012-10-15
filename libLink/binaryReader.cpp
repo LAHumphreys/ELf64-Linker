@@ -3,166 +3,209 @@
 
 using namespace std;
 
-SimpleBinaryPosition::SimpleBinaryPosition(
-                                const BinaryReader &r,
-                                long offset) 
-: reader(r)
+BinaryReader::BinaryReader( const FileLikeObject &f) 
+: file(f)
+{
+    this->offset = 0;
+}
+
+BinaryReader::BinaryReader( const FileLikeObject &f, long offset) 
+: file(f)
 {
     this->offset = offset;
 }
 
-SimpleBinaryPosition::SimpleBinaryPosition(
-                                const BinaryPosition &other) 
-: reader(other.Reader())
+BinaryReader::BinaryReader(const BinaryReader &other) 
+: file(other.file)
 {
     this->offset = other.Offset();
     // TODO: Convert to delegated constructor when gcc 4.7 is
     // available
 }
 
-SimpleBinaryPosition::SimpleBinaryPosition(
-                                BinaryPosition &&other) 
-: reader(other.Reader())
+// Create a new BinaryReader
+BinaryReader BinaryReader::operator+( long additionalOffset) const 
 {
-    this->offset = other.Offset();
-    // TODO: Convert to delegated constructor when gcc 4.7 is
-    // available
-}
- 
-// Create a new BinaryPosition
-SimpleBinaryPosition SimpleBinaryPosition::operator+(
-                                 long additionalOffset) const 
-{
-    return SimpleBinaryPosition(reader, offset + additionalOffset);
+    return BinaryReader(file, offset + additionalOffset);
 }
 
-SimpleBinaryPosition SimpleBinaryPosition::operator+(
-                                    const BinaryPosition& p) const
+BinaryReader BinaryReader::operator+( const BinaryReader& p) const
 {
-    return SimpleBinaryPosition(reader, offset + p.Offset());
+    return BinaryReader(file, offset + p.Offset());
 }
 
-SimpleBinaryPosition SimpleBinaryPosition::operator-(
-                                 long additionalOffset) const 
+BinaryReader BinaryReader::operator-( long additionalOffset) const 
 {
-    return SimpleBinaryPosition(reader, offset - additionalOffset);
+    return BinaryReader(file, offset - additionalOffset);
 }
 
-SimpleBinaryPosition SimpleBinaryPosition::operator-(
-                                    const BinaryPosition& p) const
+BinaryReader BinaryReader::operator-( const BinaryReader& p) const
 {
-    return SimpleBinaryPosition(reader, offset - p.Offset());
+    return BinaryReader(file, offset - p.Offset());
 }
 
 // Reposition the pointer
-SimpleBinaryPosition& SimpleBinaryPosition::operator+=(
-                                    long additionalOffset) 
+BinaryReader& BinaryReader::operator+=( long additionalOffset) 
 {
     offset += additionalOffset;
     return *this;
 }
 
-SimpleBinaryPosition& SimpleBinaryPosition::operator+=(
-                                    const BinaryPosition& p) 
+BinaryReader& BinaryReader::operator+=( const BinaryReader& p) 
 {
     offset += p.Offset();
     return *this;
 }
 
-SimpleBinaryPosition& SimpleBinaryPosition::operator-=(
-                                    long additionalOffset) 
+BinaryReader& BinaryReader::operator-=( long additionalOffset) 
 {
     offset -= additionalOffset;
     return *this;
 }
 
-SimpleBinaryPosition& SimpleBinaryPosition::operator-=(
-                                    const BinaryPosition& p) 
+BinaryReader& BinaryReader::operator-=( const BinaryReader& p) 
 {
     offset -= p.Offset();
     return *this;
 }
 
-SimpleBinaryPosition& SimpleBinaryPosition::operator=(long offset) {
+BinaryReader& BinaryReader::operator=(long offset) {
     this->offset = offset;
     return *this;
 }
 
-void SimpleBinaryPosition::Read(void *dest, long size) const{
-    reader.Read(offset,dest,size);
+BinaryReader BinaryReader::Begin() const {
+    return BinaryReader(file,0);
 }
 
-unsigned char * SimpleBinaryPosition::Dup(long size) const {
+BinaryReader BinaryReader::End() const {
+    return BinaryReader(file,file.Size());
+}
+
+BinaryReader BinaryReader::Pos(long offset) const {
+    return BinaryReader(file,offset);
+}
+
+BinaryReader BinaryReader::Find(unsigned char c) const {
+    BinaryReader loc(file,file.Next(offset, c));
+    if ( loc < Begin() )
+        return Begin();
+    else if ( loc > End() )
+        return End();
+    else
+        return loc;
+}
+
+BinaryReader BinaryReader::RFind(unsigned char c) const {
+    BinaryReader loc(file,file.Last(offset, c));
+    if ( loc < Begin() )
+        return Begin();
+    else if ( loc > End() )
+        return End();
+    else
+        return loc;
+}
+
+void BinaryReader::Read(void *dest, long size) const{
+    file.Read(offset,dest,size);
+}
+
+unsigned char * BinaryReader::Dup(long size) const {
     unsigned char * data = new unsigned char[size];
-    reader.Read(offset,data,size);
+    file.Read(offset,data,size);
     return data;
 }
 
-void SimpleBinaryPosition::ReadString(string& dest) const{
-    reader.ReadString(offset,dest);
+void BinaryReader::ReadLine(void *dest, long max, char delim) const{
+    long loc = file.Next(offset, delim);
+    if ( loc - offset > max ) {
+        file.Read(offset,dest,max);
+    } else {
+        file.Read(offset,dest,loc - offset);
+    }
 }
 
-void SimpleBinaryPosition::AppendString(string& dest) const{
+void BinaryReader::ReadString(string& dest) const{
+    file.ReadString(offset,dest);
+}
+
+void BinaryReader::AppendString(string& dest) const{
     string s;
-    reader.ReadString(offset,s);
+    file.ReadString(offset,s);
     dest+=s;
 }
 
-string SimpleBinaryPosition::ReadString() const {
+string BinaryReader::ReadString() const {
     string s;
-    reader.ReadString(offset,s);
+    file.ReadString(offset,s);
     return s;
 }
 
 //Comparision operators
-bool SimpleBinaryPosition::operator==
-                           (const BinaryPosition & other) const 
+bool BinaryReader::operator== (const BinaryReader & other) const 
 {
     return offset == other.Offset();
 }
-bool SimpleBinaryPosition::operator<=
-                           (const BinaryPosition & other) const 
+bool BinaryReader::operator<= (const BinaryReader & other) const 
 {
     return offset <= other.Offset();
 }
-bool SimpleBinaryPosition::operator>=
-                           (const BinaryPosition & other) const 
+bool BinaryReader::operator>= (const BinaryReader & other) const 
 {
     return offset >= other.Offset();
 }
-bool SimpleBinaryPosition::operator>
-                           (const BinaryPosition & other) const 
+bool BinaryReader::operator> (const BinaryReader & other) const 
 {
     return offset > other.Offset();
 }
-bool SimpleBinaryPosition::operator<
-                           (const BinaryPosition & other) const 
+bool BinaryReader::operator< (const BinaryReader & other) const 
 {
     return offset < other.Offset();
 }
 
-SubReader::SubReader(const BinaryPosition &p, long size)
+SubReader::SubReader(const BinaryReader &p, long size)
     :pos_(p) 
 {
     this->size = size;
 }
 
 void SubReader::Read(long offset, void *dest, long size) const {
-    pos_.Reader().Read( pos_.Offset()+offset, dest, size);
+    (pos_ + offset).Read(dest,size);
 }
 
 void SubReader::ReadString(long offset, std::string& dest)const {
-    pos_.Reader().ReadString( pos_.Offset()+offset, dest);
+    (pos_ + offset).ReadString(dest);
 }
 
-SimpleBinaryPosition SubReader::Begin() const {
-    return SimpleBinaryPosition(*this,0);
-}
-SimpleBinaryPosition SubReader::End() const {
-    return SimpleBinaryPosition(*this,size);
+long SubReader::Size() const {
+    return size;
 }
 
-SimpleBinaryPosition SubReader::Pos(long offset) const {
-    return SimpleBinaryPosition(*this,offset);
+long SubReader::Next( long offset, unsigned char c) const
+{
+    BinaryReader loc = (pos_ + offset).Find(c);
+    if ( loc > pos_ + size )
+        return Size();
+    else
+        return  (loc - pos_).Offset();
 }
 
+long SubReader::Last( long offset, unsigned char c) const
+{
+    BinaryReader loc = (pos_ + offset).RFind(c);
+    if ( loc < pos_)
+        return 0;
+    else
+        return loc.Offset();
+}
+
+// Extra utility functions
+BinaryReader SubReader::Begin() const {
+    return BinaryReader(*this,0);
+}
+BinaryReader SubReader::End() const{
+    return BinaryReader(*this,size);
+}
+BinaryReader SubReader::Pos(long offset) const {
+    return BinaryReader(*this,offset);
+}

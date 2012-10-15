@@ -7,10 +7,10 @@ using namespace std;
 #define ProgramX86_64
 
 class Section;
-class BinaryPosition;
+class BinaryReader;
 class ProgramHeader {
 public:
-    ProgramHeader ( const BinaryPosition&, 
+    ProgramHeader ( const BinaryReader&, 
                     const vector< Section *>& sections );
     virtual ~ProgramHeader (){};
 
