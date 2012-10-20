@@ -16,7 +16,7 @@
 class ElfParser {
 public:
     // C'tor / D'tor
-    ElfParser (const FileLikeObject &f);
+    ElfParser (const FileLikeReader &f);
     virtual ~ElfParser ();
 
     // Create a string representing the object file in LINK format

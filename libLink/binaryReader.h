@@ -8,7 +8,7 @@ class BinaryReader; //forward declaration
 class BinaryReader;
 
 // Requirements for a class to be wrapped by BinaryReader
-class FileLikeObject {
+class FileLikeReader {
 public:
     virtual void Read(long offset, void *dest, long size) const =0;
     virtual void ReadString(long offset, std::string& dest)const =0;
@@ -19,8 +19,8 @@ public:
 
 class BinaryReader {
 public:
-    BinaryReader(const FileLikeObject& f, long offset);
-    BinaryReader(const FileLikeObject& f);
+    BinaryReader(const FileLikeReader& f, long offset);
+    BinaryReader(const FileLikeReader& f);
     BinaryReader(const BinaryReader &other);
 
     // Access data
@@ -61,15 +61,15 @@ public:
 
     virtual long Offset() const {return offset;}
 private: 
-    const FileLikeObject& file;
+    const FileLikeReader& file;
     long offset;
 };
 
-class SubReader: public FileLikeObject {
+class SubReader: public FileLikeReader {
 public:
     SubReader(const BinaryReader &p, long size);
 
-    // Implement the interface for FileLikeObject
+    // Implement the interface for FileLikeReader
     virtual void Read(long offset, void *dest, long size) const ;
     virtual void ReadString(long offset, std::string& dest)const;
     virtual long Next( long offset, unsigned char c) const;

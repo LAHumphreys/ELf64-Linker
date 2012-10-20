@@ -3,13 +3,13 @@
 
 using namespace std;
 
-BinaryReader::BinaryReader( const FileLikeObject &f) 
+BinaryReader::BinaryReader( const FileLikeReader &f) 
 : file(f)
 {
     this->offset = 0;
 }
 
-BinaryReader::BinaryReader( const FileLikeObject &f, long offset) 
+BinaryReader::BinaryReader( const FileLikeReader &f, long offset) 
 : file(f)
 {
     this->offset = offset;

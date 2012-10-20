@@ -11,7 +11,7 @@ using namespace std;
     \details Provides an abstraction of the process of mem-mapping
              the ELF file, and guarantees a call to munmap
 */
-class ElfFileReader: public FileLikeObject {
+class ElfFileReader: public FileLikeReader {
 public:
     ElfFileReader (const string &fname);
     virtual ~ElfFileReader();

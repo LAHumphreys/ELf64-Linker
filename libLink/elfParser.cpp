@@ -5,7 +5,7 @@ using namespace std;
 
 #include "elfParser.h"
 
-ElfParser::ElfParser(const FileLikeObject &f) 
+ElfParser::ElfParser(const FileLikeReader &f) 
   : reader(f), stringTable(reader), headerStrings(reader)
 
 {
