@@ -5,6 +5,12 @@
 #include "stringTable.h"
 #include "binaryReader.h"
 
+Section::Section( ) 
+    : sh_flags("")
+{
+    ConfigureFlags();
+}
+
 Section::Section( const BinaryReader& headerPos, 
                   const BinaryReader& strings ) 
     : sh_flags("")
@@ -119,3 +125,4 @@ bool Section::IsLInkSection() {
     return not (IsSymTable() || IsStringTable() || IsRelocTable() 
                 || name == "");
 }
+

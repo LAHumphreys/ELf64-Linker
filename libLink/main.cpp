@@ -12,8 +12,7 @@ int main(int argc, const char *argv[])
         ElfFileReader f(argv[1]);
         ElfParser p(f);
 
-        ofstream file;
-        file.open("out.X");
+        ofstream file( "out.X",ios_base::out | ios_base::binary);
         StdWriter fileObj(file);
         BinaryWriter writer(fileObj);
 

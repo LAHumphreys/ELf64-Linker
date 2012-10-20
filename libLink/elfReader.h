@@ -18,6 +18,7 @@ public:
 
     virtual void Read(long offset, void *dest, long size) const;
     virtual void ReadString(long offset, string& dest) const;
+    virtual unsigned char Get(long offset) const;
 
     virtual long Size() const;
     virtual long Next( long offset, unsigned char c) const;

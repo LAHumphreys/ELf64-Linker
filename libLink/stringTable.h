@@ -2,6 +2,7 @@
    #define STR_TAB_H
 #endif
 #include <vector>
+#include "section.h"
 
 class StringTable {
     public:
@@ -11,16 +12,11 @@ class StringTable {
             long size;
             long offset;
         };
-        /**
-            \fn      AddString
-            \brief   Add a string to the string table
-            @param[in]   str     A pointer to a constant string
-            @return The address (offset within the string table) the string was inserted at
-        */
         
         StringTable();
         ~StringTable();
         long AddString(const char * str);
+        void WriteTable(BinaryWriter& writer);
     private:
         std::vector<ElfString *> strings;
         long writePtr;

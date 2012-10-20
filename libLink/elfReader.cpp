@@ -51,6 +51,10 @@ void ElfFileReader::Read(long offset, void *dest, long size) const {
     memcpy(dest,sptr + offset,size);
 }
 
+unsigned char ElfFileReader::Get(long offset)const {
+    return this->sptr[offset];
+}
+
 long ElfFileReader::Size() const {
     return size;
 }

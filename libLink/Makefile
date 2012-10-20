@@ -1,11 +1,11 @@
 INCLUDE_FLAGS="-I linux"
 DEBUG_FLAGS="-ggdb"
-archiveTest: archivetest.cpp elfReader.o elfParser.o elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o binaryData.o binaryReader.o binaryWriter.o arc.o stdWriter.o
-	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -std=c++0x -o archiveTest archivetest.cpp  elfParser.o elfReader.o elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o arc.o binaryData.o stdWriter.o binaryReader.o binaryWriter.o
-elf2Link: elf2Link.cpp elfReader.o elfParser.o  elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o binaryData.o binaryReader.o arc.o
-	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -std=c++0x -o elf2Link elf2Link.cpp elfParser.o elfReader.o elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o arc.o binaryData.o binaryReader.o stdWriter.o
-main: main.cpp elfReader.o elfParser.o elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o binaryData.o stdWriter.o binaryReader.o binaryWriter.o arc.o 
-	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -std=c++0x -o main main.cpp  elfParser.o elfReader.o elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o arc.o binaryData.o stdWriter.o binaryReader.o binaryWriter.o
+archiveTest: archivetest.cpp elfReader.o elfParser.o elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o binaryData.o binaryReader.o binaryWriter.o arc.o stdWriter.o dataVector.o
+	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -std=c++0x -o archiveTest archivetest.cpp  elfParser.o elfReader.o elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o arc.o binaryData.o stdWriter.o dataVector.o binaryReader.o binaryWriter.o
+elf2Link: elf2Link.cpp elfReader.o elfParser.o  elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o binaryData.o binaryReader.o arc.o dataVector.o
+	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -std=c++0x -o elf2Link elf2Link.cpp elfParser.o elfReader.o elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o arc.o binaryData.o binaryReader.o stdWriter.o dataVector.o
+main: main.cpp elfReader.o elfParser.o elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o binaryData.o stdWriter.o binaryReader.o binaryWriter.o arc.o dataVector.o
+	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -std=c++0x -o main main.cpp  elfParser.o elfReader.o elfHeader.o section.o flags.o stringTable.o symbol.o programHeader.o reloc.o arc.o binaryData.o stdWriter.o dataVector.o binaryReader.o binaryWriter.o
 
 reader.o: reader.cpp reader.h
 	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -c -std=c++0x -o reader.o reader.cpp
@@ -54,6 +54,9 @@ stdWriter.o: stdWriter.cpp stdWriter.h
 
 arc.o: arc.cpp arc.h
 	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -c -std=c++0x -o arc.o arc.cpp
+
+dataVector.o: dataVector.cpp dataVector.h
+	g++ $(DEBUG_FLAGS) $(INCLUDE_FLAGS) -c -std=c++0x -o dataVector.o dataVector.cpp
   
 
 

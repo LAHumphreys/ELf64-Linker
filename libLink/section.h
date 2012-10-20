@@ -52,12 +52,16 @@ public:
         return elfHeader.sh_type != SHT_NOBITS; 
     }
 
+    // The caller is repsonsible for destruction
+    static Section* MakeNewStringTable(StringTable &tab);
+
 
 
 protected:
     void ConfigureFlags();
     void SetFlags();
 private:
+    Section ();
     Data * data;
     Elf64_Shdr elfHeader;
     StringTable *stringTable;

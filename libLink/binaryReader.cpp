@@ -110,6 +110,10 @@ void BinaryReader::Read(void *dest, long size) const{
     file.Read(offset,dest,size);
 }
 
+void BinaryReader::Read(BinaryWriter& pos, long size) const {
+    pos.Write(*this,size);
+}
+
 unsigned char * BinaryReader::Dup(long size) const {
     unsigned char * data = new unsigned char[size];
     file.Read(offset,data,size);
@@ -122,6 +126,18 @@ void BinaryReader::ReadLine(void *dest, long max, char delim) const{
         file.Read(offset,dest,max);
     } else {
         file.Read(offset,dest,loc - offset);
+    }
+}
+
+void BinaryReader::ReadLine(BinaryWriter& pos, long maxsize,
+                                                     char delim ) 
+                                                     const
+{
+    long loc = file.Next(offset, delim);
+    if ( loc - offset > maxsize ) {
+        pos.Write(*this,maxsize);
+    } else {
+        pos.Write(*this,loc-offset);
     }
 }
 
@@ -139,6 +155,10 @@ string BinaryReader::ReadString() const {
     string s;
     file.ReadString(offset,s);
     return s;
+}
+
+unsigned char BinaryReader::Get() const {
+    return this->file.Get(this->offset);
 }
 
 //Comparision operators
@@ -175,6 +195,10 @@ void SubReader::Read(long offset, void *dest, long size) const {
 
 void SubReader::ReadString(long offset, std::string& dest)const {
     (pos_ + offset).ReadString(dest);
+}
+
+unsigned char SubReader::Get(long offset)const {
+    (pos_ + offset).Get();
 }
 
 long SubReader::Size() const {

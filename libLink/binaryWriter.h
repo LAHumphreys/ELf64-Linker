@@ -3,6 +3,8 @@ using namespace std;
 #ifndef BINARY_WRITER_H
 #define BINARY_WRITER_H
 
+class BinaryReader;
+
 class FileLikeWriter {
 public:
     virtual void Write(long offset, const void *src, long size)  =0;
@@ -19,8 +21,10 @@ public:
 
     // Access data
     virtual void Write(void *src, long size);
+    virtual void Write(const BinaryReader& pos, long size);
     virtual void WriteString(std::string& src);
     virtual void WriteString(const void *src);
+    virtual void WriteString(const BinaryReader &pos);
     virtual void Fill(long size);
     virtual void Fill(long size, unsigned char c);
 
@@ -53,5 +57,27 @@ public:
 private: 
     FileLikeWriter& file;
     long offset;
+};
+
+class DataWriter : FileLikeWriter{
+public:
+    DataWriter(void *, long );
+    virtual void Write(long offset, const void *src, long size);
+    virtual void Put(long offset, unsigned char c);
+    virtual void Fill(long offset, unsigned char c, long count);
+    //pointless
+    virtual void Flush( ) {};
+private:
+    unsigned char * rawdata;
+    long length;
+};
+
+template<int size>
+class DataLump: DataWriter
+{
+public:
+     DataLump(): DataWriter(this->data,size){};
+private:
+     unsigned char rawData[size];
 };
 #endif

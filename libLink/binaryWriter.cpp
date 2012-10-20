@@ -1,4 +1,5 @@
 #include "binaryWriter.h"
+#include "binaryReader.h"
 #include <string>
 #include <cstring>
 
@@ -28,12 +29,23 @@ void BinaryWriter::Write(void *src, long size) {
     file.Write(offset,src,size);
 }
 
+void BinaryWriter::Write(const BinaryReader& pos, long size) {
+    for (long i = 0; i < size; i++) {
+        file.Put(offset+i,(pos +i).Get());
+    }
+}
+
 void BinaryWriter::Fill(long size) {
     this->file.Fill(offset,0,size);
 }
 
 void BinaryWriter::Fill(long size, unsigned char c ) {
     this->file.Fill(offset,c,size);
+}
+
+void BinaryWriter::WriteString(const BinaryReader &pos) {
+    string buf = pos.ReadString();
+    this->file.Write(this->offset, buf.c_str(),buf.length());
 }
 
 void BinaryWriter::WriteString(std::string& src) {
@@ -123,4 +135,35 @@ bool BinaryWriter::operator> (const BinaryWriter & other) const
 bool BinaryWriter::operator< (const BinaryWriter & other) const 
 {
     return offset < other.Offset();
+}
+
+DataWriter::DataWriter(void *data, long size) {
+    rawdata = (unsigned char *)data;
+    length = size;
+}
+void DataWriter::Write(long offset, const void *src, long len ) {
+    if ( offset + len >= this->length ) {
+        throw "Invalid write to data object: not enough space";
+    } else if ( offset < 0)  {
+        throw "Invalid write to data object: -'ve offset";
+    }else {
+        memcpy(this->rawdata+offset,src,length);
+    }
+}
+
+void DataWriter::Put(long offset, unsigned char c) {
+    if ( offset >= this->length ) {
+        throw "Invalid Put to data object: not enough space";
+    }
+    this->rawdata[offset] = c;
+}
+
+void DataWriter::Fill(long offset, unsigned char c, long count) {
+    if ( offset + count >= this->length ) {
+        throw "Invalid fill to data object: not enough space";
+    } else if ( offset < 0)  {
+        throw "Invalid fill to data object: -'ve offset";
+    }else {
+       memset(this->rawdata,c,count);
+    }
 }
