@@ -36,7 +36,6 @@ private:
     string sectionNames;
     string name;
     Flags flags;
-    /* data */
 };
 
 

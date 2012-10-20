@@ -82,6 +82,10 @@ void ElfHeaderX86_64::Write(ofstream &file) {
     file.write(readPtr,sizeof(data));
 }
 
+void ElfHeaderX86_64::GetHeader(Elf64_Ehdr& out ) {
+    memcpy(out,this->data,sizeof(Elf64_Ehdr));
+}
+
 size_t ElfHeaderX86_64::Size() {
     return sizeof(Elf64_Ehdr);
 }

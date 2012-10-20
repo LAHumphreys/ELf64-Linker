@@ -33,6 +33,8 @@ public:
     uint16_t& SectionHeaderSize() { return data.e_shentsize; }
     uint16_t& StringTableIndex() { return data.e_shstrndx; }
 
+    void GetHeader(Elf64_Ehdr& out);
+
     // Calculated Flags
     string LinkFlags();
 
