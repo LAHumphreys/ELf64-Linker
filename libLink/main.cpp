@@ -1,13 +1,22 @@
-#include "x86Parser.h"
+#include "elfParser.h"
 #include <iostream>
 #include <regex>
+#include <fstream>
+#include "binaryWriter.h"
+#include "stdWriter.h"
 using namespace std;
 
 int main(int argc, const char *argv[])
 {
     try {
-        X86Parser p(argv[1]);
-        p.Write("out.elf");
+        ElfFileReader f(argv[1]);
+        ElfParser p(f);
+
+        ofstream file;
+        file.open("out.X");
+        StdWriter fileObj(file);
+        BinaryWriter writer(fileObj);
+
     } catch (string s) {
         cout << s << endl;
     } catch (const char * s) {
