@@ -4,9 +4,11 @@
 #include <sstream>
 #include "stringTable.h"
 #include "binaryReader.h"
+#include "dataVector.h"
+#include "binaryData.h"
 
 Section::Section( ) 
-    : sh_flags("")
+    : sh_flags(""), stringTable(NULL), data(NULL)
 {
     ConfigureFlags();
 }
@@ -124,5 +126,37 @@ string Section::GetLinkFlags() {
 bool Section::IsLInkSection() {
     return not (IsSymTable() || IsStringTable() || IsRelocTable() 
                 || name == "");
+
 }
 
+Section * Section::MakeNewStringTable( StringTable &tab, 
+                                       StringTable *sectionNames)
+{
+    Section * newSection = new Section();
+    newSection->data = new Data(tab.Size());
+    tab.WriteTable(newSection->data->Writer());
+    newSection->stringTable = sectionNames;
+
+    newSection->name = tab.Name();
+    newSection->sh_flags.SetFlags("W");
+
+    //build the elf header
+    newSection->elfHeader.sh_entsize = 0; //no fixed sized entries
+    newSection->elfHeader.sh_flags = newSection->GetFlags();
+    newSection->elfHeader.sh_addralign = 0; //no addresses
+    newSection->elfHeader.sh_info = 0; // man elf ( not 4 strings)
+      
+    // TODO: Handle for long files
+    newSection->elfHeader.sh_link = 0; 
+
+    newSection->elfHeader.sh_name = 
+       newSection->stringTable->AddString(newSection->name.c_str());
+    newSection->elfHeader.sh_type = SHT_STRTAB;
+    newSection->elfHeader.sh_size = newSection->data->Size();
+
+
+    //needs setting later
+    newSection->elfHeader.sh_addr;
+    newSection->elfHeader.sh_offset;
+    return newSection;
+}

@@ -53,7 +53,8 @@ public:
     }
 
     // The caller is repsonsible for destruction
-    static Section* MakeNewStringTable(StringTable &tab);
+    static Section* MakeNewStringTable( StringTable &tab,
+                                        StringTable *sectionNames);
 
 
 

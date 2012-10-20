@@ -13,11 +13,17 @@ class StringTable {
             long offset;
         };
         
-        StringTable();
+        StringTable(string name);
         ~StringTable();
+        string Name() { return name; }
         long AddString(const char * str);
         void WriteTable(BinaryWriter& writer);
+        void WriteTable(BinaryWriter&& writer) {
+            WriteTable(writer);
+        };
+        long Size() { return writePtr;}
     private:
         std::vector<ElfString *> strings;
         long writePtr;
+        string name;
 };

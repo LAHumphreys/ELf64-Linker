@@ -2,11 +2,14 @@
 #include <sstream>
 #include <iomanip>
 #include <cstring>
+#include "dataVector.h"
 
 
-Data::Data (const BinaryReader &p, long size) {
-    data.resize(size);
+Data::Data (const BinaryReader &p, long size):data(size) {
     Writer().Write(p,size);
+}
+
+Data::Data(long size):data(size) {
 }
 
 string Data::HexCode() { 

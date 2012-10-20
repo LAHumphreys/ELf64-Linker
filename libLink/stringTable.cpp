@@ -5,7 +5,8 @@
    #include "stringTable.h"
 #endif
 
-StringTable::StringTable ( ) {
+StringTable::StringTable ( string name) {
+    this->name = name;
     writePtr=0;
     strings.reserve(1000);
 }
