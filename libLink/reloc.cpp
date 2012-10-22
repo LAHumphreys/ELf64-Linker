@@ -104,9 +104,9 @@ void Relocation::ConvertFromElf () {
         throw error; 
         break;
     default:
-	    string error;
+        string error;
         error = "I'm sorry: I have no idea what this";
-        error = "type of location is";
+        error += "type of location is";
         throw error; 
     }
 
