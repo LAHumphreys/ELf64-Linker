@@ -70,6 +70,7 @@ public:
     virtual bool operator ==(const BinaryReader& other) const;
 
     virtual long Offset() const {return offset;}
+    virtual operator long() { return offset;}
 private: 
     const FileLikeReader& file;
     long offset;

@@ -19,14 +19,16 @@ public:
     BinaryWriter(FileLikeWriter& f);
     BinaryWriter(const BinaryWriter &other);
 
-    // Access data
-    virtual void Write(void *src, long size);
+    // Write data
+    virtual void Write(const void *src, long size);
     virtual void Write(const BinaryReader& pos, long size);
-    virtual void WriteString(std::string& src);
+    virtual void WriteString(const std::string& src);
     virtual void WriteString(const void *src);
     virtual void WriteString(const BinaryReader &pos);
     virtual void Fill(long size);
     virtual void Fill(long size, unsigned char c);
+    virtual void FillTo ( const BinaryWriter &stop, 
+                          unsigned char c = '\0');
 
     // Index file
     virtual BinaryWriter Begin() const;
@@ -37,6 +39,9 @@ public:
     virtual BinaryWriter operator+ (const BinaryWriter& p) const;
     virtual BinaryWriter operator- (long additionalOffset) const;
     virtual BinaryWriter operator- (const BinaryWriter& p) const;
+    virtual BinaryWriter NextBoundrary (long alignment) const;
+
+    virtual long operator%(long alignment) const;
 
     // Reposition the pointer
     virtual BinaryWriter& operator+=(long additionalOffset);
@@ -54,6 +59,7 @@ public:
     virtual bool operator ==(const BinaryWriter& other) const;
 
     virtual long Offset() const {return offset;}
+    virtual operator long() { return offset;}
 private: 
     FileLikeWriter& file;
     long offset;

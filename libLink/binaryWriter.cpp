@@ -25,7 +25,7 @@ BinaryWriter::BinaryWriter(const BinaryWriter &other)
     // available
 }
 
-void BinaryWriter::Write(void *src, long size) {
+void BinaryWriter::Write(const void *src, long size) {
     file.Write(offset,src,size);
 }
 
@@ -39,6 +39,14 @@ void BinaryWriter::Fill(long size) {
     this->file.Fill(offset,0,size);
 }
 
+void BinaryWriter::FillTo ( const BinaryWriter& stop,
+                            unsigned char c ) {
+    long diff = stop.offset - offset;
+    if ( diff > 0) {
+        Fill(diff , c);
+    } 
+}
+
 void BinaryWriter::Fill(long size, unsigned char c ) {
     this->file.Fill(offset,c,size);
 }
@@ -48,7 +56,7 @@ void BinaryWriter::WriteString(const BinaryReader &pos) {
     this->file.Write(this->offset, buf.c_str(),buf.length());
 }
 
-void BinaryWriter::WriteString(std::string& src) {
+void BinaryWriter::WriteString(const std::string& src) {
     this->file.Write(offset,src.c_str(), src.length());
 }
 
@@ -75,6 +83,17 @@ BinaryWriter BinaryWriter::operator-( long additionalOffset) const
 BinaryWriter BinaryWriter::operator-( const BinaryWriter& p) const
 {
     return BinaryWriter(file, offset - p.Offset());
+}
+
+BinaryWriter BinaryWriter::NextBoundrary(long alignment) const {
+    long diff = offset % alignment;
+    if (diff != 0 ) {
+        // Move to next boundrary
+        BinaryWriter(file,offset + (alignment-diff));
+    } else {
+        // already on a boundrary
+        BinaryWriter(file,offset);
+    }
 }
 
 // Reposition the pointer
@@ -105,6 +124,10 @@ BinaryWriter& BinaryWriter::operator-=( const BinaryWriter& p)
 BinaryWriter& BinaryWriter::operator=(long offset) {
     this->offset = offset;
     return *this;
+}
+
+long BinaryWriter::operator%(long alignment) const {
+    return offset % alignment;
 }
 
 BinaryWriter BinaryWriter::Begin() const {

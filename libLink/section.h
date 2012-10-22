@@ -24,9 +24,13 @@ public:
     string WriteLinkHeader();
     string WriteLinkData();
 
+    void WriteRawData(BinaryWriter &writer);
+    void WriteRawData(BinaryWriter &&writer){WriteRawData(writer);}
+
     // attributes
     size_t Size() {return sizeof(Elf64_Shdr);}
     Elf64_Addr& Address() { return elfHeader.sh_addr; }
+    Elf64_Shdr RawHeader() { return elfHeader;}
 
     // properties
     bool Writeable() { return elfHeader.sh_flags & SHF_WRITE; }

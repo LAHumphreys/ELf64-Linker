@@ -23,7 +23,8 @@ Section::Section( const BinaryReader& headerPos,
     name = (strings + elfHeader.sh_name).ReadString();
 
     // Get our data
-    data = new Data(headerPos.Begin() + DataStart() , DataSize());
+    data = new Data( headerPos.Begin() + (long)DataStart() , 
+                     DataSize());
 
     ConfigureFlags();
     SetFlags();
@@ -159,4 +160,8 @@ Section * Section::MakeNewStringTable( StringTable &tab,
     newSection->elfHeader.sh_addr;
     newSection->elfHeader.sh_offset;
     return newSection;
+}
+
+void Section::WriteRawData(BinaryWriter &writer) {
+    writer.Write(data->Reader(),data->Size());
 }

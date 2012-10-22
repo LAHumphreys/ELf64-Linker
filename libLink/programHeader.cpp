@@ -2,6 +2,7 @@
 #include "section.h"
 #include <sstream>
 #include "binaryReader.h"
+#include <algorithm>
 
 using namespace std;
 
@@ -10,14 +11,13 @@ ProgramHeader::ProgramHeader ( const BinaryReader& reader,
     :flags("")
 {
     reader.Read(&data,Size());
-    sectionNames = "";
     // While this isn't terribly efficient, there's only going to
     // be 20-30 sections a file...
     for ( auto s : sections) {
         if ( DataStart() <= s->DataStart() &&
              DataEnd()   >= s->DataEnd() )
         {
-            sectionNames += s->Name() + " ";
+            sectionNames.insert(sectionNames.begin(), s->Name());
         }
     }
     InitialiseFlags();
@@ -39,6 +39,15 @@ string ProgramHeader::WriteLink() {
      link << hex << SizeInMemory() << " ";
      link << hex << Address() << " ";
      link << flags.LinkMask() << " ";
-     link << "\"" << sectionNames << "\"";
+       
+     link << "\"";
+     for_each( sectionNames.begin(), 
+               sectionNames.end(), 
+               [&] (string &s) { link << name << " "; });
+     link << "\"";
      return link.str();
+}
+
+Elf64_Phdr ProgramHeader::RawHeader() {
+    return data;
 }
