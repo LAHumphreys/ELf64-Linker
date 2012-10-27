@@ -1,0 +1,69 @@
+
+#Define the base directories
+LINKER_DIR=$(HOME)/Linker
+EXPORTS_DIR=$(LINKER_DIR)/exports
+
+
+# Define the internal file structure
+EXPORT_INCLUDES_DIR=$(EXPORTS_DIR)/includes/
+EXPORT_OBJS_DIR=$(EXPORTS_DIR)/objs/
+EXPORT_LIB_DIR=$(EXPORTS_DIR)/lib/
+
+
+#
+#  CONFIGURE COMPILER
+#
+
+# Compilation variables
+#
+ADDITIONAL_INCLUDE_FLAGS=
+DEBUG_FLAGS=-ggdb
+CPPSTD=gnu++98 #(overridden by USE_CPPXX)
+
+# Set to YES to enable
+DEBUG_ON=YES
+USE_CPP11=YES
+
+# Build up cpp flags
+# 
+# These should be configured above
+# DO NOT CHANGE THESE UNLESS YOU KNOW WHAT YOU ARE DOING
+INCLUDE_FLAGS=-I$(EXPORT_INCLUDES_DIR)
+INCLUDE_FLAGS+=$(ADDITIONAL_INCLUDE_FLAGS)
+
+CPP_FLAGS=$(INCLUDE_FLAGS)
+
+ifeq ($(DEBUG_ON),YES)
+  CPP_FLAGS+=$(DEBUG_FLAGS)
+endif
+
+ifeq ($(USE_CPP11),YES)
+  CPPSTD=c++0x
+endif
+
+CPP_FLAGS+=-std=$(CPPSTD)
+
+# calculate variables used for macros 
+# DO NOT CHANGE THESE UNLESS YOU KNOW WHAT YOU ARE DOING
+EXPORTED_INCLUDES=$(addprefix $(EXPORT_INCLUDES_DIR),$(EXPORT_INCLUDES))
+TO_BUILD=$(addprefix $(EXPORT_OBJS_DIR),$(addsuffix .o,$(SOURCES)))
+LIB_TO_BUILD=$(addsuffix .a,$(EXPORT_LIB_DIR)$(TARGET_LIB))
+
+all: $(EXPORTED_INCLUDES) $(LIB_TO_BUILD)
+
+clean: $(LIB_TO_BUILD) $(EXPORTED_INCLUDES) $(TO_BUILD)
+	rm $+
+
+
+# Macro for building STATIC libraries
+$(LIB_TO_BUILD): $(TO_BUILD)
+	ar -cr 	$@ 	$+
+
+# Macro for moving include files to the includes directory. 
+$(EXPORT_INCLUDES_DIR)%: %
+	cp $+ $@
+
+# Macro for building object files
+$(EXPORT_OBJS_DIR)%.o: %
+	g++  $(CPP_FLAGS) -c -o $@ $+
+
