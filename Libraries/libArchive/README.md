@@ -9,7 +9,7 @@ All reading is done through the IOIInterface library
 
 ### Usage
 1) Creating the object initialises it and parses the library:
-// file is some BinaryReader object
+    // file is some binary reader object
     Archive arc = Archive(file);
 2) You can now access individual files:
     for( int i=0; i< arc.Count(); i++ ) {
