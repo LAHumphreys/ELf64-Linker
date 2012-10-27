@@ -1,4 +1,0 @@
--> binaryWritter can now return a new position and the next boundary (or the
-   currrent position if already on a boundrary
--> BinaryWriter can now fill up to (but not including) the position of another
-   binary Writer object
