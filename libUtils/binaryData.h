@@ -1,7 +1,6 @@
 #ifndef DATA_H
 #define DATA_H
 
-#include "symbol.h"
 #include <sstream>
 #include "binaryReader.h"
 #include "binaryWriter.h"

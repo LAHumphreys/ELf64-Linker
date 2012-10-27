@@ -1,3 +1,6 @@
+# makefile tools library  for bulding multi-directory projects
+#
+# Luke Humphreys 2012
 
 #Define the base directories
 LINKER_DIR=$(HOME)/Linker
@@ -45,15 +48,61 @@ CPP_FLAGS+=-std=$(CPPSTD)
 
 # calculate variables used for macros 
 # DO NOT CHANGE THESE UNLESS YOU KNOW WHAT YOU ARE DOING
-EXPORTED_INCLUDES=$(addprefix $(EXPORT_INCLUDES_DIR),$(EXPORT_INCLUDES))
-TO_BUILD=$(addprefix $(EXPORT_OBJS_DIR),$(addsuffix .o,$(SOURCES)))
-LIB_TO_BUILD=$(addsuffix .a,$(EXPORT_LIB_DIR)$(TARGET_LIB))
+BUILD_DEPS=BUILD_FOLDERS
+TO_CLEAN=FOLDERS_TO_CLEAN FILES_TO_CLEAN
+TO_BUILD=
+FILES_TO_CLEAN=
+FOLDERS_TO_CLEAN=
 
-all: $(EXPORTED_INCLUDES) $(LIB_TO_BUILD)
+ifdef SOURCES
+   TO_BUILD+=$(addprefix $(EXPORT_OBJS_DIR),$(addsuffix .o,$(SOURCES)))
+   FILES_TO_CLEAN+=$(TO_BUILD)
+endif
 
-clean: $(LIB_TO_BUILD) $(EXPORTED_INCLUDES) $(TO_BUILD)
-	rm $+
+ifdef  EXPORT_INCLUDES
+   EXPORTED_INCLUDES=$(addprefix $(EXPORT_INCLUDES_DIR),$(EXPORT_INCLUDES))
+   BUILD_DEPS+=$(EXPORTED_INCLUDES)
+   FILES_TO_CLEAN+=$(EXPORTED_INCLUDES)
+endif
 
+ifdef MAKE_DIRS
+   FOLDERS_TO_BUILD=$(MAKE_DIRS)
+   FOLDERS_TO_CLEAN=$(MAKE_DIRS)
+endif
+
+ifdef TARGET_LIB
+   LIB_TO_BUILD=$(addsuffix .a,$(EXPORT_LIB_DIR)$(TARGET_LIB))
+   BUILD_DEPS+=$(LIB_TO_BUILD)
+   FILES_TO_CLEAN+=$(LIB_TO_BUILD)
+endif
+
+ifeq ($(strip $(FILES_TO_CLEAN)),)
+    CLEAN_CMD=@echo "nothing to clean"
+else
+    CLEAN_CMD=rm $(FILES_TO_CLEAN)
+endif
+
+
+all: $(BUILD_DEPS)
+
+clean: FOLDERS_TO_CLEAN 
+	$(CLEAN_CMD)
+
+FOLDERS_TO_CLEAN:
+	@for dir in $(FOLDERS_TO_BUILD); do  \
+		$(MAKE) -C $$dir clean;         \
+		echo "***********************************************************"; \
+		echo "Cleaned: $$dir ";\
+		echo "************************************************************"; \
+	done                                 
+# Macro for building subfolders
+BUILD_FOLDERS :
+	@for dir in $(FOLDERS_TO_BUILD); do  \
+		$(MAKE) -C $$dir || exit;        \
+		echo "***********************************************************"; \
+		echo "Built successfully: $$dir ";\
+		echo "************************************************************"; \
+	done
 
 # Macro for building STATIC libraries
 $(LIB_TO_BUILD): $(TO_BUILD)
