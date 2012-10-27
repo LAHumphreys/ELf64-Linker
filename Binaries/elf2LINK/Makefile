@@ -8,4 +8,4 @@ LINKED_LIBS= libElf    \
 
 EXECUTABLE=elf2Link
 
-include ../makefile.include
+include ../../makefile.include

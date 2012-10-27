@@ -1,4 +1,4 @@
 MAKE_DIRS= Libraries \
-		   elf2LINK
+		   Binaries
 
 include makefile.include
