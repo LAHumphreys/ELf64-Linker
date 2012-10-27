@@ -3,14 +3,14 @@
 # Luke Humphreys 2012
 
 #Define the base directories
-LINKER_DIR=$(HOME)/Linker
-EXPORTS_DIR=$(LINKER_DIR)/exports
+LINKER_DIR=$(HOME)/Linker/
+EXPORTS_DIR=$(LINKER_DIR)exports/
 
 
 # Define the internal file structure
-EXPORT_INCLUDES_DIR=$(EXPORTS_DIR)/includes/
-EXPORT_OBJS_DIR=$(EXPORTS_DIR)/objs/
-EXPORT_LIB_DIR=$(EXPORTS_DIR)/lib/
+EXPORT_INCLUDES_DIR=$(EXPORTS_DIR)includes/
+EXPORT_OBJS_DIR=$(EXPORTS_DIR)objs/
+EXPORT_LIB_DIR=$(EXPORTS_DIR)lib/
 
 
 #
@@ -53,6 +53,7 @@ TO_CLEAN=FOLDERS_TO_CLEAN FILES_TO_CLEAN
 TO_BUILD=
 FILES_TO_CLEAN=
 FOLDERS_TO_CLEAN=
+LINKED_FILES=
 
 ifdef SOURCES
    TO_BUILD+=$(addprefix $(EXPORT_OBJS_DIR),$(addsuffix .o,$(SOURCES)))
@@ -76,6 +77,16 @@ ifdef TARGET_LIB
    FILES_TO_CLEAN+=$(LIB_TO_BUILD)
 endif
 
+ifdef EXECUTABLE   
+   BUILD_DEPS+=EXEC
+   EXEC_TO_BUILD=$(LINKER_DIR)$(EXECUTABLE)
+   FILES_TO_CLEAN+=$(EXEC_TO_BUILD)
+endif
+
+ifdef LINKED_LIBS
+   LINKED_FILES+=$(addprefix $(EXPORT_LIB_DIR),$(addsuffix .a,$(LINKED_LIBS)))
+endif
+
 ifeq ($(strip $(FILES_TO_CLEAN)),)
     CLEAN_CMD=@echo "nothing to clean"
 else
@@ -87,6 +98,9 @@ all: $(BUILD_DEPS)
 
 clean: FOLDERS_TO_CLEAN 
 	$(CLEAN_CMD)
+
+EXEC: $(TO_BUILD)
+	g++ $(CPP_FLAGS) -o $(EXEC_TO_BUILD) $(TO_BUILD) $(LINKED_FILES)
 
 FOLDERS_TO_CLEAN:
 	@for dir in $(FOLDERS_TO_BUILD); do  \
