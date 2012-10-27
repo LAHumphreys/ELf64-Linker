@@ -11,6 +11,7 @@
 #include "elfHeader.h"
 #include "programHeader.h"
 #include "section.h"
+#include "symbol.h"
 
 struct ElfContent {
     ElfHeaderX86_64 &header;

@@ -1,5 +1,7 @@
 MAKE_DIRS= libIOInterface \
            libArchive \
-		   libUtils  
+		   libUtils  \
+		   libLINK  \
+		   libElf
 
 include makefile.include
