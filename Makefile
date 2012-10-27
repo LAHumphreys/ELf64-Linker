@@ -1,8 +1,4 @@
-MAKE_DIRS= libIOInterface \
-           libArchive \
-		   libUtils  \
-		   libLINK  \
-		   libElf \
+MAKE_DIRS= Libraries \
 		   elf2LINK
 
 include makefile.include

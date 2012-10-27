@@ -3,4 +3,4 @@ SOURCES=$(shell echo *.cpp)
 
 TARGET_LIB=libLINK
 
-include ../makefile.include
+include ../../makefile.include

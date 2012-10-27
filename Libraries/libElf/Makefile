@@ -1,6 +1,6 @@
 EXPORT_INCLUDES=$(shell echo *.h)
 SOURCES=$(shell echo *.cpp)
 
-TARGET_LIB=libUtils
+TARGET_LIB=libElf
 
-include ../makefile.include
+include ../../makefile.include

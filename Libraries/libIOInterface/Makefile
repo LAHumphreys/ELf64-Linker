@@ -3,4 +3,4 @@ SOURCES=$(shell echo *.cpp)
 
 TARGET_LIB=libIOInterface
 
-include ../makefile.include
+include ../../makefile.include
