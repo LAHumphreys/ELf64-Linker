@@ -78,7 +78,7 @@ file, a mem-mapped object file and a subection of a .a library)
     reader.Read(binaryWriter,100);
    </code></pre>
 
--  Move the position of this BinaryReader, or return a new object
+-  Move the position of this BinaryReader
 
    <pre><code>
     for ( int i=0; header->Sections(); ++i) {

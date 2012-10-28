@@ -1,4 +1,5 @@
 MAKE_DIRS= Libraries \
-		   Binaries
+		   Binaries \
+		   Tests
 
 include makefile.include

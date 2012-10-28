@@ -9,27 +9,27 @@ void DataVector::Write(long offset, const void *src, long size){
     if (offset + size >= this->size())
         this->resize(offset+size);
     for (long i=0; i<size; i++) {
-        (*this)[i] = 
+        (*this)[i+offset] = 
                    reinterpret_cast<const unsigned char *>(src)[i];
     }
 }
 
 void DataVector::Put(long offset, unsigned char c) {
     if (offset >= this->size())
-        this->resize(offset);
+        this->resize(offset+1);
     (*this)[offset] = c;
 }
 
 void DataVector::Fill(long offset, unsigned char c, long count){
-    if (offset + this->Size() >= this->size())
-        this->resize(offset+this->Size());
-    for (long i=0; i<this->Size(); i++) {
+    if (offset + count >= this->size())
+        this->resize(offset + count);
+    for (long i=offset; i<(offset + count); i++) {
         (*this)[i] = c;
     }
 }
 
 void DataVector::Read(long offset, void *dest, long size) const {
-    memcpy(dest,this->data(),size);
+    memcpy(dest,this->data()+offset,size);
 }
 
 unsigned char DataVector::Get(long offset) const {
@@ -37,7 +37,7 @@ unsigned char DataVector::Get(long offset) const {
 }
 
 void DataVector::ReadString(long offset, std::string& dest)const {
-    dest = reinterpret_cast<const char *>(this->data());
+    dest = reinterpret_cast<const char *>(this->data()+offset);
 }
 
 long DataVector::Size()const {

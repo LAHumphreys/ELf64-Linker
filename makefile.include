@@ -5,9 +5,11 @@
 #Define the base directories
 LINKER_DIR=$(HOME)/Linker/
 EXPORTS_DIR=$(LINKER_DIR)exports/
+TEST_DIR=$(LINKER_DIR)Tests/
 
 
 # Define the internal file structure
+EXPORT_TESTS_TO=$(TEST_DIR)tests/
 EXPORT_INCLUDES_DIR=$(EXPORTS_DIR)includes/
 EXPORT_OBJS_DIR=$(EXPORTS_DIR)objs/
 EXPORT_LIB_DIR=$(EXPORTS_DIR)lib/
@@ -83,6 +85,13 @@ ifdef EXECUTABLE
    FILES_TO_CLEAN+=$(EXEC_TO_BUILD)
 endif
 
+ifdef BUILD_TIME_TESTS
+   BUILD_DEPS+=RUN_AUTO_TEST
+   TESTS_TO_BUILD=$(addprefix $(EXPORT_TESTS_TO),$(BUILD_TIME_TESTS))
+   TESTS_TO_RUN=$(TESTS_TO_BUILD)
+   FILES_TO_CLEAN+=$(TESTS_TO_BUILD)
+endif
+
 ifdef LINKED_LIBS
    LINKED_FILES+=$(addprefix $(EXPORT_LIB_DIR),$(addsuffix .a,$(LINKED_LIBS)))
 endif
@@ -99,7 +108,7 @@ all: $(BUILD_DEPS)
 clean: FOLDERS_TO_CLEAN 
 	$(CLEAN_CMD)
 
-EXEC: $(TO_BUILD)
+EXEC: $(TO_BUILD) $(LINKED_FILES)
 	g++ $(CPP_FLAGS) -o $(EXEC_TO_BUILD) $(TO_BUILD) $(LINKED_FILES)
 
 FOLDERS_TO_CLEAN:
@@ -109,6 +118,7 @@ FOLDERS_TO_CLEAN:
 		echo "Cleaned: $$dir ";\
 		echo "************************************************************"; \
 	done                                 
+ 
 # Macro for building subfolders
 BUILD_FOLDERS :
 	@for dir in $(FOLDERS_TO_BUILD); do  \
@@ -117,6 +127,19 @@ BUILD_FOLDERS :
 		echo "Built successfully: $$dir ";\
 		echo "************************************************************"; \
 	done
+
+RUN_AUTO_TEST: BUILD_AUTO_TESTS
+	@for test in $(TESTS_TO_RUN); do \
+		echo "***********************************************************"; \
+		echo "Running auto test: $$test";\
+		$$test || exit;\
+		echo "************************************************************"; \
+	done
+
+BUILD_AUTO_TESTS: $(TESTS_TO_BUILD)
+
+$(EXPORT_TESTS_TO)%: %.cpp $(LINKED_FILES)
+	g++ $(CPP_FLAGS) -o $@ $+ $(LINKED_FILES)
 
 # Macro for building STATIC libraries
 $(LIB_TO_BUILD): $(TO_BUILD)

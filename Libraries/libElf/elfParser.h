@@ -7,6 +7,7 @@
 #include <forward_list>
 #include "reloc.h"
 #include "binaryReader.h"
+#include "buildElf.h"
 
 /**
     \class   ElfParser
