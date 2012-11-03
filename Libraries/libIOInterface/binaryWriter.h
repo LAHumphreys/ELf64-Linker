@@ -36,30 +36,19 @@ public:
 
     // Create a new BinaryWriter
     virtual BinaryWriter operator+ (long additionalOffset) const;
-    virtual BinaryWriter operator+ (const BinaryWriter& p) const;
     virtual BinaryWriter operator- (long additionalOffset) const;
-    virtual BinaryWriter operator- (const BinaryWriter& p) const;
     virtual BinaryWriter NextBoundrary (long alignment) const;
 
     virtual long operator%(long alignment) const;
 
     // Reposition the pointer
     virtual BinaryWriter& operator+=(long additionalOffset);
-    virtual BinaryWriter& operator+=(const BinaryWriter&);
     virtual BinaryWriter& operator-=(long additionalOffset);
-    virtual BinaryWriter& operator-=(const BinaryWriter&);
 
     virtual BinaryWriter& operator=(long offset);
 
-    // Comparision of offset
-    virtual bool operator <(const BinaryWriter& other) const;
-    virtual bool operator >(const BinaryWriter& other) const;
-    virtual bool operator <=(const BinaryWriter& other) const;
-    virtual bool operator >=(const BinaryWriter& other) const;
-    virtual bool operator ==(const BinaryWriter& other) const;
-
     virtual long Offset() const {return offset;}
-    virtual operator long() { return offset;}
+    virtual operator long() const { return offset;}
 private: 
     FileLikeWriter& file;
     long offset;

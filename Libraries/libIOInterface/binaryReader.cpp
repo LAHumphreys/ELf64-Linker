@@ -23,25 +23,18 @@ BinaryReader::BinaryReader(const BinaryReader &other)
     // available
 }
 
-// Create a new BinaryReader
-BinaryReader BinaryReader::operator+( long additionalOffset) const 
+// Reposition the pointer
+BinaryReader BinaryReader::operator+( long additionalOffset) const
 {
-    return BinaryReader(file, offset + additionalOffset);
+    BinaryReader p(this->file,additionalOffset + offset);
+    return p;
 }
-
-BinaryReader BinaryReader::operator+( const BinaryReader& p) const
+//
+// Reposition the pointer
+BinaryReader BinaryReader::operator-( long additionalOffset) const
 {
-    return BinaryReader(file, offset + p.Offset());
-}
-
-BinaryReader BinaryReader::operator-( long additionalOffset) const 
-{
-    return BinaryReader(file, offset - additionalOffset);
-}
-
-BinaryReader BinaryReader::operator-( const BinaryReader& p) const
-{
-    return BinaryReader(file, offset - p.Offset());
+    BinaryReader p(this->file,offset - additionalOffset);
+    return p;
 }
 
 // Reposition the pointer
@@ -51,26 +44,14 @@ BinaryReader& BinaryReader::operator+=( long additionalOffset)
     return *this;
 }
 
-BinaryReader& BinaryReader::operator+=( const BinaryReader& p) 
-{
-    offset += p.Offset();
-    return *this;
-}
-
 BinaryReader& BinaryReader::operator-=( long additionalOffset) 
 {
     offset -= additionalOffset;
     return *this;
 }
 
-BinaryReader& BinaryReader::operator-=( const BinaryReader& p) 
-{
-    offset -= p.Offset();
-    return *this;
-}
-
-BinaryReader& BinaryReader::operator=(long offset) {
-    this->offset = offset;
+BinaryReader& BinaryReader::operator=(long newOffset) {
+    this->offset = newOffset;
     return *this;
 }
 
@@ -159,28 +140,6 @@ string BinaryReader::ReadString() const {
 
 unsigned char BinaryReader::Get() const {
     return this->file.Get(this->offset);
-}
-
-//Comparision operators
-bool BinaryReader::operator== (const BinaryReader & other) const 
-{
-    return offset == other.Offset();
-}
-bool BinaryReader::operator<= (const BinaryReader & other) const 
-{
-    return offset <= other.Offset();
-}
-bool BinaryReader::operator>= (const BinaryReader & other) const 
-{
-    return offset >= other.Offset();
-}
-bool BinaryReader::operator> (const BinaryReader & other) const 
-{
-    return offset > other.Offset();
-}
-bool BinaryReader::operator< (const BinaryReader & other) const 
-{
-    return offset < other.Offset();
 }
 
 SubReader::SubReader(const BinaryReader &p, long size)

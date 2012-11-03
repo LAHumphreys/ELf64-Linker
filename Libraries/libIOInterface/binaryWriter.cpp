@@ -53,15 +53,15 @@ void BinaryWriter::Fill(long size, unsigned char c ) {
 
 void BinaryWriter::WriteString(const BinaryReader &pos) {
     string buf = pos.ReadString();
-    this->file.Write(this->offset, buf.c_str(),buf.length());
+    this->file.Write(this->offset, buf.c_str(),buf.length()+1);
 }
 
 void BinaryWriter::WriteString(const std::string& src) {
-    this->file.Write(offset,src.c_str(), src.length());
+    this->file.Write(offset,src.c_str(), src.length()+1);
 }
 
 void BinaryWriter::WriteString(const void *src) {
-    this->file.Write(offset,src,strlen((const char *)src));
+    this->file.Write(offset,src,strlen((const char *)src)+1);
 }
 
 // Create a new BinaryWriter
@@ -70,19 +70,9 @@ BinaryWriter BinaryWriter::operator+( long additionalOffset) const
     return BinaryWriter(file, offset + additionalOffset);
 }
 
-BinaryWriter BinaryWriter::operator+( const BinaryWriter& p) const
-{
-    return BinaryWriter(file, offset + p.Offset());
-}
-
 BinaryWriter BinaryWriter::operator-( long additionalOffset) const 
 {
     return BinaryWriter(file, offset - additionalOffset);
-}
-
-BinaryWriter BinaryWriter::operator-( const BinaryWriter& p) const
-{
-    return BinaryWriter(file, offset - p.Offset());
 }
 
 BinaryWriter BinaryWriter::NextBoundrary(long alignment) const {
@@ -103,21 +93,9 @@ BinaryWriter& BinaryWriter::operator+=( long additionalOffset)
     return *this;
 }
 
-BinaryWriter& BinaryWriter::operator+=( const BinaryWriter& p) 
-{
-    offset += p.Offset();
-    return *this;
-}
-
 BinaryWriter& BinaryWriter::operator-=( long additionalOffset) 
 {
     offset -= additionalOffset;
-    return *this;
-}
-
-BinaryWriter& BinaryWriter::operator-=( const BinaryWriter& p) 
-{
-    offset -= p.Offset();
     return *this;
 }
 
@@ -136,28 +114,6 @@ BinaryWriter BinaryWriter::Begin() const {
 
 BinaryWriter BinaryWriter::Pos(long offset) const {
     return BinaryWriter(file,offset);
-}
-
-//Comparision operators
-bool BinaryWriter::operator== (const BinaryWriter & other) const 
-{
-    return offset == other.Offset();
-}
-bool BinaryWriter::operator<= (const BinaryWriter & other) const 
-{
-    return offset <= other.Offset();
-}
-bool BinaryWriter::operator>= (const BinaryWriter & other) const 
-{
-    return offset >= other.Offset();
-}
-bool BinaryWriter::operator> (const BinaryWriter & other) const 
-{
-    return offset > other.Offset();
-}
-bool BinaryWriter::operator< (const BinaryWriter & other) const 
-{
-    return offset < other.Offset();
 }
 
 DataWriter::DataWriter(void *data, long size) {

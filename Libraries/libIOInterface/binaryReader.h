@@ -48,29 +48,17 @@ public:
     virtual BinaryReader Find(unsigned char c) const;
     virtual BinaryReader RFind(unsigned char c) const;
 
-    // Create a new BinaryReader
-    virtual BinaryReader operator+ (long additionalOffset) const;
-    virtual BinaryReader operator+ (const BinaryReader& p) const;
-    virtual BinaryReader operator- (long additionalOffset) const;
-    virtual BinaryReader operator- (const BinaryReader& p) const;
-
+    virtual BinaryReader operator+(long additionalOffset) const;
+    virtual BinaryReader operator-(long additionalOffset) const;
     // Reposition the pointer
     virtual BinaryReader& operator+=(long additionalOffset);
-    virtual BinaryReader& operator+=(const BinaryReader&);
     virtual BinaryReader& operator-=(long additionalOffset);
-    virtual BinaryReader& operator-=(const BinaryReader&);
 
-    virtual BinaryReader& operator=(long offset);
-
-    // Comparision of offset
-    virtual bool operator <(const BinaryReader& other) const;
-    virtual bool operator >(const BinaryReader& other) const;
-    virtual bool operator <=(const BinaryReader& other) const;
-    virtual bool operator >=(const BinaryReader& other) const;
-    virtual bool operator ==(const BinaryReader& other) const;
+    // Note this is not allowed to change the reader, only the position
+    virtual BinaryReader& operator=(long newOffset);
 
     virtual long Offset() const {return offset;}
-    virtual operator long() { return offset;}
+    virtual operator long() const { return offset;}
 private: 
     const FileLikeReader& file;
     long offset;
