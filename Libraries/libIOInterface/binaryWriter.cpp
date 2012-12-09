@@ -79,10 +79,10 @@ BinaryWriter BinaryWriter::NextBoundrary(long alignment) const {
     long diff = offset % alignment;
     if (diff != 0 ) {
         // Move to next boundrary
-        BinaryWriter(file,offset + (alignment-diff));
+        return BinaryWriter(file,offset + (alignment-diff));
     } else {
         // already on a boundrary
-        BinaryWriter(file,offset);
+        return BinaryWriter(file,offset);
     }
 }
 

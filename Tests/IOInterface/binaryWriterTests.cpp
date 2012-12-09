@@ -38,6 +38,7 @@ int VerifyAssignments();
 int VerifyArithmetic();
 int VerifyWrites();
 int VerifyStringWrites();
+int VerifyBoundraryFinder();
 
 using namespace std;
 int main(int argc, const char *argv[])
@@ -51,6 +52,7 @@ int main(int argc, const char *argv[])
     Test("Verify Arithmetic Operators", VerifyArithmetic).RunTest();
     Test("Verify Writes", VerifyWrites).RunTest();
     Test("Verify String Writes", VerifyStringWrites).RunTest();
+    Test("Verify Alignment", VerifyBoundraryFinder).RunTest();
     return 0;
 }
 
@@ -135,6 +137,48 @@ int VerifyPositionFinders() {
         return e.Error();
     }
     return 0;
+}
+
+int VerifyBoundraryFinder() {
+    try {
+        BinaryWriter pos(data,50);
+        if (   pos.NextBoundrary(10) != pos
+            || pos.NextBoundrary(2) != pos
+            || pos.NextBoundrary(1) != pos
+            || pos.NextBoundrary(50) != pos ) 
+        {
+            cout << "moved off a valid boundrary!" << endl;
+            return 1;
+        }
+        if ( pos.NextBoundrary(3) != pos.operator+(1) ) {
+            cout << "Failed to move to the correct boundrary";
+            cout << " ( " << pos.NextBoundrary(3).Offset() << endl;
+            return 2;
+        }
+        BinaryWriter pos0(data,0);
+        if (   pos0.NextBoundrary(10) != pos0
+            || pos0.NextBoundrary(2) != pos0
+            || pos0.NextBoundrary(1) != pos0
+            || pos0.NextBoundrary(50) != pos0 ) 
+        {
+            cout << "moved off a valid boundrary!" << endl;
+            return 3;
+        }
+        BinaryWriter pos2(data,2);
+        if ( pos2.NextBoundrary(4) != pos2.Pos(4)) {
+            cout << "Failed to move to the correct boundrary";
+            cout << " ( " << pos2.NextBoundrary(3).Offset() << endl;
+            return 4;
+        }
+        BinaryWriter pos12(data,12);
+        if ( pos12.NextBoundrary(8) != pos12.Pos(16)) {
+            cout << "Failed to move to the correct boundrary";
+            cout << " ( " << pos12.NextBoundrary(8).Offset() << endl;
+            return 5;
+        }
+    } catch (TestError& e) {
+        return e.Error();
+    }
 }
 
 int VerifyAssignments() {

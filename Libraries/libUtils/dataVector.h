@@ -11,7 +11,7 @@ class DataVector: public vector<unsigned char>,
                   public FileLikeReader, 
                   public FileLikeWriter {
 public:
-    DataVector(long size): vector<unsigned char>(size){}
+    DataVector(long size);
     //Writer functions
     virtual void Write(long offset, const void *src, long size);
     virtual void Put(long offset, unsigned char c);

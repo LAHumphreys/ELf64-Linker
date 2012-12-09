@@ -1,4 +1,3 @@
-MAKE_DIRS= elf2elf \
-           IOInterface
+MAKE_DIRS= IOInterface elf2elf
 
 include ../makefile.include

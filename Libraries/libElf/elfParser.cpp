@@ -30,8 +30,8 @@ void ElfParser::ReadSections() {
 
     // Read in the section constants
     long hdrSize = header->SectionHeaderSize();
-    BinaryReader tableStart = reader.Begin() + 
-                              header->SectionTableStart();
+    BinaryReader tableStart = reader.Begin().operator+
+                            (header->SectionTableStart());
 
     // Which section holds the (header) string table?
     long sidx = header->StringTableIndex();
@@ -48,6 +48,7 @@ void ElfParser::ReadSections() {
        if (sections[i]->Name() == ".symtab" ) symidx = i;
        if (sections[i]->Name() == ".strtab" ) stridx = i;
        if (sections[i]->IsLInkSection() ) ++linkSections;
+       sectionMap[sections[i]->Name()] = i;
        nextSection += hdrSize;
     }
     stringTable = sections[stridx]->DataStart();
@@ -58,8 +59,8 @@ void ElfParser::ReadProgramHeaders() {
     progHeaders.resize(header->ProgramHeaders());
 
     // Read in the section constants
-    BinaryReader readPos = reader.Begin() + 
-                           header->ProgramHeadersStart();
+    BinaryReader readPos = reader.Begin().operator+ 
+                           (header->ProgramHeadersStart());
     long hdrSize =  header->ProgramHeaderSize();
 
     for ( int i=0; i<header->ProgramHeaders(); ++i) {
@@ -72,7 +73,8 @@ void ElfParser::ReadSymbols() {
     Section * symTable = sections[symidx];
     symbols.resize(symTable->NumItems());
 
-    BinaryReader readPos = reader.Begin() + symTable->DataStart();
+    BinaryReader readPos = reader.Begin().operator+
+                           (symTable->DataStart());
 
     for ( int i=0; i < symTable->NumItems(); ++i) {
         symbols[i] = new Symbol(readPos,stringTable);
@@ -118,3 +120,13 @@ string ElfParser::PrintLink() {
     return link.str();
 }
 
+ElfContent ElfParser::Content() {
+    ElfContent content = {
+        *(this->header),
+        this->sections,
+        this->progHeaders,
+        this->symbols,
+        this->sectionMap
+    };
+    return content;
+}

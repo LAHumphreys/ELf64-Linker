@@ -12,6 +12,7 @@ int validatePut();
 int validatePutAndGrow();
 int validateWrite();
 int validateWriteAndGrow();
+int validateResize();
   
 int validateRead();
 int validateReadString();
@@ -30,6 +31,7 @@ int main(int argc, const char *argv[])
     Test("Reading a string  from a vector works ", validateReadString).RunTest();
     Test("Getting from a vector works", validateGet).RunTest();
     Test("Searching for a byte works correctly", validateSearch).RunTest();
+    Test("Resizing the vector...", validateResize).RunTest();
     return 0;
 }
 
@@ -210,3 +212,16 @@ int validateSearch() {
     return 0;
 }
 
+int validateResize() {
+    DataVector data(50);
+    data.resize(40);
+    data.resize(45);
+    data.resize(50);
+    data.resize(100);
+    long large = 134136;
+    data.resize(large);
+    for (int i = 0; i < large; i++) {
+        data[i] = 20;
+    }
+    return 0;
+}

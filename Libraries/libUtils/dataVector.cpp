@@ -5,6 +5,13 @@
 using namespace std;
 
 
+DataVector::DataVector(long size)
+   : vector<unsigned char>(size)
+{
+    for ( int i=0; i< size; i++) {
+        this->operator[](i) = 'l';
+    }
+}
 void DataVector::Write(long offset, const void *src, long size){
     if (offset + size >= this->size())
         this->resize(offset+size);
@@ -22,7 +29,7 @@ void DataVector::Put(long offset, unsigned char c) {
 
 void DataVector::Fill(long offset, unsigned char c, long count){
     if (offset + count >= this->size())
-        this->resize(offset + count);
+        this->resize(offset + count + 1);
     for (long i=offset; i<(offset + count); i++) {
         (*this)[i] = c;
     }

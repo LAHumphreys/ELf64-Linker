@@ -30,15 +30,18 @@ public:
                                     ProgramHeader& prog, 
                                     BinaryWriter& writer);
     void WriteSectionHeaders(ElfContent& data);
+    void WriteToFile(BinaryWriter& w);
 protected:
     void InitialiseFile(ElfContent& data);
     void InitialiseHeader(ElfContent& data);
     bool IsSpecialSection(Section& s);
     template<class T>
     void SortByAddress(T start, T end);
+    void WriteSpecial(ElfContent&, string name, long&, BinaryWriter&);
 
 private:
     Elf64_Ehdr header;
+    StringTable sheaders;
 
     //final data
     DataVector file;

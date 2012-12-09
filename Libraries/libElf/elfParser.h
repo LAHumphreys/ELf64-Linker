@@ -30,6 +30,8 @@ public:
     int SymbolCount() { return sections.size(); }
     int LinkSymbols() { return linkSymbols; }
     int RelocCount() { return 0; /*not yet implemented */}
+
+    ElfContent Content();
 protected:
     void ReadSymbols();
     void ReadProgramHeaders();
@@ -45,6 +47,7 @@ private:
     std::vector<Section *> sections;
     std::vector<ProgramHeader *> progHeaders;
     std::vector<Symbol *> symbols;
+    std::map<string,int> sectionMap;
 
     // We're want to rapidly add things, and only ever want to
     // iterate through. 

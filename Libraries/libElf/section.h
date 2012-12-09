@@ -46,11 +46,12 @@ public:
 
     // Data
     Elf64_Off& DataStart() { return elfHeader.sh_offset; }
-    uint64_t& DataSize() { return elfHeader.sh_size; }
-    uint64_t& ItemSize() { return elfHeader.sh_entsize; }
+    Elf64_Xword& DataSize() { return elfHeader.sh_size; }
+    Elf64_Xword& ItemSize() { return elfHeader.sh_entsize; }
+    Elf64_Word& NameOffset() { return elfHeader.sh_name; }
 
     // Calculated Properties
-    uint64_t NumItems() { return DataSize() / ItemSize(); }
+    Elf64_Xword NumItems() { return DataSize() / ItemSize(); }
     Elf64_Off DataEnd() { return DataStart() + DataSize(); }
     bool HasFileData() { 
         return elfHeader.sh_type != SHT_NOBITS; 
