@@ -15,6 +15,11 @@ EXPORT_TESTS_TO=$(TEST_DIR)tests/
 EXPORT_INCLUDES_DIR=$(EXPORTS_DIR)includes/
 EXPORT_OBJS_DIR=$(EXPORTS_DIR)objs/
 EXPORT_LIB_DIR=$(EXPORTS_DIR)lib/
+ifndef TAGS_DIR
+    EXPORT_TAGS_DIR=$(EXPORTS_DIR)tags/
+else
+    EXPORT_TAGS_DIR=$(TAGS_DIR)
+endif
 
 
 #
@@ -30,6 +35,14 @@ CPPSTD=gnu++98 #(overridden by USE_CPPXX)
 # Set to YES to enable
 DEBUG_ON=YES
 USE_CPP11=YES
+
+#
+#  CONFIGURE TAGS
+#
+ifndef CTAGS
+    CTAGS=ctags
+endif
+CPP_TAGS_FLAGS=-R --sort=1 --c++-kinds=+p --fields=+iaS --extra=+q --language-force=C++ --tag-relative=no
 
 # Build up cpp flags
 # 
@@ -58,15 +71,17 @@ TO_BUILD=
 FILES_TO_CLEAN=
 FOLDERS_TO_CLEAN=
 LINKED_FILES=
+CPP_TAGS_TO_BUILD=
+
 
 ifdef SOURCES
-   $(shell mkdir -p mkdir -p $(EXPORT_OBJS_DIR))
+   $(shell mkdir -p $(EXPORT_OBJS_DIR))
    TO_BUILD+=$(addprefix $(EXPORT_OBJS_DIR),$(addsuffix .o,$(SOURCES)))
    FILES_TO_CLEAN+=$(TO_BUILD)
 endif
 
 ifdef EXPORT_INCLUDES
-   $(shell mkdir -p mkdir -p $(EXPORT_INCLUDES_DIR))
+   $(shell mkdir -p $(EXPORT_INCLUDES_DIR))
    EXPORTED_INCLUDES=$(addprefix $(EXPORT_INCLUDES_DIR),$(EXPORT_INCLUDES))
    BUILD_DEPS+=$(EXPORTED_INCLUDES)
    FILES_TO_CLEAN+=$(EXPORTED_INCLUDES)
@@ -91,7 +106,7 @@ ifdef EXECUTABLE
 endif
 
 ifdef BUILD_TIME_TESTS
-   $(shell mkdir -p mkdir -p $(EXPORT_TESTS_TO))
+   $(shell mkdir -p $(EXPORT_TESTS_TO))
    BUILD_DEPS+=RUN_AUTO_TEST
    TESTS_TO_BUILD=$(addprefix $(EXPORT_TESTS_TO),$(BUILD_TIME_TESTS))
    TESTS_TO_RUN=$(TESTS_TO_BUILD)
@@ -100,6 +115,12 @@ endif
 
 ifdef LINKED_LIBS
    LINKED_FILES+=$(addprefix $(EXPORT_LIB_DIR),$(addsuffix .a,$(LINKED_LIBS)))
+endif
+
+ifdef CPP_TAGS_FILE
+   $(shell mkdir -p $(EXPORT_TAGS_DIR))
+   CPP_TAGS_TO_BUILD=$(EXPORT_TAGS_DIR)$(CPP_TAGS_FILE)
+   BUILD_DEPS+=$(CPP_TAGS_TO_BUILD)
 endif
 
 ifeq ($(strip $(FILES_TO_CLEAN)),)
@@ -159,3 +180,11 @@ $(EXPORT_INCLUDES_DIR)%: %
 $(EXPORT_OBJS_DIR)%.o: %
 	g++  $(CPP_FLAGS) -c -o $@ $+
 
+ifneq ($(strip $(CPP_TAGS_TO_BUILD)),)
+#rebuild the tags file if anything has changed
+$(CPP_TAGS_TO_BUILD): $(subst $(CPP_TAGS_TO_BUILD),,$(BUILD_DEPS))
+	$(CTAGS) $(CPP_TAGS_FLAGS) -f $(CPP_TAGS_TO_BUILD) $(PWD)
+endif
+
+usage:
+	@echo "Set the base directory: export LINKER_DIR=<location of makefile.include>"

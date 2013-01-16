@@ -7,5 +7,6 @@ LINKED_LIBS= libElf    \
 			 libIOInterface 
 
 EXECUTABLE=elf2Link
+CPP_TAGS_FILE=elf2Link-c++.tags
 
 include ../../makefile.include

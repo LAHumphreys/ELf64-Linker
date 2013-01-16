@@ -6,5 +6,6 @@ LINKED_LIBS= libElf    \
 			 libTest
 
 BUILD_TIME_TESTS=mismatch
+CPP_TAGS_FILE=testStlMismatch-c++.test
 
 include ../../makefile.include
