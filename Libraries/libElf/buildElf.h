@@ -41,7 +41,6 @@ protected:
 
 private:
     Elf64_Ehdr header;
-    StringTable sheaders;
 
     //final data
     DataVector file;

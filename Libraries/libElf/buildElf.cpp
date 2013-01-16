@@ -14,7 +14,6 @@ ElfFile::ElfFile(ElfContent& data)
 {
     InitialiseHeader(data);
     InitialiseFile(data);
-    StoreSectionNames(data);
       
     // Process the program headers
     sectionHeadersStart = (long)ProcessProgHeaders( data);
@@ -60,13 +59,6 @@ void ElfFile::InitialiseHeader(ElfContent &data) {
     
     this->header.e_phoff = sizeof(this->header);
     // We can't set the 
-}
-
-void ElfFile::StoreSectionNames(ElfContent& data) {
-    // We need a new string table...
-    for ( Section* &s: data.sections ) {
-        s->NameOffset() = s->sheaders.AddString(s->Name());
-    }
 }
 
 BinaryWriter ElfFile::ProcessProgHeaders(ElfContent &data ) {
