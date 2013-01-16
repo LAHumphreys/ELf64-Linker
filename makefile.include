@@ -3,7 +3,9 @@
 # Luke Humphreys 2012
 
 #Define the base directories
-LINKER_DIR=$(HOME)/Linker/
+ifndef LINKER_DIR
+   LINKER_DIR=$(HOME)/Linker/
+endif
 EXPORTS_DIR=$(LINKER_DIR)exports/
 TEST_DIR=$(LINKER_DIR)Tests/
 
@@ -58,11 +60,13 @@ FOLDERS_TO_CLEAN=
 LINKED_FILES=
 
 ifdef SOURCES
+   $(shell mkdir -p mkdir -p $(EXPORT_OBJS_DIR))
    TO_BUILD+=$(addprefix $(EXPORT_OBJS_DIR),$(addsuffix .o,$(SOURCES)))
    FILES_TO_CLEAN+=$(TO_BUILD)
 endif
 
-ifdef  EXPORT_INCLUDES
+ifdef EXPORT_INCLUDES
+   $(shell mkdir -p mkdir -p $(EXPORT_INCLUDES_DIR))
    EXPORTED_INCLUDES=$(addprefix $(EXPORT_INCLUDES_DIR),$(EXPORT_INCLUDES))
    BUILD_DEPS+=$(EXPORTED_INCLUDES)
    FILES_TO_CLEAN+=$(EXPORTED_INCLUDES)
@@ -74,6 +78,7 @@ ifdef MAKE_DIRS
 endif
 
 ifdef TARGET_LIB
+   $(shell mkdir -p $(EXPORT_LIB_DIR))
    LIB_TO_BUILD=$(addsuffix .a,$(EXPORT_LIB_DIR)$(TARGET_LIB))
    BUILD_DEPS+=$(LIB_TO_BUILD)
    FILES_TO_CLEAN+=$(LIB_TO_BUILD)
@@ -86,6 +91,7 @@ ifdef EXECUTABLE
 endif
 
 ifdef BUILD_TIME_TESTS
+   $(shell mkdir -p mkdir -p $(EXPORT_TESTS_TO))
    BUILD_DEPS+=RUN_AUTO_TEST
    TESTS_TO_BUILD=$(addprefix $(EXPORT_TESTS_TO),$(BUILD_TIME_TESTS))
    TESTS_TO_RUN=$(TESTS_TO_BUILD)
