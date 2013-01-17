@@ -23,8 +23,8 @@ public:
         this->err = s;
         this->errCode = i;
     };
-    int Error() { 
-        cout << err << endl;
+    int Error( stringstream& log) { 
+        log << err << endl;
         return errCode==0? 255: errCode;
     }
 
@@ -33,12 +33,12 @@ private:
     long errCode;
 };
 
-int VerifyPositionFinders();
-int VerifyAssignments();
-int VerifyArithmetic();
-int VerifyWrites();
-int VerifyStringWrites();
-int VerifyBoundraryFinder();
+int VerifyPositionFinders( stringstream& log);
+int VerifyAssignments( stringstream& log);
+int VerifyArithmetic( stringstream& log);
+int VerifyWrites( stringstream& log);
+int VerifyStringWrites( stringstream& log);
+int VerifyBoundraryFinder( stringstream& log);
 
 using namespace std;
 int main(int argc, const char *argv[])
@@ -47,12 +47,12 @@ int main(int argc, const char *argv[])
     for (int i = 0; i < DATA_SIZE; i++) {
         data[i] = char(i);
     }
-    Test("Return positions in file", VerifyPositionFinders).RunTest();
-    Test("Verify Assignment Operators", VerifyAssignments).RunTest();
-    Test("Verify Arithmetic Operators", VerifyArithmetic).RunTest();
-    Test("Verify Writes", VerifyWrites).RunTest();
-    Test("Verify String Writes", VerifyStringWrites).RunTest();
-    Test("Verify Alignment", VerifyBoundraryFinder).RunTest();
+    Test("Return positions in file",  (loggedTest)VerifyPositionFinders).RunTest();
+    Test("Verify Assignment Operators",  (loggedTest)VerifyAssignments).RunTest();
+    Test("Verify Arithmetic Operators",  (loggedTest)VerifyArithmetic).RunTest();
+    Test("Verify Writes",  (loggedTest)VerifyWrites).RunTest();
+    Test("Verify String Writes",  (loggedTest)VerifyStringWrites).RunTest();
+    Test("Verify Alignment",  (loggedTest)VerifyBoundraryFinder).RunTest();
     return 0;
 }
 
@@ -119,7 +119,7 @@ long VerifyOffset(BinaryWriter& writer, long offset, string msg) {
     return VerifyOffset(writer,offset,msg,char(offset));
 }
 
-int VerifyPositionFinders() {
+int VerifyPositionFinders( stringstream& log) {
     try {
         BinaryWriter pos(data);
         BinaryWriter other = pos.operator+(DATA_SIZE);
@@ -134,12 +134,12 @@ int VerifyPositionFinders() {
         }
 
     } catch (TestError& e) {
-        return e.Error();
+        return e.Error(log);
     }
     return 0;
 }
 
-int VerifyBoundraryFinder() {
+int VerifyBoundraryFinder( stringstream& log) {
     try {
         BinaryWriter pos(data,50);
         if (   pos.NextBoundrary(10) != pos
@@ -147,12 +147,12 @@ int VerifyBoundraryFinder() {
             || pos.NextBoundrary(1) != pos
             || pos.NextBoundrary(50) != pos ) 
         {
-            cout << "moved off a valid boundrary!" << endl;
+            log << "moved off a valid boundrary!" << endl;
             return 1;
         }
         if ( pos.NextBoundrary(3) != pos.operator+(1) ) {
-            cout << "Failed to move to the correct boundrary";
-            cout << " ( " << pos.NextBoundrary(3).Offset() << endl;
+            log << "Failed to move to the correct boundrary";
+            log << " ( " << pos.NextBoundrary(3).Offset() << endl;
             return 2;
         }
         BinaryWriter pos0(data,0);
@@ -161,27 +161,27 @@ int VerifyBoundraryFinder() {
             || pos0.NextBoundrary(1) != pos0
             || pos0.NextBoundrary(50) != pos0 ) 
         {
-            cout << "moved off a valid boundrary!" << endl;
+            log << "moved off a valid boundrary!" << endl;
             return 3;
         }
         BinaryWriter pos2(data,2);
         if ( pos2.NextBoundrary(4) != pos2.Pos(4)) {
-            cout << "Failed to move to the correct boundrary";
-            cout << " ( " << pos2.NextBoundrary(3).Offset() << endl;
+            log << "Failed to move to the correct boundrary";
+            log << " ( " << pos2.NextBoundrary(3).Offset() << endl;
             return 4;
         }
         BinaryWriter pos12(data,12);
         if ( pos12.NextBoundrary(8) != pos12.Pos(16)) {
-            cout << "Failed to move to the correct boundrary";
-            cout << " ( " << pos12.NextBoundrary(8).Offset() << endl;
+            log << "Failed to move to the correct boundrary";
+            log << " ( " << pos12.NextBoundrary(8).Offset() << endl;
             return 5;
         }
     } catch (TestError& e) {
-        return e.Error();
+        return e.Error(log);
     }
 }
 
-int VerifyAssignments() {
+int VerifyAssignments( stringstream& log) {
     try {
         BinaryWriter pos(data);
         BinaryWriter other = pos.Pos(5);
@@ -196,13 +196,13 @@ int VerifyAssignments() {
         pos = 123;
         VerifyOffset(pos,123,"= int");
     } catch (TestError& e) {
-        return e.Error();
+        return e.Error(log);
     }
     return 0;
 }
 
 
-int VerifyArithmetic() {
+int VerifyArithmetic( stringstream& log) {
     try {
         BinaryWriter pos(data);
         pos+=1;
@@ -220,12 +220,12 @@ int VerifyArithmetic() {
         VerifyOffset(p3,4,"- other");
         VerifyOffset(other,5,"- int (no change)");
     } catch (TestError& e) {
-        return e.Error();
+        return e.Error(log);
     }
     return 0;
 }
 
-int VerifyWrites() {
+int VerifyWrites( stringstream& log) {
     try {
         DataVector out(100);
         DataVector zeroes(100);
@@ -246,17 +246,17 @@ int VerifyWrites() {
         off.Fill(20,2);
         off2.FillTo(off.Begin() + out.Reader().Find(95),'c');
         
-        cout << "front" <<endl;
+        log << "front" <<endl;
         VerifyData((char *)out.data(),(char *)zeroes.data(),20);
-        cout << "data" << endl;
+        log << "data" << endl;
         VerifyData((char *)out.data()+20,(char *)data.data()+20,30);
-        cout << "twos" << endl;
+        log << "twos" << endl;
         VerifyData((char *)out.data()+50,(char *)twos.data(),20);
-        cout << "padding" <<endl;
+        log << "padding" <<endl;
         VerifyData((char *)out.data()+70,(char *)data.data()+70,5);
-        cout << "FillTo" <<endl;
+        log << "FillTo" <<endl;
         VerifyData((char *)out.data()+75,(char *)cs.data()+75,20);
-        cout << "back" <<endl;
+        log << "back" <<endl;
         VerifyData((char *)out.data()+95,(char *)data.data()+95,5);
 
 
@@ -273,22 +273,22 @@ int VerifyWrites() {
         woff.Write(zeroes.data(),20);
         woff2.Write(cs.Reader().Begin(),20);
 
-        cout << "write" <<endl;
+        log << "write" <<endl;
         VerifyData((char *)out.data(),(char *)data.data(),50);
-        cout << "offset write" << endl;
+        log << "offset write" << endl;
         VerifyData((char *)out.data()+50,(char *)zeroes.data(),20);
-        cout << "Write reader" << endl;
+        log << "Write reader" << endl;
         VerifyData((char *)out.data()+75,(char *)cs.data(),20);
-        cout << "back" << endl;
+        log << "back" << endl;
         VerifyData((char *)out.data()+95,(char *)data.data()+95,5);
 
     } catch (TestError& e) {
-        return e.Error();
+        return e.Error(log);
     }
     return 0;
 }
 
-int VerifyStringWrites() {
+int VerifyStringWrites(stringstream& log ) {
     try {
         char str[] = "Hello World!\0++IGNORED++";
         //don't forget the null char
@@ -310,28 +310,28 @@ int VerifyStringWrites() {
         pos.WriteString(stds);
         w2.WriteString(out.Reader().Pos(50));
 
-        cout << "array write" << endl;
+        log << "array write" << endl;
         VerifyData((char *)out.data(),str,len);
-        cout << "left alone" << endl;
+        log << "left alone" << endl;
         VerifyData( (char *)out.data()+len, (char *)data.data() + len,
                                             50-len);
-        cout << "string write" << endl;
+        log << "string write" << endl;
         VerifyData((char *)out.data()+50,stds.c_str(),stds.length()+1);
-        cout << "back" << endl;
+        log << "back" << endl;
         VerifyData( (char *)out.data() + 50 + stds.length() + 1,
                     (char* )data.data()+ 50 + stds.length() + 1,
                     50 -1 - stds.length());
-        cout << "skipped" << endl;
+        log << "skipped" << endl;
         VerifyData((char *)out2.data(),(char *)data.data(),10);
-        cout << "reader write" << endl;
+        log << "reader write" << endl;
         VerifyData((char *)out2.data()+10,stds.c_str(),stds.length());
-        cout << "back (2) " << endl;
+        log << "back (2) " << endl;
         VerifyData( (char *)out2.data() + 10 + stds.length() + 1,
                     (char *)data.data() + 10 + stds.length() + 1,
                     100 - 10 - stds.length() -1 );
 
     } catch (TestError& e) {
-        return e.Error();
+        return e.Error(log);
     }
     return 0;
 }

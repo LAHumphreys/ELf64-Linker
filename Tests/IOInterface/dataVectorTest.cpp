@@ -3,39 +3,40 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
-int validateFill();
-int validateFillAndGrow();
-int validatePut();
-int validatePutAndGrow();
-int validateWrite();
-int validateWriteAndGrow();
-int validateResize();
+int validateFill( stringstream& log);
+int validateFillAndGrow( stringstream& log);
+int validatePut( stringstream& log);
+int validatePutAndGrow( stringstream& log);
+int validateWrite( stringstream& log);
+int validateWriteAndGrow( stringstream& log);
+int validateResize( stringstream& log);
   
-int validateRead();
-int validateReadString();
-int validateGet();
-int validateSearch();
+int validateRead( stringstream& log);
+int validateReadString( stringstream& log);
+int validateGet( stringstream& log);
+int validateSearch( stringstream& log);
 
 int main(int argc, const char *argv[])
 {
-    Test("Filling a vector works", validateFill).RunTest();
-    Test("Filling a vector grows if necessary", validateFillAndGrow).RunTest();
-    Test("Putting into a vector works", validatePut).RunTest();
-    Test("Putting into a vector grows if necessary", validatePutAndGrow).RunTest();
-    Test("Writing into a vector works", validateWrite).RunTest();
-    Test("Writing into a vector grows if necessary", validateWriteAndGrow).RunTest();
-    Test("Read from a vector works correctly", validateRead).RunTest();
-    Test("Reading a string  from a vector works ", validateReadString).RunTest();
-    Test("Getting from a vector works", validateGet).RunTest();
-    Test("Searching for a byte works correctly", validateSearch).RunTest();
-    Test("Resizing the vector...", validateResize).RunTest();
+    Test("Filling a vector works",  (loggedTest)validateFill).RunTest();
+    Test("Filling a vector grows if necessary",  (loggedTest)validateFillAndGrow).RunTest();
+    Test("Putting into a vector works",  (loggedTest)validatePut).RunTest();
+    Test("Putting into a vector grows if necessary",  (loggedTest)validatePutAndGrow).RunTest();
+    Test("Writing into a vector works",  (loggedTest)validateWrite).RunTest();
+    Test("Writing into a vector grows if necessary",  (loggedTest)validateWriteAndGrow).RunTest();
+    Test("Read from a vector works correctly",  (loggedTest)validateRead).RunTest();
+    Test("Reading a string  from a vector works ",  (loggedTest)validateReadString).RunTest();
+    Test("Getting from a vector works",  (loggedTest)validateGet).RunTest();
+    Test("Searching for a byte works correctly",  (loggedTest)validateSearch).RunTest();
+    Test("Resizing the vector...",  (loggedTest)validateResize).RunTest();
     return 0;
 }
 
-int validateFill() {
+int validateFill( stringstream& log) {
     DataVector data(50);
     vector<unsigned char> v(50);
     FillContainer(v,50,'*');
@@ -57,7 +58,7 @@ int validateFill() {
 
 }
 
-int validateFillAndGrow() {
+int validateFillAndGrow( stringstream& log) {
     DataVector data(50);
     vector<unsigned char> v(100);
     FillContainer(v,100,'*');
@@ -71,7 +72,7 @@ int validateFillAndGrow() {
     return 0;
 }
 
-int validatePut() {
+int validatePut( stringstream& log) {
     DataVector data(50);
     vector<unsigned char> v(50);
     FillContainer(v,50,'*');
@@ -85,7 +86,7 @@ int validatePut() {
     return 0;
 }
 
-int validatePutAndGrow() {
+int validatePutAndGrow( stringstream& log) {
     DataVector data(50);
     vector<unsigned char> v(100);
     FillContainer(v,100,'*');
@@ -104,7 +105,7 @@ int validatePutAndGrow() {
     return 0;
 }
 
-int validateWrite(){
+int validateWrite( stringstream& log){
     DataVector data(50);
     unsigned char *source = new unsigned char[100];
     FillContainer(source,100,'*');
@@ -125,7 +126,7 @@ int validateWrite(){
     return 0;
 }
 
-int validateWriteAndGrow() {
+int validateWriteAndGrow( stringstream& log) {
     DataVector data(50);
     unsigned char *source = new unsigned char[100];
     FillContainer(source,100,'*');
@@ -143,7 +144,7 @@ int validateWriteAndGrow() {
     return 0;
 }
 
-int validateRead() {
+int validateRead( stringstream& log) {
     DataVector data(50);
     unsigned char *dest = new unsigned char[50];
     FillContainer(dest,50,'-');
@@ -166,7 +167,7 @@ int validateRead() {
     return 0;
 }
 
-int validateReadString() {
+int validateReadString( stringstream& log) {
     string source="Hello world!";
     string dest="I'll be over written";
     DataVector data(50);
@@ -174,15 +175,15 @@ int validateReadString() {
     data.Write(10,source.c_str(),source.length()+1);
     data.ReadString(10, dest);
     if ( dest != source ) {
-        cout << dest << endl;
-        cout << source << endl;
+        log << dest << endl;
+        log << source << endl;
         return 1;
     }
     else
         return 0;
 }
 
-int validateGet() {
+int validateGet( stringstream& log) {
     DataVector data(50);
     FillContainer(data,50,'*');
     data[10] = '-';
@@ -192,7 +193,7 @@ int validateGet() {
         return 0;
 }
 
-int validateSearch() {
+int validateSearch( stringstream& log) {
     DataVector data(50);
     FillContainer(data,50,'*');
     data[10] = '-';
@@ -212,7 +213,7 @@ int validateSearch() {
     return 0;
 }
 
-int validateResize() {
+int validateResize( stringstream& log) {
     DataVector data(50);
     data.resize(40);
     data.resize(45);

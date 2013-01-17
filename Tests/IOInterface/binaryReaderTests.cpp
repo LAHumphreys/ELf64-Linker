@@ -23,8 +23,8 @@ public:
         this->err = s;
         this->errCode = i;
     };
-    int Error() { 
-        cout << err << endl;
+    int Error( stringstream& log) { 
+        log << err << endl;
         return errCode==0? 255: errCode;
     }
 
@@ -33,11 +33,11 @@ private:
     long errCode;
 };
 
-int VerifyPositionFinders();
-int VerifyAssignments();
-int VerifyArithmetic();
-int VerifySearch();
-int VerifyReads();
+int VerifyPositionFinders( stringstream& log);
+int VerifyAssignments( stringstream& log);
+int VerifyArithmetic( stringstream& log);
+int VerifySearch( stringstream& log);
+int VerifyReads( stringstream& log);
 
 using namespace std;
 int main(int argc, const char *argv[])
@@ -46,11 +46,11 @@ int main(int argc, const char *argv[])
     for (int i = 0; i < DATA_SIZE; i++) {
         data[i] = char(i);
     }
-    Test("Return positions in file", VerifyPositionFinders).RunTest();
-    Test("Verify Assignment Operators", VerifyAssignments).RunTest();
-    Test("Verify Arithmetic Operators", VerifyArithmetic).RunTest();
-    Test("Verify Searches", VerifySearch).RunTest();
-    Test("Verify Reads", VerifyReads).RunTest();
+    Test("Return positions in file",  (loggedTest)VerifyPositionFinders).RunTest();
+    Test("Verify Assignment Operators",  (loggedTest)VerifyAssignments).RunTest();
+    Test("Verify Arithmetic Operators",  (loggedTest)VerifyArithmetic).RunTest();
+    Test("Verify Searches",  (loggedTest)VerifySearch).RunTest();
+    Test("Verify Reads",  (loggedTest)VerifyReads).RunTest();
     return 0;
 }
 
@@ -116,7 +116,7 @@ long VerifyOffset(const BinaryReader& reader, long offset,
     return VerifyOffset(reader,offset,msg,char(offset));
 }
 
-int VerifyPositionFinders() {
+int VerifyPositionFinders( stringstream& log) {
     try {
         BinaryReader pos(data);
         BinaryReader other = pos.End();
@@ -131,12 +131,12 @@ int VerifyPositionFinders() {
         }
 
     } catch (TestError& e) {
-        return e.Error();
+        return e.Error(log);
     }
     return 0;
 }
 
-int VerifyAssignments() {
+int VerifyAssignments( stringstream& log) {
     try {
         BinaryReader pos(data);
         BinaryReader other = pos.Pos(5);
@@ -151,13 +151,13 @@ int VerifyAssignments() {
         pos = 123;
         VerifyOffset(pos,123,"= int");
     } catch (TestError& e) {
-        return e.Error();
+        return e.Error(log);
     }
     return 0;
 }
 
 
-int VerifyArithmetic() {
+int VerifyArithmetic( stringstream& log) {
     try {
         BinaryReader pos(data);
         pos+=1;
@@ -171,12 +171,12 @@ int VerifyArithmetic() {
         VerifyOffset(other-pos,4,"- other");
         VerifyOffset(other,5,"- int (no change)");
     } catch (TestError& e) {
-        return e.Error();
+        return e.Error(log);
     }
     return 0;
 }
 
-int VerifySearch() {
+int VerifySearch( stringstream& log) {
     try {
         BinaryReader r(data);
         VerifyOffset(r.Find(25),25,"find");
@@ -184,14 +184,14 @@ int VerifySearch() {
         VerifyOffset(r.Pos(26).RFind(25),25, "off rfind");
         VerifyOffset(r.RFind(25),r.Begin(), "rfind");
     } catch (TestError& e) {
-        return e.Error();
+        return e.Error(log);
     }
     return 0;
 }
-int VerifyReads() {
+int VerifyReads( stringstream& log) {
     try {
         BinaryReader r(data);
-        cout << "Dup tests" << endl;
+        log << "Dup tests" << endl;
         char * d = (char *)r.Dup(10);
         VerifyData(d, dataptr,10);
         delete [] d;
@@ -206,31 +206,31 @@ int VerifyReads() {
         dv.Put(20,'\0');
         BinaryReader rd(dv);
 
-        cout << " String tests" << endl;
+        log << " String tests" << endl;
         string s = rd.Begin().ReadString();
         VerifyData(s.c_str(),(char *)dv.data(),21);
         if ( s.length() != 20)
             throw(TestError("String has invalid length",s.length()));
-        cout << "Read by ref" << endl;
+        log << "Read by ref" << endl;
         rd.Pos(21).ReadString(s);
         VerifyData(s.c_str(),(char *)dv.data()+21,30);
         if ( s.length() != 29)
             throw(TestError("String has invalid length", s.length()));
-        cout << "Append to string" << endl;
+        log << "Append to string" << endl;
         rd.Begin().AppendString(s);
-        cout << "Front" << endl;
+        log << "Front" << endl;
         VerifyData(s.c_str(),(char *)dv.data()+21,29);
-        cout << "Back" << endl;
+        log << "Back" << endl;
         VerifyData(s.c_str(),(char *)dv.data(),20);
         if ( s.length() != 49)
             throw(TestError("String has invalid length", s.length()));
 
-        cout << "Checking null string" << endl;
+        log << "Checking null string" << endl;
         rd.Pos(20).ReadString(s);
         if ( s.length() != 0)
             throw(TestError("String has invalid length", s.length()));
 
-        cout << "Read to array" << endl;
+        log << "Read to array" << endl;
         char * buf = new char[100];
         memset(buf,'\0',100);
         r.Begin().Read(buf,100);
@@ -240,7 +240,7 @@ int VerifyReads() {
         VerifyData(buf,dataptr+24, 25);
         delete [] buf;
 
-        cout << "Read to writer" << endl;
+        log << "Read to writer" << endl;
         DataVector dataout(128);
         BinaryWriter w = dataout.Writer().Begin();
         r.Begin().Read(w,50);
@@ -250,7 +250,7 @@ int VerifyReads() {
 
 
     } catch (TestError& e) {
-        return e.Error();
+        return e.Error(log);
     }
     return 0;
 }
