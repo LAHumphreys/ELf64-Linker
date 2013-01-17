@@ -62,6 +62,9 @@ public:
     virtual void Fill(long offset, unsigned char c, long count);
     //pointless
     virtual void Flush( ) {};
+
+	unsigned char * RawPtr() { return rawdata;}
+	BinaryWriter Begin() { return BinaryWriter(*this,0);}
 private:
     unsigned char * rawdata;
     long length;

@@ -126,7 +126,7 @@ void DataWriter::Write(long offset, const void *src, long len ) {
     } else if ( offset < 0)  {
         throw "Invalid write to data object: -'ve offset";
     }else {
-        memcpy(this->rawdata+offset,src,length);
+        memcpy(this->rawdata+offset,src,len);
     }
 }
 

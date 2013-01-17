@@ -122,7 +122,7 @@ int validateWrite( stringstream& log){
     }
     if ( data[45] != '-' ) 
         return 45;
-
+	delete[] source;
     return 0;
 }
 
@@ -141,6 +141,8 @@ int validateWriteAndGrow( stringstream& log) {
         if ( data[i] != '*')
             return i ==0? 255: i;
     }
+
+	delete[] source;
     return 0;
 }
 
@@ -164,6 +166,7 @@ int validateRead( stringstream& log) {
         if ( dest[i] != '-')
             return i ==0? 255: i;
     }
+	delete [] dest;
     return 0;
 }
 
