@@ -1,3 +1,3 @@
-MAKE_DIRS= IOInterface elf2elf
+MAKE_DIRS= IOInterface StringTable 
 
 include ../makefile.include

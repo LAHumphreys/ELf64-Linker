@@ -21,8 +21,7 @@ Test::Test(string description, std::function<int(stringstream& log)> test) {
 void Test::RunTest() {
 	stringstream log;
 	int result;
-    cout <<setw(80)<<setfill('*')<< "***" << endl;
-    cout << description << endl;
+    cout << description << ": ";
 	if ( testType == BASIC ) {
 	    result = test();
 	} else {
@@ -38,5 +37,4 @@ void Test::RunTest() {
 		}
         exit(result);
     }
-    cout <<setw(80)<<setfill('*')<< "***" << endl;
 }
