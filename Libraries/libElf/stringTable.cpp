@@ -38,6 +38,7 @@ long StringTable::AddString(const char * str) {
 
 void StringTable::WriteTable(BinaryWriter& writer) {
     writer.Write("\0",1);
+	writer+=1;
     for (ElfString* & str : this->strings) {
         writer.Write(str->str,str->size);
         writer += str->size;
