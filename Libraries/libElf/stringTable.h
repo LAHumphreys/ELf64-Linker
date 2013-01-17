@@ -13,9 +13,8 @@ class StringTable {
             long offset;
         };
         
-        StringTable(string name);
+        StringTable();
         ~StringTable();
-        string Name() { return name; }
         long AddString(const char * str);
         void WriteTable(BinaryWriter& writer);
         void WriteTable(BinaryWriter&& writer) {
@@ -25,5 +24,11 @@ class StringTable {
     private:
         std::vector<ElfString *> strings;
         long writePtr;
-        string name;
 };
+
+/*
+* The String table is just a list of null-terminated strings.
+* The first byte, index 0, must hold the null character:
+*    "\0StringOne\0StringTwo\0StringThree\0"
+*
+*/

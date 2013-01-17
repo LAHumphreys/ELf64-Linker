@@ -5,9 +5,8 @@
    #include "stringTable.h"
 #endif
 
-StringTable::StringTable ( string name) {
-    this->name = name;
-    writePtr=0;
+StringTable::StringTable () {
+    writePtr=1;//first byte is defined to hold the null char
     strings.reserve(1000);
 }
 StringTable::~StringTable ( ) {
@@ -38,6 +37,7 @@ long StringTable::AddString(const char * str) {
 }
 
 void StringTable::WriteTable(BinaryWriter& writer) {
+    writer.Write("\0",1);
     for (ElfString* & str : this->strings) {
         writer.Write(str->str,str->size);
         writer += str->size;
