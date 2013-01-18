@@ -54,7 +54,7 @@ private:
     long offset;
 };
 
-class DataWriter : FileLikeWriter{
+class DataWriter : public FileLikeWriter{
 public:
     DataWriter(void *, long );
     virtual void Write(long offset, const void *src, long size);
@@ -71,10 +71,10 @@ private:
 };
 
 template<int size>
-class DataLump: DataWriter
+class DataLump: public DataWriter
 {
 public:
-     DataLump(): DataWriter(this->data,size){};
+     DataLump(): DataWriter(this->rawData,size){};
 private:
      unsigned char rawData[size];
 };

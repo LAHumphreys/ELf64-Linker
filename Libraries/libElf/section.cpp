@@ -138,7 +138,6 @@ Section * Section::MakeNewStringTable( StringTable &tab,
     tab.WriteTable(newSection->data->Writer());
     newSection->stringTable = sectionNames;
 
-    newSection->name = tab.Name();
     newSection->sh_flags.SetFlags("W");
 
     //build the elf header
