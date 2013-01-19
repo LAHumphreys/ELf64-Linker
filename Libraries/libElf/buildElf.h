@@ -31,6 +31,7 @@ public:
                                     BinaryWriter& writer);
     void WriteSectionHeaders(ElfContent& data);
     void WriteToFile(BinaryWriter& w);
+    inline void WriteToFile(BinaryWriter&& w) { WriteToFile(w); }
 protected:
     void InitialiseFile(ElfContent& data);
     void InitialiseHeader(ElfContent& data);
