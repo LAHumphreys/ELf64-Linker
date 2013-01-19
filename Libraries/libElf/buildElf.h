@@ -41,7 +41,7 @@ protected:
     void WriteSpecial(ElfContent&, string name, long&, BinaryWriter&);
 
 private:
-    Elf64_Ehdr header;
+    ElfHeaderX86_64 header;
 
     //final data
     DataVector file;
@@ -86,11 +86,11 @@ void ElfFile::SortByAddress(T start, T end) {
  *  +-------------------------------+
  *  | ...                           |
  *  +-------------------------------+
- *  | ".shstrtab" section           |
+ *  | ".shstrtab" section header    |
  *  +-------------------------------+
- *  | ".symtab"   section           |
+ *  | ".symtab"   section header    |
  *  +-------------------------------+
- *  | ".strtab"   section           |
+ *  | ".strtab"   section header    |
  *  +-------------------------------+
  *  
  */
@@ -98,30 +98,7 @@ void ElfFile::SortByAddress(T start, T end) {
 /*
  *                The Elf Header
  *              +----------------+
- * This class will format the data up, but it is not expected to
- * perform any non trivial relocation etc.
- *
- * +------------------------+--------------------+
- * |                 ELF File Header             |
- * +------------------------+--------------------+
- * | Callers Responsibility | Our Responsibility |
- * +------------------------+--------------------+
- * | e_type                 | e_phoff            |
- * +------------------------+--------------------+
- * | e_machine              | e_shoff            |
- * +------------------------+--------------------+
- * | e_version              | e_phnum            |
- * +------------------------+--------------------+
- * | e_entry                | e_shnum            |
- * +------------------------+--------------------+
- * | e_flags                | e_shstrndx         |
- * +------------------------+--------------------+
- * | e_ehsize               |                    |
- * +------------------------+--------------------+
- * | e_phentsize            |                    |
- * +------------------------+--------------------+
- * | e_shentsize            |                    |
- * +------------------------+--------------------+
+ *  The class will build up a new ELfHeader from scratch
  *
  */
 

@@ -20,6 +20,7 @@ public:
     ElfHeaderX86_64 (string linkHeader);
     ElfHeaderX86_64 (const BinaryReader &reader);
     void PopulateIdentity();
+    void PopulateLinuxConsts();
     void Write(ofstream &file);
 
     size_t Size();
@@ -34,6 +35,7 @@ public:
     uint16_t& StringTableIndex() { return data.e_shstrndx; }
 
     void GetHeader(Elf64_Ehdr& out);
+    static ElfHeaderX86_64 NewObjectFile();
 
     // Calculated Flags
     string LinkFlags();
@@ -41,6 +43,7 @@ public:
 
 
 private:
+    ElfHeaderX86_64 () {}
     Elf64_Ehdr data;
     Endian endian;
     char * readPtr;

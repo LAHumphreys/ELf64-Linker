@@ -9,33 +9,33 @@ ElfFile::ElfFile(ElfContent& data)
      : file(1024) , 
        programHeadersStart(file),
        dataSectionStart(file),
-       sectionHeadersStart(file)
-
+       sectionHeadersStart(file),
+       header(ElfHeaderX86_64::NewObjectFile())
 {
     InitialiseHeader(data);
     InitialiseFile(data);
       
     // Process the program headers
-    sectionHeadersStart = (long)ProcessProgHeaders( data);
-    header.e_shoff = sectionHeadersStart;
+    header.SectionTableStart() =  (long)ProcessProgHeaders( data);
 
     WriteSectionHeaders(data);
 
     // Finally write the header
-    file.Writer().Write(&header,header.e_ehsize);
+    file.Writer().Write(&header,header.Size());
 
     // clean up any extra data
     file.resize( (long)sectionHeadersStart + 
-                 header.e_shnum * header.e_shentsize );
+                 header.Sections() * header.SectionHeaderSize() );
 }
 
 void ElfFile::InitialiseFile(ElfContent& data) {
     long sectionDataLength = 0;
     
-    programHeadersStart = data.header.Size();
+    programHeadersStart = header.Size();
     dataSectionStart = (long) programHeadersStart + 
-                       (  data.header.ProgramHeaderSize() 
+                       (  header.ProgramHeaderSize() 
                         * data.progHeaders.size() );
+                         
     // Reserve space for data, plus room for alignment 
     // ( the idea is to allocate too much and resize back down )
 
@@ -43,22 +43,25 @@ void ElfFile::InitialiseFile(ElfContent& data) {
     for( auto section : data.sections)
         sectionDataLength += section->Size();
     // allow room for alignments of loadable segments
-    sectionDataLength += 16 * header.e_phnum;
+    sectionDataLength += 16 * header.ProgramHeaders();
 
     file.resize(  (long) dataSectionStart
                 + sectionDataLength
-                + header.e_shentsize * header.e_shnum);
+                + header.SectionHeaderSize() * header.Sections());
 }
 
 void ElfFile::InitialiseHeader(ElfContent &data) {
-    // we had nothing to do with formating the data:
-    data.header.GetHeader(this->header);
-
-    this->header.e_phnum = data.progHeaders.size();
-    this->header.e_shnum = data.sections.size();
     
-    this->header.e_phoff = sizeof(this->header);
-    // We can't set the 
+    header.ProgramHeaders() = data.progHeaders.size();
+    header.Sections()  = data.sections.size();
+    
+    // If there is no load table, progheader start is defined to be 0 by 
+    // the elf standard
+    if ( header.ProgramHeaders() == 0 ) {
+        header.ProgramHeadersStart() = 0;
+    } else {
+        header.ProgramHeadersStart() = header.Size();
+    }
 }
 
 BinaryWriter ElfFile::ProcessProgHeaders(ElfContent &data ) {
@@ -89,8 +92,8 @@ BinaryWriter ElfFile::ProcessProgHeaders(ElfContent &data ) {
         ph->DataStart() = dataWritePos;
         ph->FileSize() = dataEnd - dataWritePos;
 
-        pheaderWritePos.Write(ph,header.e_phentsize);
-        pheaderWritePos += header.e_phentsize;
+        pheaderWritePos.Write(ph,header.ProgramHeaderSize());
+        pheaderWritePos += header.ProgramHeaderSize();
     }
     return pheaderWritePos;
 }
@@ -133,21 +136,7 @@ BinaryWriter ElfFile::WriteDataSections( ElfContent &data,
         }
     }
     writePos = (long)end;
-
-    section = data.sections[data.sectionMap[".shstrtab"]];
-    section->DataStart() = writePos;
-    section->WriteRawData(writePos);
-    writePos+=section->Size();
-
-    section = data.sections[data.sectionMap[".symtab"]];
-    section->DataStart() = writePos;
-    section->WriteRawData(writePos);
-    writePos+=section->Size();
-
-    section = data.sections[data.sectionMap[".strtab"]];
-    section->DataStart() = writePos;
-    section->WriteRawData(writePos);
-    end = section->Size() + writePos;
+    return writePos;
 }
 
 bool ElfFile::IsSpecialSection(Section& s) {
@@ -165,8 +154,8 @@ void ElfFile::WriteSectionHeaders(ElfContent &data ) {
     for ( auto sec : data.sections ) {
         if ( ! IsSpecialSection( *sec ) ) {
             const auto& sheader = sec->RawHeader();
-            writer.Write(&sheader,header.e_shentsize);
-            writer += header.e_shentsize;
+            writer.Write(&sheader,header.SectionHeaderSize());
+            writer += header.SectionHeaderSize();
             ++idx;
         }
     }
@@ -180,14 +169,14 @@ void ElfFile::WriteSpecial(ElfContent& data, string name,
                                              long& idx,
                                              BinaryWriter& writer) {
     if ( name == ".shstrtab" )  {
-        this->header.e_shstrndx = idx;
+        this->header.StringTableIndex() = idx;
     }
     auto loc = data.sectionMap.find(name);
     if ( loc != data.sectionMap.end() ) {
         auto sec = data.sections[loc->second];
         const auto& sheader = sec->RawHeader();
-        writer.Write(&sheader,header.e_shentsize);
-        writer += header.e_shentsize;
+        writer.Write(&sheader,header.SectionHeaderSize());
+        writer += header.SectionHeaderSize();
         ++idx;
     }
 }
