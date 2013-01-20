@@ -6,6 +6,7 @@
 #include <sstream>
 #include "tester.h"
 #include <elf.h>
+#include "dataLump.h"
 
 int magic( stringstream& log);
 int headerClass( stringstream& log);
@@ -18,7 +19,7 @@ int machine(stringstream& log);
 int HeaderSizes(stringstream& log );
 
 ElfParser *p;
-DataVector outfile(5000);
+DataLump<5000> outfile;
 ElfHeaderX86_64 *header;
 Elf64_Ehdr *hdr;
 

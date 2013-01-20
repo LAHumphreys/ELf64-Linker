@@ -1,7 +1,7 @@
-#include <string>
-#include "binaryWriter.h"
 #ifndef BINARY_READER_H
 #define BINARY_READER_H
+#include <string>
+#include "binaryWriter.h"
 
 using namespace std;
 
@@ -84,4 +84,5 @@ private:
     BinaryReader pos_;
     long size;
 };
+
 #endif

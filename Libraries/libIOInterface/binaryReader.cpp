@@ -192,3 +192,5 @@ BinaryReader SubReader::End() const{
 BinaryReader SubReader::Pos(long offset) const {
     return BinaryReader(*this,offset);
 }
+
+

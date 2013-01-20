@@ -1,9 +1,12 @@
-#include <string>
-using namespace std;
 #ifndef BINARY_WRITER_H
 #define BINARY_WRITER_H
 
+#include <string>
 class BinaryReader;
+class BinaryWriter;
+#include "binaryReader.h"
+using namespace std;
+
 
 class FileLikeWriter {
 public:
@@ -52,30 +55,5 @@ public:
 private: 
     FileLikeWriter& file;
     long offset;
-};
-
-class DataWriter : public FileLikeWriter{
-public:
-    DataWriter(void *, long );
-    virtual void Write(long offset, const void *src, long size);
-    virtual void Put(long offset, unsigned char c);
-    virtual void Fill(long offset, unsigned char c, long count);
-    //pointless
-    virtual void Flush( ) {};
-
-	unsigned char * RawPtr() { return rawdata;}
-	BinaryWriter Begin() { return BinaryWriter(*this,0);}
-private:
-    unsigned char * rawdata;
-    long length;
-};
-
-template<int size>
-class DataLump: public DataWriter
-{
-public:
-     DataLump(): DataWriter(this->rawData,size){};
-private:
-     unsigned char rawData[size];
 };
 #endif

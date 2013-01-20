@@ -116,33 +116,3 @@ BinaryWriter BinaryWriter::Pos(long offset) const {
     return BinaryWriter(file,offset);
 }
 
-DataWriter::DataWriter(void *data, long size) {
-    rawdata = (unsigned char *)data;
-    length = size;
-}
-void DataWriter::Write(long offset, const void *src, long len ) {
-    if ( offset + len >= this->length ) {
-        throw "Invalid write to data object: not enough space";
-    } else if ( offset < 0)  {
-        throw "Invalid write to data object: -'ve offset";
-    }else {
-        memcpy(this->rawdata+offset,src,len);
-    }
-}
-
-void DataWriter::Put(long offset, unsigned char c) {
-    if ( offset >= this->length ) {
-        throw "Invalid Put to data object: not enough space";
-    }
-    this->rawdata[offset] = c;
-}
-
-void DataWriter::Fill(long offset, unsigned char c, long count) {
-    if ( offset + count >= this->length ) {
-        throw "Invalid fill to data object: not enough space";
-    } else if ( offset < 0)  {
-        throw "Invalid fill to data object: -'ve offset";
-    }else {
-       memset(this->rawdata,c,count);
-    }
-}
