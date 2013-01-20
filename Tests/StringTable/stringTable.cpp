@@ -3,6 +3,7 @@
 #include "stringTable.h"
 #include <cstring>
 #include <iostream>
+#include "dataLump.h"
 
 using namespace std;
 
@@ -92,7 +93,7 @@ int WriteTable (stringstream& log) {
 	 log << "declare data lump" << endl;
 	 DataLump<100> outTable;
 	 log << "copying table....";
-	 tab.WriteTable(outTable.Begin());
+	 tab.WriteTable(outTable.Writer());
 	 log << "done" << endl;
 
      
