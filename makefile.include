@@ -33,7 +33,11 @@ DEBUG_FLAGS=-ggdb
 CPPSTD=gnu++98 #(overridden by USE_CPPXX)
 
 # Set to YES to enable
-DEBUG_ON=YES
+ifndef DEBUG_ON
+    DEBUG_ON=YES
+endif
+
+# This project requires the C++11 standard
 USE_CPP11=YES
 
 #
@@ -51,7 +55,12 @@ CPP_TAGS_FLAGS=-R --sort=1 --c++-kinds=+p --fields=+iaS --extra=+q --language-fo
 INCLUDE_FLAGS=-I$(EXPORT_INCLUDES_DIR)
 INCLUDE_FLAGS+=$(ADDITIONAL_INCLUDE_FLAGS)
 
-CPP_FLAGS=$(INCLUDE_FLAGS)
+ifdef CPP_FLAGS
+    CPP_FLAGS+=$(INCLUDE_FLAGS)
+else
+    CPP_FLAGS=$(INCLUDE_FLAGS)
+endif
+
 
 ifeq ($(DEBUG_ON),YES)
   CPP_FLAGS+=$(DEBUG_FLAGS)
@@ -188,3 +197,5 @@ endif
 
 usage:
 	@echo "Set the base directory: export LINKER_DIR=<location of makefile.include>"
+	@echo "To add extra flags to g++: export CPP_FLAGS=<flags>"
+	@echo "To disable debug symbols: export DEBUG_ON=FALSE"
