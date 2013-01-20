@@ -1,11 +1,12 @@
 #ifndef STD_WRITER_H
 #define STD_WRITER_H
 #include <fstream>
+#include <string>
 #include "binaryWriter.h"
 
 using namespace std;
 
-class StdWriter: public FileLikeWriter {
+class StdWriter: public virtual FileLikeWriter {
 public:
     StdWriter (ofstream &f);
     virtual void Write(long offset, const void *src, long size);
@@ -16,5 +17,16 @@ public:
 private:
     ofstream &file;
 };
+
+class OFStreamWriter: public ofstream, public StdWriter {
+public:
+	OFStreamWriter(const char *fname);
+	OFStreamWriter(const OFStreamWriter& rhs);
+	string Fname() { return fileName;}
+	virtual ~OFStreamWriter(){}
+private:
+    string fileName;
+};
+
 
 #endif
