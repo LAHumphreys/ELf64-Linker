@@ -7,6 +7,9 @@
 #include "dataVector.h"
 #include "binaryData.h"
 
+//TODO: remove this
+#include <iostream>
+
 Section::Section( ) 
     : sh_flags(""), stringTable(NULL), data(NULL)
 {
@@ -15,15 +18,17 @@ Section::Section( )
 
 Section::Section( const BinaryReader& headerPos, 
                   const BinaryReader& strings ) 
-    : sh_flags("")
+    : SectionHeader(headerPos), sh_flags("")
 {
-    // over write the data in our data POD 
-    headerPos.Read(&elfHeader,Size());
     // Get our name
-    name = (strings + elfHeader.sh_name).ReadString();
+    name = (strings + (long)NameOffset()).ReadString();
 
+//TODO: Remove
+cout << "getting data for: " << name << endl;
+cout << "Start: " << DataStart() << endl;
+cout << "Size: " << DataSize() << endl;
     // Get our data
-    data = new Data( headerPos.Begin() + (long)DataStart() , 
+    data = new Data( headerPos.Begin().operator+(DataStart()) , 
                      DataSize());
 
     ConfigureFlags();
@@ -38,11 +43,11 @@ void Section::ConfigureFlags() {
 }
 
 void Section::SetFlags() {
-    if ( elfHeader.sh_flags & SHF_WRITE) 
+    if ( Writeable() ) 
         sh_flags.SetFlag("SHF_WRITE",true);
-    if ( elfHeader.sh_flags & SHF_ALLOC) 
+    if ( Allocate() ) 
         sh_flags.SetFlag("SHF_ALLOC",true);
-    if ( elfHeader.sh_flags & SHF_EXECINSTR) 
+    if ( Executable() ) 
         sh_flags.SetFlag("SHF_EXECINSTR",true);
 }
 
@@ -69,20 +74,20 @@ Section::Section(string header, StringTable * stable)
     sh_flags.SetFlags(flags);
     s >> align;
 
-    elfHeader.sh_name = stringTable->AddString(name.c_str());
-    elfHeader.sh_type = SHT_PROGBITS; // sym tables etc may override
-    elfHeader.sh_flags = GetFlags();
-    elfHeader.sh_addr = addr;
-    elfHeader.sh_offset = 0; // we don't know this yet
-    elfHeader.sh_size = size;
-    elfHeader.sh_addralign = align;
+    NameOffset() = stringTable->AddString(name.c_str());
+    RawType() = SHT_PROGBITS; // sym tables etc may override
+    RawFlags() = GetFlags();
+    Address() = addr;
+    DataStart() = 0; // we don't know this yet
+    DataSize() = size;
+    Alignment() = align;
     // only used for specialisations with fixed sized entries
     // (tables)
-    elfHeader.sh_entsize = 0; 
+    ItemSize() = 0; 
     
     // These don't appear to be used
-    elfHeader.sh_link = 0;
-    elfHeader.sh_info = 0;
+    RawLink() = 0;
+    RawInfo() = 0;
 }
 
 
@@ -141,23 +146,19 @@ Section * Section::MakeNewStringTable( StringTable &tab,
     newSection->sh_flags.SetFlags("W");
 
     //build the elf header
-    newSection->elfHeader.sh_entsize = 0; //no fixed sized entries
-    newSection->elfHeader.sh_flags = newSection->GetFlags();
-    newSection->elfHeader.sh_addralign = 0; //no addresses
-    newSection->elfHeader.sh_info = 0; // man elf ( not 4 strings)
+    newSection->ItemSize() = 0; //no fixed sized entries
+    newSection->RawFlags() = newSection->GetFlags();
+    newSection->Alignment() = 0; //no addresses
+    newSection->RawInfo() = 0; // man elf ( not 4 strings)
       
     // TODO: Handle for long files
-    newSection->elfHeader.sh_link = 0; 
+    newSection->RawLink() = 0; 
 
-    newSection->elfHeader.sh_name = 
+    newSection->NameOffset() = 
        newSection->stringTable->AddString(newSection->name.c_str());
-    newSection->elfHeader.sh_type = SHT_STRTAB;
-    newSection->elfHeader.sh_size = newSection->data->Size();
+    newSection->RawType() = SHT_STRTAB;
+    newSection->DataSize() = newSection->data->Size();
 
-
-    //needs setting later
-    newSection->elfHeader.sh_addr;
-    newSection->elfHeader.sh_offset;
     return newSection;
 }
 

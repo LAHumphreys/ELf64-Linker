@@ -153,8 +153,7 @@ void ElfFile::WriteSectionHeaders(ElfContent &data ) {
     // Write the standard header sections
     for ( auto sec : data.sections ) {
         if ( ! IsSpecialSection( *sec ) ) {
-            const auto& sheader = sec->RawHeader();
-            writer.Write(&sheader,header.SectionHeaderSize());
+            writer.Write(&sec,header.SectionHeaderSize());
             writer += header.SectionHeaderSize();
             ++idx;
         }
@@ -174,8 +173,7 @@ void ElfFile::WriteSpecial(ElfContent& data, string name,
     auto loc = data.sectionMap.find(name);
     if ( loc != data.sectionMap.end() ) {
         auto sec = data.sections[loc->second];
-        const auto& sheader = sec->RawHeader();
-        writer.Write(&sheader,header.SectionHeaderSize());
+        writer.Write(sec,header.SectionHeaderSize());
         writer += header.SectionHeaderSize();
         ++idx;
     }
