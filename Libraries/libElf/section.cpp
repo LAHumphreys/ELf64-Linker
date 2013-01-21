@@ -7,9 +7,6 @@
 #include "dataVector.h"
 #include "binaryData.h"
 
-//TODO: remove this
-#include <iostream>
-
 Section::Section( ) 
     : sh_flags(""), stringTable(NULL), data(NULL)
 {
@@ -23,10 +20,6 @@ Section::Section( const BinaryReader& headerPos,
     // Get our name
     name = (strings + (long)NameOffset()).ReadString();
 
-//TODO: Remove
-cout << "getting data for: " << name << endl;
-cout << "Start: " << DataStart() << endl;
-cout << "Size: " << DataSize() << endl;
     // Get our data
     data = new Data( headerPos.Begin().operator+(DataStart()) , 
                      DataSize());
