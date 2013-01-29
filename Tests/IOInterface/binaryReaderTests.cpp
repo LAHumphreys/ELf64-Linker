@@ -39,6 +39,7 @@ int VerifyArithmetic( stringstream& log);
 int VerifySearch( stringstream& log);
 int VerifyReads( stringstream& log);
 int VerifyStringPull( stringstream& log);
+int VerifyPODPull( stringstream& log);
 
 using namespace std;
 int main(int argc, const char *argv[])
@@ -52,7 +53,8 @@ int main(int argc, const char *argv[])
     Test("Verify Arithmetic Operators",  (loggedTest)VerifyArithmetic).RunTest();
     Test("Verify Searches",  (loggedTest)VerifySearch).RunTest();
     Test("Verify Reads",  (loggedTest)VerifyReads).RunTest();
-    Test("Verify Pulls",  (loggedTest)VerifyStringPull).RunTest();
+    Test("Verify String Pulls",  (loggedTest)VerifyStringPull).RunTest();
+    Test("Verify POD Pulls",  (loggedTest)VerifyPODPull).RunTest();
     return 0;
 }
 
@@ -369,3 +371,157 @@ int VerifyStringPull( stringstream& log) {
     return 0;
 }
 
+int VerifyPODPull( stringstream& log) {
+    DataVector dv(100);
+    
+    dv.Fill(0,'*',100);
+    BinaryWriter w(dv);
+    
+    int i = 1;
+    long l = 10;
+    float f = 100;
+    double d = 1000;
+    
+    struct POD1 {
+            int i;
+            long l;
+            float f;
+            double d;
+            long sum() { return i + l + f +d; }
+            bool operator== (POD1& rhs) { 
+                return memcpy(this,&rhs,sizeof(POD1)) != 0;
+            }
+    };
+
+    struct POD2 {
+            POD1 p1;
+            int ints[5];
+            POD1 p3;
+            long sum () {
+               long sum = 0;
+               for (int i = 0; i < 5; i++) {
+                   sum+=ints[i];
+               }
+               return p1.sum() + p3.sum() + sum;
+            }
+            bool operator== (POD2& rhs) { 
+                return memcpy(this,&rhs,sizeof(POD2)) != 0;
+            }
+    };
+    
+    
+    struct POD3 {
+            POD1 p1s[5];
+            POD2 p2s[5];
+            long sum () {
+                long sum = 0;
+                for (int i = 0; i < 5; i++) {
+                    sum+=p1s[i].sum() + p2s[i].sum();
+                }
+                return sum;
+            }
+            bool operator== (POD3& rhs) { 
+                return memcpy(this,&rhs,sizeof(POD3)) != 0;
+            }
+    };
+    
+    POD1 p1a = {i,l,f,d};
+    POD1 p1b = {2*i,2*l,2*f,2*d};
+    POD2 p2 = {p1a,{1,2,3,4,5},p1b};
+    POD3 p3 = { {p1a,p1b,p1a,p1b,p1a}, { p2,p2,p2,p2,p2} };
+    
+    // We have some chicken and egg here, assume the << operator 
+    // doesn't work yet...
+    log << "size of i:  " << sizeof(int) << endl;
+    log << "size of l:  " << sizeof(long) << endl;
+    log << "size of f:  " << sizeof(float) << endl;
+    log << "size of d:  " << sizeof(double) << endl;
+    log << "size of p1: " << sizeof(POD1) << endl;
+    log << "size of p2: " << sizeof(POD2) << endl;
+    log << "size of p3: " << sizeof(POD3) << endl;
+    
+    log << "Writing data...";
+    w.Write(&i,sizeof(i));
+    w+=sizeof(i);
+    w.Write(&l,sizeof(l));
+    w+=sizeof(l);
+    w.Write(&f,sizeof(f));
+    w+=sizeof(f);
+    w.Write(&d,sizeof(d));
+    w+=sizeof(d);
+    w.Write(&p1a,sizeof(p1a));
+    w+=sizeof(p1a);
+    w.Write(&p1b,sizeof(p1b));
+    w+=sizeof(p1b);
+    w.Write(&p2,sizeof(p2));
+    w+=sizeof(p2);
+    w.Write(&p3,sizeof(p3));
+    w+=sizeof(p3);
+    log << "done" << endl;
+    
+    int ri = 30;
+    long rl = 30000;
+    float rf = 34345.45345;
+    double rd = 3453453434.34534534;
+    POD1 rp1a;
+    POD1 rp1b;
+    POD2 rp2;
+    POD3 rp3;
+
+    BinaryReader reader(dv);
+
+    log << "Checking Plain types" << endl;
+    reader >> ri;
+    reader >> rl;
+    reader >> rf;
+    reader >> rd;
+
+    if ( ri != i ) {
+        log << "i missmatch, " << ri << endl;
+        return 1;
+    }
+
+    if ( rl != l ) {
+        log << "l missmatch, " << rl << endl;
+        return 1;
+    }
+
+    if ( rf != f ) {
+        log << "f missmatch, " << rf << endl;
+        return 1;
+    }
+
+    if ( rd != d ) {
+        log << "d missmatch,  " << rd << endl;
+        return 1;
+    }
+
+    log << "Checking compound types..." << endl;
+
+    reader >> rp1a;
+    reader >> rp1b;
+    reader >> rp2;
+    reader >> rp3;
+
+    if ( rp1a.sum() != p1a.sum() || !(rp1a == p1a) ) {
+        log << "p1a missmatch, " << endl;;
+        return 1;
+    }
+
+    if ( rp1b.sum() != p1b.sum() || !(rp1b == p1b) ) {
+        log << "p1b missmatch, "<< endl;;
+        return 1;
+    }
+
+    if ( rp2.sum() != p2.sum() || !(rp2 == p2) ) {
+        log << "p2 missmatch, "<< endl;;
+        return 1;
+    }
+
+    if ( rp3.sum() != p3.sum() || !(rp3 == p3) ) {
+        log << "p3 missmatch, "<< endl;;
+        return 1;
+    }
+
+    return 0;
+}
