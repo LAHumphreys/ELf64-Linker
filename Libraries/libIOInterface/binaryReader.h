@@ -48,8 +48,10 @@ public:
     virtual BinaryReader Find(unsigned char c) const;
     virtual BinaryReader RFind(unsigned char c) const;
 
-    virtual BinaryReader operator+(long additionalOffset) const;
-    virtual BinaryReader operator-(long additionalOffset) const;
+    template <typename number>
+    BinaryReader operator+(number additionalOffset) const;
+    template <typename number>
+    BinaryReader operator-(number additionalOffset) const;
 
     /* Read data and reposition the pointer */
     BinaryReader& Pull(void *,unsigned char delim);
@@ -97,5 +99,6 @@ private:
     BinaryReader pos_;
     long size;
 };
+
 #include "binaryReader.hpp"
 #endif

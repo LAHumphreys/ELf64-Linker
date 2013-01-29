@@ -23,19 +23,6 @@ BinaryReader::BinaryReader(const BinaryReader &other)
     // available
 }
 
-// Reposition the pointer
-BinaryReader BinaryReader::operator+( long additionalOffset) const
-{
-    BinaryReader p(this->file,additionalOffset + offset);
-    return p;
-}
-//
-// Reposition the pointer
-BinaryReader BinaryReader::operator-( long additionalOffset) const
-{
-    BinaryReader p(this->file,offset - additionalOffset);
-    return p;
-}
 
 // Reposition the pointer
 BinaryReader& BinaryReader::operator+=( long additionalOffset) 

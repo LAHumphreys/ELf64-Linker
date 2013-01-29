@@ -38,8 +38,10 @@ public:
     virtual BinaryWriter Pos(long offset) const;
 
     // Create a new BinaryWriter
-    virtual BinaryWriter operator+ (long additionalOffset) const;
-    virtual BinaryWriter operator- (long additionalOffset) const;
+    template<typename number>
+    BinaryWriter operator+ (number additionalOffset) const;
+    template<typename number>
+    BinaryWriter operator- (number additionalOffset) const;
     virtual BinaryWriter NextBoundrary (long alignment) const;
 
     virtual long operator%(long alignment) const;
@@ -56,4 +58,5 @@ private:
     FileLikeWriter& file;
     long offset;
 };
+#include "binaryWriter.hpp"
 #endif

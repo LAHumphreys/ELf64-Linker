@@ -64,17 +64,6 @@ void BinaryWriter::WriteString(const void *src) {
     this->file.Write(offset,src,strlen((const char *)src)+1);
 }
 
-// Create a new BinaryWriter
-BinaryWriter BinaryWriter::operator+( long additionalOffset) const 
-{
-    return BinaryWriter(file, offset + additionalOffset);
-}
-
-BinaryWriter BinaryWriter::operator-( long additionalOffset) const 
-{
-    return BinaryWriter(file, offset - additionalOffset);
-}
-
 BinaryWriter BinaryWriter::NextBoundrary(long alignment) const {
     long diff = offset % alignment;
     if (diff != 0 ) {
