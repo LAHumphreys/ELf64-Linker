@@ -62,6 +62,10 @@ else
 endif
 
 
+ifeq ($(FATAL_WARNINGS),YES)
+  CPP_FLAGS+=-Werror
+endif
+
 ifeq ($(DEBUG_ON),YES)
   CPP_FLAGS+=$(DEBUG_FLAGS)
 endif
