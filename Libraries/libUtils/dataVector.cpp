@@ -29,7 +29,7 @@ void DataVector::Put(long offset, unsigned char c) {
 
 void DataVector::Fill(long offset, unsigned char c, long count){
     if (offset + count >= this->size())
-        this->resize(offset + count + 1);
+        this->resize(offset + count);
     for (long i=offset; i<(offset + count); i++) {
         (*this)[i] = c;
     }

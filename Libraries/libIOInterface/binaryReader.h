@@ -50,6 +50,17 @@ public:
 
     virtual BinaryReader operator+(long additionalOffset) const;
     virtual BinaryReader operator-(long additionalOffset) const;
+
+    /* Read data and reposition the pointer */
+    BinaryReader& Pull(void *,unsigned char delim);
+    template<class T>
+    BinaryReader& Pull(T&);
+
+    /* Convienience operator that redirect to the pull */
+    inline BinaryReader& operator>>(char *);
+    template<class T>
+    inline BinaryReader& operator>>(T&);
+
     // Reposition the pointer
     virtual BinaryReader& operator+=(long additionalOffset);
     virtual BinaryReader& operator-=(long additionalOffset);
@@ -84,5 +95,5 @@ private:
     BinaryReader pos_;
     long size;
 };
-
+#include "binaryReader.hpp"
 #endif

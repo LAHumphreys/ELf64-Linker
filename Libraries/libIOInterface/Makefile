@@ -1,4 +1,4 @@
-EXPORT_INCLUDES=$(shell echo *.h)
+EXPORT_INCLUDES=$(shell echo *.h *.hpp)
 SOURCES=$(shell echo *.cpp)
 
 TARGET_LIB=libIOInterface

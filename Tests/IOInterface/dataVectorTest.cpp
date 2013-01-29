@@ -64,6 +64,12 @@ int validateFillAndGrow( stringstream& log) {
     FillContainer(v,100,'*');
     FillContainer(data,50,'-');
 
+    data.Fill(0,'#',50);
+    if ( data.Size() != 50 ) {
+        log << "the data object needless grow" << endl;
+        return 50;
+    }
+
     data.Fill(0,'*',90);
     auto diff = mismatch(v.begin(),v.end(),data.begin());
     if ( diff.first != v.begin()+90 ) {

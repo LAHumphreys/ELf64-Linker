@@ -193,4 +193,17 @@ BinaryReader SubReader::Pos(long offset) const {
     return BinaryReader(*this,offset);
 }
 
+BinaryReader& BinaryReader::Pull(void* dest, unsigned char delim) {
+    long end = file.Next(offset,delim);
+    long len;
+    if ( end >= file.Size() ) {
+        len = file.Size()-offset;
+    } else {
+        len = end + 1 - offset; /*remember to +1 for \0*/
+    }
+    Read(dest,len);
+    offset+=len;
+    return *this;
+}
+
 

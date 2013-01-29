@@ -38,6 +38,7 @@ int VerifyAssignments( stringstream& log);
 int VerifyArithmetic( stringstream& log);
 int VerifySearch( stringstream& log);
 int VerifyReads( stringstream& log);
+int VerifyStringPull( stringstream& log);
 
 using namespace std;
 int main(int argc, const char *argv[])
@@ -51,6 +52,7 @@ int main(int argc, const char *argv[])
     Test("Verify Arithmetic Operators",  (loggedTest)VerifyArithmetic).RunTest();
     Test("Verify Searches",  (loggedTest)VerifySearch).RunTest();
     Test("Verify Reads",  (loggedTest)VerifyReads).RunTest();
+    Test("Verify Pulls",  (loggedTest)VerifyStringPull).RunTest();
     return 0;
 }
 
@@ -105,6 +107,47 @@ long VerifyData(const char* d1, const char *d2, long size) {
             err << " ( " << int(d1[i]) << " ) ";
             err << " and " << d2[i];
             err << " ( " << int(d2[i]) << " ) " << endl;
+
+            char *str1 = new char[i+1];
+            char *str2 = new char[i+1];
+            char *ptr = new char[i+1];
+            for ( int j=0; j<=i; j++ ) {
+                if ( d1[j] == '\0' ) { 
+                    str1[j] = '`';
+                } else {
+                    str1[j] = d1[j];
+                }
+
+                if ( d2[j] == '\0' ) { 
+                    str2[j] = '`';
+                } else {
+                    str2[j] = d2[j];
+                }
+                ptr[j] = ' ';
+            }
+
+            if ( d1[i] == '\0' ) { 
+                str1[i] = '`';
+            } else {
+                str1[i] = d1[i];
+            }
+
+            if ( d2[i] == '\0' ) { 
+                str2[i] = '`';
+            } else {
+                str2[i] = d2[i];
+            }
+            ptr[i] = '^';
+            str1[i+1] = '\0';
+            str2[i+1] = '\0';
+            ptr[i+1] = '\0';
+            err << endl << str1 << endl;
+            err << str2 << endl;
+            err << ptr << endl;
+            delete [] str1;
+            delete [] str2;
+            delete [] ptr;
+
             throw TestError(err.str(),i);
         }
     }
@@ -188,6 +231,7 @@ int VerifySearch( stringstream& log) {
     }
     return 0;
 }
+
 int VerifyReads( stringstream& log) {
     try {
         BinaryReader r(data);
@@ -252,6 +296,76 @@ int VerifyReads( stringstream& log) {
     } catch (TestError& e) {
         return e.Error(log);
     }
+    return 0;
+}
+
+int VerifyStringPull( stringstream& log) {
+    try {
+        DataVector dv(100);
+
+        dv.Fill(0,'*',100);
+        dv.Put(50,'\0');
+        dv.Put(20,'\0');
+
+        BinaryReader rd(dv);
+        BinaryReader rd2(dv);
+
+        char * read = new char[120];
+        char * pulld = new char [120];
+        char * opd = new char [120];
+
+        memset(read,'1',120);
+        memset(pulld,'1',120);
+        memset(opd,'1',120);
+
+        log << "First pull... " << endl;
+        rd.Read(read,21);
+        rd.Pull(pulld,'\0');
+
+        VerifyData(read, pulld,120);
+
+        log << "First op" << endl;
+        rd2 >> opd;
+        VerifyData(read, opd,120);
+
+        if ( rd.Offset() != 21 ) {
+            log << "Pull didn't correctly advance the offset!" << endl;
+            return 1;
+        }
+
+        log << "Second pull... " << endl;
+
+        rd.Read(read+21,30);
+        rd.Pull(pulld+strlen(pulld)+1,'\0');
+
+
+        VerifyData(read, pulld,120);
+
+        log << "Second op" << endl;
+        rd2 >> opd + strlen(opd) + 1;
+        VerifyData(read, opd,120);
+
+        log << "Pull to the end... " << endl;
+        log << "Data size: " << dv.Size() << endl;
+
+        rd.Read(read+51,49);
+        rd.Pull(pulld+51,'\0');
+
+
+        VerifyData(read, pulld,120);
+
+        log << "Final op" << endl;
+        rd2 >> opd + 51;
+        VerifyData(read, opd,120);
+
+
+        delete [] read;
+        delete [] pulld;
+        delete [] opd;
+    } catch (TestError& e) {
+        return e.Error(log);
+    }
+
     return 0;
 }
 
