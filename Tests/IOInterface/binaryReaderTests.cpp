@@ -112,7 +112,7 @@ long VerifyData(const char* d1, const char *d2, long size) {
 
             char *str1 = new char[i+1];
             char *str2 = new char[i+1];
-            char *ptr = new char[i+1];
+           char *ptr = new char[i+1];
             for ( int j=0; j<=i; j++ ) {
                 if ( d1[j] == '\0' ) { 
                     str1[j] = '`';

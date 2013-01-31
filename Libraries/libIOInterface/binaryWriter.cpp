@@ -105,3 +105,14 @@ BinaryWriter BinaryWriter::Pos(long offset) const {
     return BinaryWriter(file,offset);
 }
 
+BinaryWriter& BinaryWriter::Push(const char* src ,char delim) {
+    long len = 0;
+    for (bool found=false; !found; len++ ) {
+        found = (src[len] == delim);
+    }
+    Write(src,len);
+    offset+=len;
+    return *this;
+}
+
+

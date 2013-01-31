@@ -58,7 +58,7 @@ public:
     template<class T>
     BinaryReader& Pull(T&);
 
-    /* Convienience operator that redirect to the pull */
+    /* Convienience operator that redirects to pull */
     inline BinaryReader& operator>>(char *dest) {
         return Pull(dest,'\0');
     }

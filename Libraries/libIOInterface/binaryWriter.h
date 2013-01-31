@@ -52,6 +52,19 @@ public:
 
     virtual BinaryWriter& operator=(long offset);
 
+    /* Write data and reposition the pointer */
+    BinaryWriter& Push(const char *,char delim);
+    template<class T>
+    BinaryWriter& Push(T&);
+
+    /* Convienience operator that redirects to push */
+    inline BinaryWriter& operator<<(const char *src) {
+        return Push(src,'\0');
+    }
+
+    template<class T>
+    inline BinaryWriter& operator<<(const T&);
+
     virtual long Offset() const {return offset;}
     virtual operator long() const { return offset;}
 private: 
