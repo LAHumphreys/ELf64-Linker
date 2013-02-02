@@ -9,7 +9,6 @@ endif
 EXPORTS_DIR=$(LINKER_DIR)exports/
 TEST_DIR=$(LINKER_DIR)Tests/
 
-
 # Define the internal file structure
 EXPORT_TESTS_TO=$(TEST_DIR)tests/
 EXPORT_INCLUDES_DIR=$(EXPORTS_DIR)includes/
@@ -47,6 +46,24 @@ ifndef CTAGS
     CTAGS=ctags
 endif
 CPP_TAGS_FLAGS=-R --sort=1 --c++-kinds=+p --fields=+iaS --extra=+q --language-force=C++ --tag-relative=no
+
+ifndef VALGRIND_OPTIONS
+    VALGRIND_OPTIONS=--leak-check=full
+    # Report the source of unintialised errors
+    VALGRIND_OPTIONS+=--track-origins=yes
+    # I have lots of ram!
+	--freelist-vol=2000000000
+    # Should run silently for regression tests, only report errors
+    VALGRIND_OPTIONS+=--quiet
+    # Fail the build if an error is found
+    VALGRIND_OPTIONS+=--error-exitcode=1
+    # Report any file handles that haven't been cleaned up
+    VALGRIND_OPTIONS+=--track-fds=yes
+    # Using a (vim!) wrapper that allows us to easily handle large call stacks
+    VALGRIND_OPTIONS+=--num-callers=50
+    # For easy debugging
+    VALGRIND_OPTIONS+=--fullpath-after=
+endif
 
 # Build up cpp flags
 # 
@@ -120,7 +137,11 @@ endif
 
 ifdef BUILD_TIME_TESTS
    $(shell mkdir -p $(EXPORT_TESTS_TO))
-   BUILD_DEPS+=RUN_AUTO_TEST
+   ifeq ($(findstring memtest,$(MAKECMDGOALS)),memtest)
+	   BUILD_DEPS+=VALGRIND_AUTO_TESTS
+   else
+		BUILD_DEPS+=RUN_AUTO_TEST
+   endif
    TESTS_TO_BUILD=$(addprefix $(EXPORT_TESTS_TO),$(BUILD_TIME_TESTS))
    TESTS_TO_RUN=$(TESTS_TO_BUILD)
    FILES_TO_CLEAN+=$(TESTS_TO_BUILD)
@@ -144,6 +165,7 @@ endif
 
 
 all: $(BUILD_DEPS)
+memtest: all
 
 clean: FOLDERS_TO_CLEAN 
 	$(CLEAN_CMD)
@@ -162,7 +184,7 @@ FOLDERS_TO_CLEAN:
 # Macro for building subfolders
 BUILD_FOLDERS :
 	@for dir in $(FOLDERS_TO_BUILD); do  \
-		$(MAKE) -C $$dir || exit;        \
+		$(MAKE) -C $$dir $(MAKECMDGOALS) || exit;        \
 		echo "***********************************************************"; \
 		echo "Built successfully: $$dir ";\
 		echo "************************************************************"; \
@@ -173,6 +195,14 @@ RUN_AUTO_TEST: BUILD_AUTO_TESTS
 		echo "***********************************************************"; \
 		echo "Running auto test: $$test";\
 		$$test || exit;\
+		echo "************************************************************"; \
+	done
+
+VALGRIND_AUTO_TESTS: BUILD_AUTO_TESTS
+	@for test in $(TESTS_TO_RUN); do \
+		echo "***********************************************************"; \
+		echo "Running auto test: $$test";\
+		    valgrind $(VALGRIND_OPTIONS) $$test || exit;\
 		echo "************************************************************"; \
 	done
 
