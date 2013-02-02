@@ -17,10 +17,12 @@ long viaVtable (FileLikeObject& arr2s, FileLikeObject& arr5s,
                                        FileLikeObject& both,
                                        stringstream& log);
 
-const long GB = 1024*1024*1024;
-const long maxCount = 0.001*GB;
-//const long maxCount = 20;
+const long MB = 1024*1024;
+const long maxCount = 0.0099*MB;
+//WARNING!: arbitrary - make sure this is compatible with your setup
+const long STACK_CUTOFF = 0.01*MB; 
 
+//Uncoment this to dump arrays if something goes wrong
 //#define DEBUG
 int main(int argc, const char *argv[])
 {
@@ -38,13 +40,15 @@ int main(int argc, const char *argv[])
     time = (double(endTime)  - double(startTime)) 
                   / CLOCKS_PER_SEC; cout << time << "s" << endl;
 
-    cout << "  Using raw arrays on the stack: ";
-    startTime = clock();
-    result = ArraysStack(log);
-    endTime = clock();
-    time = (double(endTime)  - double(startTime)) 
-                  / CLOCKS_PER_SEC;
-    cout << time << "s" << endl;
+    if ( maxCount < STACK_CUTOFF ) {
+        cout << "  Using raw arrays on the stack: ";
+        startTime = clock();
+        result = ArraysStack(log);
+        endTime = clock();
+        time = (double(endTime)  - double(startTime)) 
+                      / CLOCKS_PER_SEC;
+        cout << time << "s" << endl;
+    }
 
     cout << "  Using dataLump on heap: ";
     startTime = clock();
@@ -54,13 +58,15 @@ int main(int argc, const char *argv[])
                   / CLOCKS_PER_SEC;
     cout << time << "s" << endl;
 
-    cout << "  Using dataLump on the stack: ";
-    startTime = clock();
-    if ( Inline(log) != result ) ret = false;
-    endTime = clock();
-    time = (double(endTime)  - double(startTime)) 
-                  / CLOCKS_PER_SEC;
-    cout << time << "s" << endl;
+    if ( maxCount < STACK_CUTOFF ) {
+        cout << "  Using dataLump on the stack: ";
+        startTime = clock();
+        if ( Inline(log) != result ) ret = false;
+        endTime = clock();
+        time = (double(endTime)  - double(startTime)) 
+                      / CLOCKS_PER_SEC;
+        cout << time << "s" << endl;
+    }
 
     cout << "  Using virtual interface (heap): ";
     startTime = clock();
@@ -71,13 +77,15 @@ int main(int argc, const char *argv[])
     cout << time << "s" << endl;
 
 
-    cout << "  Using virtual interface (stack): ";
-    startTime = clock();
-    if ( Vtable(log) != result ) ret = false;
-    endTime = clock();
-    time = (double(endTime)  - double(startTime)) 
-                  / CLOCKS_PER_SEC;
-    cout << time << "s" << endl;
+    if ( maxCount < STACK_CUTOFF ) {
+        cout << "  Using virtual interface (stack): ";
+        startTime = clock();
+        if ( Vtable(log) != result ) ret = false;
+        endTime = clock();
+        time = (double(endTime)  - double(startTime)) 
+                      / CLOCKS_PER_SEC;
+        cout << time << "s" << endl;
+    }
 
     if ( ret ) {
         cout << "TEST PASSED" << endl;

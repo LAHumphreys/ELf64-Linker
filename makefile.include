@@ -51,8 +51,8 @@ ifndef VALGRIND_OPTIONS
     VALGRIND_OPTIONS=--leak-check=full
     # Report the source of unintialised errors
     VALGRIND_OPTIONS+=--track-origins=yes
-    # I have lots of ram!
-	--freelist-vol=2000000000
+    # RAM is cheap
+    VALGRIND_OPTIONS+=--freelist-vol=2000000000
     # Should run silently for regression tests, only report errors
     VALGRIND_OPTIONS+=--quiet
     # Fail the build if an error is found

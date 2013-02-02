@@ -105,6 +105,7 @@ long VerifyFill(stringstream& log) {
        }
        Delete(writer);
     }
+    delete [] refstring;
     return ret;
 }
 

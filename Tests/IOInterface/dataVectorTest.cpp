@@ -70,8 +70,10 @@ int validateFillAndGrow( stringstream& log) {
         return 50;
     }
 
+    data.Fill(0,'-',100);
     data.Fill(0,'*',90);
     auto diff = mismatch(v.begin(),v.end(),data.begin());
+    
     if ( diff.first != v.begin()+90 ) {
         return 1;
     }

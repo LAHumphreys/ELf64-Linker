@@ -10,7 +10,8 @@
 
 ElfParser *p;
 DataLump<5000> outfile;
-Section* stringheader;
+ElfHeaderX86_64 header;
+SectionHeader* stringheaders;
 
 int ValidHeader(stringstream& log );
 
@@ -29,6 +30,12 @@ int main(int argc, const char *argv[])
     
     // Write out the data
     file.WriteToFile(outfile.Writer());
+
+    // read in the section data
+    BinaryReader readPos(outfile);
+    ElfHeaderX86_64 header(readPos);
+    readPos += header.SectionTableStart() 
+             + header.StringTableIndex() * header.SectionHeaderSize();
     Test("Header format",(loggedTest)ValidHeader).RunTest();
     delete p;
 
@@ -37,11 +44,7 @@ int main(int argc, const char *argv[])
 
 int ValidHeader(stringstream& log ) {
     int retCode = 0;
-    BinaryReader readPos(outfile);
-    ElfHeaderX86_64 header(readPos);
-    readPos += header.SectionTableStart() 
-             + header.StringTableIndex() * header.SectionHeaderSize();
-    stringheader = (Elf64_Shdr) readPos.Dup(header.SectionHeaderSize());
+    stringheader = new SectionHeader(readPos);
 
     if ( stringheader->sh_type != SHT_STRTAB ) {
         log << stringheader->sh_type << " , " << SHT_STRTAB << endl;
@@ -51,6 +54,7 @@ int ValidHeader(stringstream& log ) {
 
     if ( retCode == 0 ) {
     }
+
     delete stringheader;
 
     return retCode;
