@@ -40,6 +40,8 @@ protected:
     void SortByAddress(T start, T end);
     void WriteSpecial(ElfContent&, string name, long&, BinaryWriter&);
 
+    BinaryWriter WriteUnloadedDataSections( ElfContent& data,
+                                            BinaryWriter& dataWritePos);
 private:
     ElfHeaderX86_64 header;
 
@@ -51,6 +53,7 @@ private:
     BinaryWriter programHeadersStart;
     BinaryWriter dataSectionStart;
     BinaryWriter sectionHeadersStart;
+    vector<bool> dataWritten;
 };
 
 template<class T> 

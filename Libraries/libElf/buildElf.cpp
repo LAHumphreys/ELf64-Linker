@@ -16,7 +16,12 @@ ElfFile::ElfFile(ElfContent& data)
     InitialiseFile(data);
       
     // Process the program headers
-    header.SectionTableStart() =  (long)ProcessProgHeaders( data);
+    BinaryWriter dataWritePos =  ProcessProgHeaders( data);
+
+    // Write any additional data, not required at run time
+    sectionHeadersStart = (long)WriteUnloadedDataSections(data, dataWritePos);
+    header.SectionTableStart() = (long)sectionHeadersStart;
+
 
     WriteSectionHeaders(data);
 
@@ -62,6 +67,11 @@ void ElfFile::InitialiseHeader(ElfContent &data) {
     } else {
         header.ProgramHeadersStart() = header.Size();
     }
+
+    dataWritten.resize(header.Sections());
+    for ( int sec=0; sec<dataWritten.size(); sec++ ) {
+        dataWritten[sec] = false;
+    }
 }
 
 BinaryWriter ElfFile::ProcessProgHeaders(ElfContent &data ) {
@@ -98,6 +108,24 @@ BinaryWriter ElfFile::ProcessProgHeaders(ElfContent &data ) {
     return pheaderWritePos;
 }
 
+BinaryWriter ElfFile::WriteUnloadedDataSections( ElfContent& data,
+                                                 BinaryWriter& dataWritePos ) 
+{
+    // Pick up any sections that don't have program headers
+    //  - This may be all in a .o file
+    for ( int i =0; i< header.Sections(); i++ ) {
+        Section& sec = *(data.sections[i]);
+        if ( !dataWritten[i] && sec.HasFileData()) {
+            sec.DataStart() = dataWritePos;
+            sec.WriteRawData(dataWritePos);
+            // These are not loadable, we have no responsibility to 
+            // align them
+            dataWritePos = (long)dataWritePos + sec.DataSize();
+        }
+    }
+    return dataWritePos;
+}
+
 
 BinaryWriter ElfFile::WriteDataSections( ElfContent &data, 
                                          ProgramHeader& prog,
@@ -123,8 +151,8 @@ BinaryWriter ElfFile::WriteDataSections( ElfContent &data,
             writePos = (long)writer + section->Address() 
                                     - prog.Address();
             section->WriteRawData(writePos);
-            if (end <=  section->Size() + writePos)
-                 end =  section->Size() + writePos;
+            if (end <=  section->DataSize() + writePos)
+                 end =  section->DataSize() + writePos;
 
         } else {
             writePos = (long)end;
@@ -132,7 +160,7 @@ BinaryWriter ElfFile::WriteDataSections( ElfContent &data,
             section->WriteRawData(writePos);
             // These are not loadable, we have no responsibility to 
             // align them
-            end = section->Size() + writePos;
+            end = section->DataSize() + writePos;
         }
     }
     writePos = (long)end;
@@ -148,13 +176,12 @@ bool ElfFile::IsSpecialSection(Section& s) {
 }
 
 void ElfFile::WriteSectionHeaders(ElfContent &data ) {
-    auto writer = dataSectionStart;
+    auto writer = sectionHeadersStart;
     long idx = 0;
     // Write the standard header sections
-    for ( auto sec : data.sections ) {
+    for ( Section* sec : data.sections ) {
         if ( ! IsSpecialSection( *sec ) ) {
-            writer.Write(&sec,header.SectionHeaderSize());
-            writer += header.SectionHeaderSize();
+            writer << (Elf64_Shdr) *sec;
             ++idx;
         }
     }
