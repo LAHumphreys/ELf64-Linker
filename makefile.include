@@ -36,6 +36,11 @@ ifndef DEBUG_ON
     DEBUG_ON=YES
 endif
 
+# If yes, build will if any warnings are raised
+ifndef FATAL_WARNINGS
+   FATAL_WARNINGS=YES
+endif
+
 # This project requires the C++11 standard
 USE_CPP11=YES
 
