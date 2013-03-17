@@ -94,6 +94,9 @@ endif
 INCLUDE_FLAGS=-I$(EXPORT_INCLUDES_DIR)
 INCLUDE_FLAGS+=$(ADDITIONAL_INCLUDE_FLAGS)
 
+# Make the defer header available for use in test scripts
+TEST_CPP_FLAGS=-I$(LINKER_DIR)Libraries/libDefer/
+
 ifdef CPP_FLAGS
     CPP_FLAGS+=$(INCLUDE_FLAGS)
 else
@@ -254,7 +257,7 @@ GDB_AUTO_TESTS: BUILD_AUTO_TESTS
 BUILD_AUTO_TESTS: $(TESTS_TO_BUILD)
 
 $(EXPORT_TESTS_TO)%: %.cpp $(LINKED_FILES)
-	g++ $(CPP_FLAGS) -o $@ $+ $(LINKED_FILES)
+	g++ $(CPP_FLAGS) $(TEST_CPP_FLAGS) -o $@ $+ $(LINKED_FILES)
 
 # Macro for building STATIC libraries
 $(LIB_TO_BUILD): $(TO_BUILD)
