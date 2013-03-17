@@ -1,0 +1,12 @@
+# Configure break points / initialisation here
+break elfStringTable.cpp:29
+break elfStringTable.cpp:52
+
+#
+# Code to auto-run and cleanup the session
+#
+set $_exitcode = -999
+run
+if $_exitcode != -999
+    quit
+end

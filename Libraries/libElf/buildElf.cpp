@@ -172,9 +172,8 @@ void ElfFile::WriteSpecial(ElfContent& data, string name,
     }
     auto loc = data.sectionMap.find(name);
     if ( loc != data.sectionMap.end() ) {
-        auto sec = data.sections[loc->second];
-        writer.Write(sec,header.SectionHeaderSize());
-        writer += header.SectionHeaderSize();
+        const Elf64_Shdr& sec = *data.sections[loc->second];
+        writer << sec;
         ++idx;
     }
 }

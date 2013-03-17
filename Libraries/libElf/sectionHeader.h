@@ -6,7 +6,7 @@
 #include "elf.h"
 #include "binaryData.h"
 
-class SectionHeader: Elf64_Shdr {
+class SectionHeader: public Elf64_Shdr {
 public:
     SectionHeader(const BinaryReader& loc); /* IO interface construction */
     SectionHeader(const Elf64_Shdr& rhs);  /* copy construction */

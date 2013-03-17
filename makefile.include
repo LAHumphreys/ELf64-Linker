@@ -75,11 +75,8 @@ ifndef GDB_OPTIONS
    GDB_OPTIONS=-tui 
    # Source the command file in the root directory 
    #  - define break points here
-   GBD_OPTIONS+=-x $(LINKER_DIR)/.gdb_setup 
-   # Start the test straight away
-   GDB_OPTIONS+=-ex run 
-   # Quit GDB when the test completes
-   GDB_OPTIONS+=-batch
+   #  - defines the code that auto-starts and cleans up the test
+   GDB_OPTIONS+=-x $(LINKER_DIR)/.gdb_setup 
    # We want the test return code to test success
    GDB_OPTIONS+=-return-child-result
 endif

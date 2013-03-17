@@ -29,6 +29,7 @@ int main(int argc, const char *argv[])
     ElfFile file( content);
     
     // Write out the data
+    outfile.Fill(0,'\0',5000);
     file.WriteToFile(outfile.Writer());
 
     // read in the section data
@@ -38,7 +39,7 @@ int main(int argc, const char *argv[])
 
     readPos = header.SectionTableStart();
     for ( int i=0; i< header.Sections(); i++ ) {
-	readPos >> sections[i];
+        readPos >> sections[i];
     }
 
     stringTableHeader = &(sections[header.StringTableIndex()]);
