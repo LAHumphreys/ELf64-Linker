@@ -47,6 +47,11 @@ ifndef CTAGS
 endif
 CPP_TAGS_FLAGS=-R --sort=1 --c++-kinds=+p --fields=+iaS --extra=+q --language-force=C++ --tag-relative=no
 
+
+#
+# Configure Debuggers
+#
+
 ifndef VALGRIND_OPTIONS
     VALGRIND_OPTIONS=--leak-check=full
     # Report the source of unintialised errors
@@ -65,6 +70,21 @@ ifndef VALGRIND_OPTIONS
     VALGRIND_OPTIONS+=--fullpath-after=
 endif
 
+ifndef GDB_OPTIONS
+   # Use terminal user interface (display source code)
+   GDB_OPTIONS=-tui 
+   # Source the command file in the root directory 
+   #  - define break points here
+   GBD_OPTIONS+=-x $(LINKER_DIR)/.gdb_setup 
+   # Start the test straight away
+   GDB_OPTIONS+=-ex run 
+   # Quit GDB when the test completes
+   GDB_OPTIONS+=-batch
+   # We want the test return code to test success
+   GDB_OPTIONS+=-return-child-result
+endif
+
+#
 # Build up cpp flags
 # 
 # These should be configured above
@@ -137,11 +157,14 @@ endif
 
 ifdef BUILD_TIME_TESTS
    $(shell mkdir -p $(EXPORT_TESTS_TO))
+   testCmd=RUN_AUTO_TEST
    ifeq ($(findstring memtest,$(MAKECMDGOALS)),memtest)
-	   BUILD_DEPS+=VALGRIND_AUTO_TESTS
-   else
-		BUILD_DEPS+=RUN_AUTO_TEST
+	   testCmd=VALGRIND_AUTO_TESTS
    endif
+   ifeq ($(findstring gdbtest,$(MAKECMDGOALS)),gdbtest)
+	   testCmd=GDB_AUTO_TESTS
+   endif
+   BUILD_DEPS+=$(testCmd)
    TESTS_TO_BUILD=$(addprefix $(EXPORT_TESTS_TO),$(BUILD_TIME_TESTS))
    TESTS_TO_RUN=$(TESTS_TO_BUILD)
    FILES_TO_CLEAN+=$(TESTS_TO_BUILD)
@@ -166,6 +189,7 @@ endif
 
 all: $(BUILD_DEPS)
 memtest: all
+gdbtest: all
 
 clean: FOLDERS_TO_CLEAN 
 	$(CLEAN_CMD)
@@ -205,6 +229,25 @@ VALGRIND_AUTO_TESTS: BUILD_AUTO_TESTS
 		    valgrind $(VALGRIND_OPTIONS) $$test || exit;\
 		echo "************************************************************"; \
 	done
+
+GDB_AUTO_TESTS: BUILD_AUTO_TESTS
+	@echo "***********************************************************"; \
+	echo "           Running auto tests under gdb                    "; \
+        echo " Setup File:  $(LINKER_DIR)/.gdb_setup"; \
+	echo "***********************************************************"; \
+	for test in $(TESTS_TO_RUN); do \
+		passed=1;\
+		echo -n "$$(basename $$test)";\
+		gdb $(GDB_OPTIONS) $$test || passed=0; \
+		if [ $$passed -eq 1 ]; then \
+			echo "$$(basename $$test) - PASSED"; \
+		else \
+			echo "$$(basename $$test) - FAILED"; \
+	                echo "***********************************************************"; \
+			exit 1;\
+		fi \
+	done; \
+	echo "***********************************************************"; \
 
 BUILD_AUTO_TESTS: $(TESTS_TO_BUILD)
 
