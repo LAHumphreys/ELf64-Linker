@@ -3,7 +3,7 @@ LINKED_LIBS= libElf\
              libIOInterface \
              libTest
 
-BUILD_TIME_TESTS=stdWriter
+BUILD_TIME_TESTS=stdWriter stdReader
 CPP_TAGS_FILE=testStdWriter.c++tags
 
 include ../../makefile.include
