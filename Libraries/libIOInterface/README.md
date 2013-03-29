@@ -14,8 +14,8 @@ allows them to be used to write to file or some other object. BinaryReader or
 BinaryWriter object represents a position in a file, and so supports
 arithmetic and comparison operations
 
-libUtils proivdes an implementation that wraps the std::fstream, and the
-std::vector with this interface
+libUtils proivdes an implementation that wraps the std::fstream, arrays, and the
+std::vector with this interface.
 
 libElf defines an object for reading object files that implements  this
 interface
@@ -44,6 +44,16 @@ file, a mem-mapped object file and a subection of a .a library)
     ElfFileReader file("a.out");
     BinaryReader reader(file);
    </code></pre>
+-  Read objects from the file. This advances the position of the reader:
+
+
+   <pre><code>
+    // Copy Section header structs from an elf file into an array
+    sections = new Elf64_Shdr[header.Sections()];
+    for( int i = 0 ; header.Sections() > i ; i++ ) {
+        elfFileReader >> sections[i]; 
+    }
+    </code></pre>
 
 -  Read data from a file. This is a const operation and does not
    change the position of the reader.
@@ -124,8 +134,10 @@ file, a mem-mapped object file and a subsection of a .a library)
     BinaryWriter writer(file);
    </code></pre>
 
-Behaviour is analgour to the reader - you may write from strings, pointers to
+Behaviour is analgous to the reader - you may write from strings, pointers to
 memory or BinaryReader objects.
+
+The << operator is used to push POD data into the file and advance the position
 
 Arithmetic repositions the offset, but never change the file reference
 
