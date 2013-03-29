@@ -1,7 +1,9 @@
 Utilities Library
 ===========
 
-This defines several objects that have general use. If an object is a utility it should be useful beyond this project (it may only depend the IO library and other std libraries).
+This defines several objects that have general use. 
+
+If an object is a utility it (ideally) should be useful beyond this project and should not perform any non-generic logic.
 
 <table>
 <tr><td>*File Basename*</td><td>*Object*</td><td>*Description*</td><tr>
@@ -26,7 +28,7 @@ StdReader
 IFStreamReader
 </td><td>
 
-- StdReader
+- StdWriter
   + Provides a reader implementation of the IO interface, based on a reference to a std::ifstream
 - IFStreamReader
   + Extends the ifstream object to implement the reader IO interface
