@@ -8,12 +8,14 @@
 #include <elf.h>
 #include "dataLump.h"
 #include "defer.h"
+#include "binaryDescribe.h"
 
 DataLump<5000> outfile;
 SectionHeader* stringheaders;
 Elf64_Shdr* sections;
 SectionHeader* stringTableHeader;
 std::map<string, int>* sectionMap;
+std::vector<Section *>* sectionHeaders;
 
 int ValidHeader(stringstream& log );
 int SectionNames(stringstream& log );
@@ -30,6 +32,10 @@ int main(int argc, const char *argv[])
     //parse the input file
     ElfContent content = p.Content();
     sectionMap = &content.sectionMap;
+
+    // old string table
+    SectionHeader& oldHeader= *(content.sections[content.sectionMap[".shstrtab"]]);
+    cout << BinaryDescribe::Describe(BinaryReader(f,oldHeader.DataStart()),oldHeader.Size()) << endl;
 
     ElfFile file( content);
     
@@ -50,6 +56,8 @@ int main(int argc, const char *argv[])
     }
 
     stringTableHeader = new SectionHeader(sections[header.StringTableIndex()]);
+    DEFER(delete stringTableHeader;)
+    sectionHeaders = &content.sections;
 
     Test("Header format",(loggedTest)ValidHeader).RunTest();
     Test("Header format",(loggedTest)SectionNames).RunTest();
@@ -73,12 +81,26 @@ int ValidHeader(stringstream& log ) {
 }
 
 int SectionNames(stringstream& log ) {
+    // new string table 
+    BinaryReader newSReader(outfile,stringTableHeader->DataStart());
+    log << BinaryDescribe::Describe(outfile.Reader(),0x4d1) << endl;
+    log << endl;
+    log << BinaryDescribe::Describe( newSReader, 
+                                     stringTableHeader->Size());
+    log << endl;
     for ( auto& pair: *sectionMap) {
         // get the first and second elements
         string originalName = pair.first;
         SectionHeader newHdr(sections[pair.second]);
-        BinaryReader strTable(outfile,newHdr.NameOffset());
+        Section& oldHdr = *(*sectionHeaders)[pair.second];
+
+        BinaryReader strTable(outfile,stringTableHeader->DataStart() + newHdr.NameOffset());
         string newName = strTable.ReadString();
-        cout << originalName << " -> " << newName << endl;
+        if ( newName != originalName ) {
+            log << "Name miss match: " << originalName << " -> " << newName << endl;
+            log << hex << oldHdr.DataStart() << " -> " << newHdr.DataStart() << endl;
+            //return 1;
+        }
     }
+    return 1;
 }

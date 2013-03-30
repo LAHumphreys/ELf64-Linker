@@ -8,6 +8,7 @@
 #include "reloc.h"
 #include "binaryReader.h"
 #include "buildElf.h"
+#include "stringTable.h"
 
 /**
     \class   ElfParser
@@ -36,6 +37,7 @@ protected:
     void ReadSymbols();
     void ReadProgramHeaders();
     void ReadSections();
+    void WriteStringTable ();
 
 private:
     BinaryReader reader;
@@ -57,5 +59,6 @@ private:
     int linkSections;
     int linkSymbols;
     string filename;
+    StringTable sh_strtab;
 };
 

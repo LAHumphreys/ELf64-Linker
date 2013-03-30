@@ -63,6 +63,7 @@ int CompareSections(stringstream& log ) {
     for ( int i=0; i< sections; i++ ) {
         const SectionHeader& newHdr = newSections[i];
         const SectionHeader& oldHdr = oldSections[i];
+        log << i << ": " << endl;
         log << "*********************************************************" << endl;
         log << "***        NEW                                      *****" << endl;
         log << newHdr.Descripe() << endl;

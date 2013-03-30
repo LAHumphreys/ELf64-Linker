@@ -128,30 +128,40 @@ bool Section::IsLInkSection() {
 
 }
 
-Section * Section::MakeNewStringTable( StringTable &tab, 
-                                       StringTable *sectionNames)
+Section * Section::MakeNewStringTable( StringTable &tab, StringTable* sectionNames, string name)
 {
+    // Create a new section object
     Section * newSection = new Section();
+
+    // Set up the name, and string table refs
+    newSection->name = name;
+    newSection->stringTable = sectionNames;
+    newSection->NameOffset() = sectionNames->AddString(name.c_str());
+
+    //
+    // set up the various constant flags
+    //
+      
+    newSection->sh_flags.SetFlags("W"); // Only writeable
+
+    newSection->ItemSize() = 0; //no fixed sized entries
+
+    newSection->Alignment() = 0; //no addresses
+
+    newSection->RawInfo() = 0; // man elf ( not 4 strings)
+
+    newSection->RawType() = SHT_STRTAB;
+    newSection->RawLink() = 0; // TODO: Handle for long files
+
+    //
+    // Finally copy across the string table data
+    //
     newSection->data = new Data(tab.Size());
     tab.WriteTable(newSection->data->Writer());
-    newSection->stringTable = sectionNames;
-
-    newSection->sh_flags.SetFlags("W");
-
-    //build the elf header
-    newSection->ItemSize() = 0; //no fixed sized entries
-    newSection->RawFlags() = newSection->GetFlags();
-    newSection->Alignment() = 0; //no addresses
-    newSection->RawInfo() = 0; // man elf ( not 4 strings)
-      
-    // TODO: Handle for long files
-    newSection->RawLink() = 0; 
-
-    newSection->NameOffset() = 
-       newSection->stringTable->AddString(newSection->name.c_str());
-    newSection->RawType() = SHT_STRTAB;
     newSection->DataSize() = newSection->data->Size();
 
+
+    // caller must delete
     return newSection;
 }
 

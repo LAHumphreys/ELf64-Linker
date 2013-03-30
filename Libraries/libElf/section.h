@@ -32,8 +32,7 @@ public:
     string Name() { return name; }
 
     // The caller is repsonsible for destruction
-    static Section* MakeNewStringTable( StringTable &tab,
-                                        StringTable *sectionNames);
+    static Section* MakeNewStringTable( StringTable &tab, StringTable *sectionNames, string name);
 
 
 
