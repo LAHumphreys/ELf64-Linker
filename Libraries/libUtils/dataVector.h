@@ -2,14 +2,12 @@
 #define DATA_VECTOR_H
 
 #include <vector>
-#include "binaryReader.h"
-#include "binaryWriter.h"
+#include "fileLikeObject.h"
 
 using namespace std;
 
 class DataVector: public vector<unsigned char>,
-                  public FileLikeReader, 
-                  public FileLikeWriter {
+                  public FileLikeObject {
 public:
     DataVector(long size);
     //Writer functions
