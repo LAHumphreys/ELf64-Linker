@@ -1,3 +1,3 @@
-MAKE_DIRS= elf2LINK addExec
+MAKE_DIRS= elf2LINK 
 
 include ../makefile.include
