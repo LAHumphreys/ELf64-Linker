@@ -52,6 +52,6 @@ string ProgramHeader::WriteLink() {
      return link.str();
 }
 
-Elf64_Phdr ProgramHeader::RawHeader() {
+RawHeader ProgramHeader::RawHeader() {
     return *this;
 }
