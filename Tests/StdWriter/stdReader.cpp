@@ -118,6 +118,7 @@ long VerifyRead(stringstream& log) {
     DEFER(Delete(reader);)
 
     char* buffer = new char[quote.length()];
+    DEFER(delete [] buffer;)
 
     vector<int> testInds  ({
          0, 

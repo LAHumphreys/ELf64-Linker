@@ -41,7 +41,7 @@ protected:
     RawProgramHeader() = default;
 };
 
-class ProgramHeader: private RawProgramHeader {
+class ProgramHeader: protected RawProgramHeader {
 public:
     typedef std::vector<Section*> SECTION_ARRAY;
     ProgramHeader ( BinaryReader&& r, const SECTION_ARRAY& s)
@@ -49,6 +49,25 @@ public:
     ProgramHeader ( BinaryReader&, 
                     const SECTION_ARRAY&);
     virtual ~ProgramHeader (){};
+
+
+    //expose utility functions from the base
+    using RawProgramHeader::Size;
+    using RawProgramHeader::DataStart;
+    using RawProgramHeader::Alignment;
+    using RawProgramHeader::FileSize;
+    using RawProgramHeader::SizeInMemory;
+    using RawProgramHeader::Address;
+    using RawProgramHeader::IsExecutable;
+    using RawProgramHeader::IsProgramSegment;
+    using RawProgramHeader::IsReadable;
+    using RawProgramHeader::IsWriteable;
+    using RawProgramHeader::AddExecutable;
+    using RawProgramHeader::AddReadable;
+    using RawProgramHeader::AddWriteable;
+    using RawProgramHeader::RemoveExecutable;
+    using RawProgramHeader::RemoveReadable;
+    using RawProgramHeader::RemoveWriteable;
 
     // Methods
     string WriteLink();

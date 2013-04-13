@@ -1,5 +1,5 @@
 #include "stdWriter.h"
-StdWriter::StdWriter(ofstream &f): file(f) {
+StdWriter::StdWriter(ostream &f): file(f) {
 }
 
 void StdWriter::Put(long offset, unsigned char c) {

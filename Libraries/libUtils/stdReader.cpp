@@ -1,6 +1,6 @@
 #include "stdReader.h"
 
-StdReader::StdReader(ifstream&f ): file(f) {
+StdReader::StdReader(istream&f ): file(f) {
     file.seekg(file.end, ios_base::beg);
     length = file.tellg();
 }

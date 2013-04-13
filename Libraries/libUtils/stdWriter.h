@@ -8,14 +8,14 @@ using namespace std;
 
 class StdWriter: public virtual FileLikeWriter {
 public:
-    StdWriter (ofstream &f);
+    StdWriter (ostream &f);
     virtual void Write(long offset, const void *src, long size);
     virtual void Flush();
     virtual void Put(long offset, unsigned char c);
     virtual void Fill(long offset, unsigned char c, long count);
 
 private:
-    ofstream &file;
+    ostream &file;
 };
 
 class OFStreamWriter: public ofstream, public StdWriter {

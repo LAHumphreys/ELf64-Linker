@@ -52,6 +52,6 @@ string ProgramHeader::WriteLink() {
      return link.str();
 }
 
-RawHeader ProgramHeader::RawHeader() {
+RawProgramHeader ProgramHeader::RawHeader() {
     return *this;
 }
