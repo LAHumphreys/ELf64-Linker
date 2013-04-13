@@ -25,7 +25,7 @@ public:
     Elf64_Addr& Address() { return p_vaddr; }
 
     // Check Flags
-    bool IsProgramSegment() { return p_type == PT_LOAD;}
+    bool IsLoadableSegment() { return p_type == PT_LOAD;}
     bool IsExecutable() { return p_flags & PF_X; }
     bool IsReadable() { return p_flags & PF_R; }
     bool IsWriteable() { return p_flags & PF_W; }
@@ -58,7 +58,7 @@ public:
     using RawProgramHeader::SizeInMemory;
     using RawProgramHeader::Address;
     using RawProgramHeader::IsExecutable;
-    using RawProgramHeader::IsProgramSegment;
+    using RawProgramHeader::IsLoadableSegment;
     using RawProgramHeader::IsReadable;
     using RawProgramHeader::IsWriteable;
     using RawProgramHeader::AddExecutable;
