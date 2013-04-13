@@ -6,12 +6,33 @@ using namespace std;
 #ifndef ProgramX86_64
 #define ProgramX86_64
 
+
 class Section;
 class BinaryReader;
-class ProgramHeader {
+
+class RawProgramHeader: public Elf64_Phdr {
 public:
-    ProgramHeader ( const BinaryReader&, 
-                    const vector< Section *>& sections );
+    RawProgramHeader(const Elf64_Phdr& other);
+    // attributes
+    size_t Size() { return sizeof(Elf64_Phdr);}
+    Elf64_Off& DataStart() { return this->p_offset; }
+    Elf64_Xword& Alignment() { return this->p_align; }
+    Elf64_Xword& FileSize() { return this->p_filesz; }
+    Elf64_Xword& SizeInMemory() { return this->p_memsz; }
+    Elf64_Addr& Address() { return this->p_vaddr; }
+protected:
+    // A blank header is meaningless, but OK, if a child class is
+    // controlling construction
+    RawProgramHeader() = default;
+};
+
+class ProgramHeader: public RawProgramHeader {
+public:
+    typedef std::vector<Section*> SECTION_ARRAY;
+    ProgramHeader ( BinaryReader&& r, const SECTION_ARRAY& s)
+        : ProgramHeader(r,s){};
+    ProgramHeader ( BinaryReader&, 
+                    const SECTION_ARRAY&);
     virtual ~ProgramHeader (){};
 
     // Methods
@@ -19,13 +40,6 @@ public:
     void InitialiseFlags();
     Elf64_Phdr RawHeader();
       
-    // attributes
-    size_t Size() { return sizeof(Elf64_Phdr);}
-    Elf64_Off& DataStart() { return data.p_offset; }
-    Elf64_Xword& Alignment() { return data.p_align; }
-    Elf64_Xword& FileSize() { return data.p_filesz; }
-    Elf64_Xword& SizeInMemory() { return data.p_memsz; }
-    Elf64_Addr& Address() { return data.p_vaddr; }
 
     const std::vector<string>& SectionNames(){return sectionNames;}
 
@@ -33,7 +47,6 @@ public:
     Elf64_Off DataEnd() { return DataStart() + FileSize(); }
 
 private:
-    Elf64_Phdr data;
     std::vector<string> sectionNames;
     string name;
     Flags flags;
