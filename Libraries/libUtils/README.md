@@ -29,7 +29,7 @@ IFStreamReader
 </td><td>
 
 - StdWriter
-  + Provides a reader implementation of the IO interface, based on a reference to a std::ifstream
+  + Provides a reader implementation of the IO interface, based on a reference to a std::istream
 - IFStreamReader
   + Extends the ifstream object to implement the reader IO interface
 </td><tr>
@@ -40,7 +40,7 @@ OFStreamWriter
 </td><td>
 
 - StdReader
-  + Provides a wrtier implementation of the IO interface, based on a reference to a std::ofstream
+  + Provides a wrtier implementation of the IO interface, based on a reference to a std::ostream
 - OFStreamWriter
   + Extends the ofstream reader object to implement the writer IO interface
 </td><tr>
