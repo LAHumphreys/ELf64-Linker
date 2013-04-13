@@ -46,10 +46,10 @@ bool Flags::AddName(const char flag, const string &name ) {
     return true;
 }
 
-bool Flags::operator[] (char flag) {
+bool Flags::operator[] (char flag) const {
     return flags[flag] & mask;
 }
-bool Flags::operator[] (const string &flag) {
+bool Flags::operator[] (const string &flag) const {
     char cflag;
     if ( names.count(flag) ) {
         cflag = names[flag];

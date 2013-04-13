@@ -14,11 +14,28 @@
 #include "symbol.h"
 
 struct ElfContent {
+    Section* GetSection(string name) {
+        auto loc = sectionMap.find(name);
+        if ( loc != sectionMap.end() ) {
+            return sections[loc->second];
+        } else {
+            return NULL;
+        }
+    }
+    Symbol* GetSymbol(string name) {
+        auto loc = symbolMap.find(name);
+        if ( loc != symbolMap.end() ) {
+            return symbols[loc->second];
+        } else {
+            return NULL;
+        }
+    }
     ElfHeaderX86_64 &header;
     std::vector<Section *>& sections;
     std::vector<ProgramHeader *>& progHeaders;
     std::vector<Symbol *>& symbols;
     std::map<string, int>& sectionMap;
+    std::map<string, int>& symbolMap;
 };
 
 class ElfFile{

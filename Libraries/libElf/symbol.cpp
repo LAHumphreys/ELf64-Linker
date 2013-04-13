@@ -4,13 +4,14 @@
 using namespace std;
 
 
-Symbol::Symbol ( const BinaryReader& reader,
-                 const BinaryReader& stable )
+Symbol::Symbol ( BinaryReader& reader,
+                 BinaryReader& stable )
 : type(""), scope(""){ 
     ConfigureFlags();
-    reader.Read(&symbol,Size());
+    reader >> (RawSymbol&) *this;
+
     // pull our name out of the string table
-    name = (stable + symbol.st_name).ReadString();
+    name = (stable + st_name).ReadString();
     UpdateFlags();
 
 }
@@ -28,7 +29,7 @@ void Symbol::ConfigureFlags() {
 }
 
 void Symbol::UpdateFlags() {
-    unsigned char infoMask = symbol.st_info;
+    unsigned char infoMask = st_info;
     unsigned char bindMask = ELF64_ST_BIND(infoMask);
     unsigned char typeMask = ELF64_ST_TYPE(infoMask);
     type.SetFlag("STT_NOTYPE",  typeMask == STT_NOTYPE );
@@ -49,7 +50,7 @@ string Symbol::LinkFormat() {
         line << name << " ";
     }
     line << hex <<  Value() << " ";
-    line << dec <<  SegmentIdx() << " ";
+    line << dec <<  SectionIndex() << " ";
     line << type.LinkMask() << " " << scope.LinkMask();
     return line.str();
 }
