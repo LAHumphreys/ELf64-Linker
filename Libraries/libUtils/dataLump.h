@@ -13,3 +13,11 @@ public:
 private:
      unsigned char rawData[size];
 };
+
+class DataIO: public virtual FileLikeObject, public DataWriter, public DataReader
+                                   
+{
+public:
+     DataIO(unsigned char* rawData, long size)
+         : DataWriter(rawData), DataReader(rawData,size){}
+};
