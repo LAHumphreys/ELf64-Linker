@@ -19,6 +19,7 @@ class ElfParser {
 public:
     // C'tor / D'tor
     ElfParser (const FileLikeReader &f);
+    ElfParser (FileLikeReader &&f): ElfParser(f){}
     virtual ~ElfParser ();
 
     // Create a string representing the object file in LINK format
@@ -50,6 +51,7 @@ private:
     std::vector<ProgramHeader *> progHeaders;
     std::vector<Symbol *> symbols;
     std::map<string,int> sectionMap;
+    std::map<string,int> symbolMap;
 
     // We're want to rapidly add things, and only ever want to
     // iterate through. 

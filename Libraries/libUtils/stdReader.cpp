@@ -1,6 +1,6 @@
 #include "stdReader.h"
 
-StdReader::StdReader(ifstream&f ): file(f) {
+StdReader::StdReader(istream&f ): file(f) {
     file.seekg(file.end, ios_base::beg);
     length = file.tellg();
 }
@@ -10,7 +10,7 @@ void StdReader::Read(long offset, void *dest, long size) const {
 }
 void StdReader::ReadString(long offset, std::string& dest) const {
     file.seekg(offset,ios_base::beg);
-    getline(file,dest);
+    getline(file,dest,'\0');
 }
 unsigned char StdReader::Get(long offset) const {
     this->file.seekg(offset, ios_base::beg);

@@ -19,6 +19,7 @@ class ElfHeaderX86_64 {
 public:
     ElfHeaderX86_64 (string linkHeader);
     ElfHeaderX86_64 (const BinaryReader &reader);
+    ElfHeaderX86_64 (BinaryReader&& r): ElfHeaderX86_64(r) {}
     void PopulateIdentity();
     void PopulateLinuxConsts();
     void Write(ofstream &file);

@@ -28,16 +28,16 @@ public:
     void SetFlag(string token,bool newStatus);
 
     // Test flag exists
-    bool operator[](const string &flag);
-    bool operator[](char flag);
+    bool operator[](const string &flag) const;
+    bool operator[](char flag) const;
 
     // Masks
     string LinkMask();
     void FromMask(unsigned long omask) { mask = omask; }
 
 private:
-    std::map<char, long> flags;
-    std::map<string, char> names;
+    mutable std::map<char, long> flags;
+    mutable std::map<string, char> names;
     unsigned long mask;
     short flagCount;
 };

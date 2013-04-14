@@ -18,15 +18,17 @@ public:
              const BinaryReader &strings );
     Section (string header, StringTable* );
     ~Section ();
-    Elf64_Xword GetFlags();
+    Elf64_Xword GetFlags() ;
 
     // Methods
     string GetLinkFlags();
     string WriteLinkHeader();
     string WriteLinkData();
 
-    void WriteRawData(BinaryWriter &writer);
-    void WriteRawData(BinaryWriter &&writer){WriteRawData(writer);}
+    void WriteRawData(BinaryWriter &writer) const;
+    void WriteRawData(BinaryWriter &&writer) const {
+        WriteRawData(writer);
+    }
 
     bool IsLInkSection();
     string Name() { return name; }

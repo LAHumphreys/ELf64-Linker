@@ -82,6 +82,7 @@ void ElfParser::ReadSymbols() {
         symbols[i] = new Symbol(readPos,stringTable);
         if ( symbols[i]->IsLinkSymbol() ) ++linkSymbols;
         readPos += symTable->ItemSize();
+        symbolMap[symbols[i]->Name()] = i;
     }
 }
 
@@ -128,7 +129,9 @@ ElfContent ElfParser::Content() {
         this->sections,
         this->progHeaders,
         this->symbols,
-        this->sectionMap
+        this->sectionMap,
+        this->symbolMap
+
     };
     return content;
 }

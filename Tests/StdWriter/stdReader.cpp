@@ -11,6 +11,8 @@ using namespace std;
 //Tests
 template<class Reader>
 long VerifyRead(stringstream& log);
+template<class Reader>
+long VerifyReadString(stringstream& log);
 
 string quote = R"(
 There is a computer disease that anybody who works with computers knows about. 
@@ -18,6 +20,8 @@ It's a very serious disease and it interferes completely with the work.
 The trouble with computers is that you 'play' with them!
 Richard P. Feynman 
 )";
+
+const char secondString[] = "Oh look!, another string on the end..";
 
 //Validators
 bool ValidateMatch( const char *str1, const char *str2, 
@@ -33,6 +37,7 @@ int main(int argc, const char *argv[])
 {
     Test("Basic gets",  (loggedTest)VerifyGet<IFStreamReader>).RunTest();
     Test("Read hunks",  (loggedTest)VerifyRead<IFStreamReader>).RunTest();
+    Test("Read hunks",  (loggedTest)VerifyReadString<IFStreamReader>).RunTest();
     return 0;
 }
 
@@ -71,6 +76,7 @@ IFStreamReader* Generator() {
     ofstream writer(fname.str().c_str(), ios_base::binary | ios_base::out);
     writer << quote;
     writer.put('\0');
+    writer << secondString << endl;
     writer.close();
 
     return new IFStreamReader(fname.str().c_str());
@@ -118,6 +124,7 @@ long VerifyRead(stringstream& log) {
     DEFER(Delete(reader);)
 
     char* buffer = new char[quote.length()];
+    DEFER(delete [] buffer;)
 
     vector<int> testInds  ({
          0, 
@@ -137,6 +144,24 @@ long VerifyRead(stringstream& log) {
             log << "Read: " << buffer << endl;
             return 1;
         }
+    }
+    return 0;
+}
+
+template<class Reader>
+long VerifyReadString(stringstream& log) {
+    long ret = 0;
+
+	Reader *reader = Generator();
+    // remember to clean up after ourselves:
+    DEFER(Delete(reader);)
+    
+    string s;
+    reader->ReadString(0,s);
+    if ( s != quote) {
+        log << "Read string s: " << s << endl;
+        log << "But should have got: " << quote << endl;
+        return 1;
     }
     return 0;
 }

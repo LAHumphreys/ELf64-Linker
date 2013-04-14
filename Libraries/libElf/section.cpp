@@ -165,6 +165,6 @@ Section * Section::MakeNewStringTable( StringTable &tab, StringTable* sectionNam
     return newSection;
 }
 
-void Section::WriteRawData(BinaryWriter &writer) {
+void Section::WriteRawData(BinaryWriter &writer) const {
     writer.Write(data->Reader(),data->Size());
 }

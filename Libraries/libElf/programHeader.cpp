@@ -6,11 +6,15 @@
 
 using namespace std;
 
-ProgramHeader::ProgramHeader ( const BinaryReader& reader, 
-                               const vector<Section *>& sections ) 
+RawProgramHeader::RawProgramHeader(const Elf64_Phdr& other) 
+    : Elf64_Phdr(other) {}
+
+ProgramHeader::ProgramHeader ( BinaryReader& reader, 
+                               const SECTION_ARRAY& sections ) 
     :flags("")
 {
-    reader.Read(&data,Size());
+    reader >> (Elf64_Phdr&)(*this);
+
     // While this isn't terribly efficient, there's only going to
     // be 20-30 sections a file...
     for ( auto s : sections) {
@@ -27,9 +31,9 @@ void ProgramHeader::InitialiseFlags() {
     flags.AddFlag('X', "Executable");
     flags.AddFlag('W', "Writeable");
     flags.AddFlag('R', "Readable");
-    if ( data.p_flags & PF_X ) flags.SetFlag("X", 1);
-    if ( data.p_flags & PF_W ) flags.SetFlag("W", 1);
-    if ( data.p_flags & PF_R ) flags.SetFlag("R", 1);
+    if ( this->p_flags & PF_X ) flags.SetFlag("X", 1);
+    if ( this->p_flags & PF_W ) flags.SetFlag("W", 1);
+    if ( this->p_flags & PF_R ) flags.SetFlag("R", 1);
 }
 
 // Format: align memsize addr flags sections..
@@ -48,6 +52,6 @@ string ProgramHeader::WriteLink() {
      return link.str();
 }
 
-Elf64_Phdr ProgramHeader::RawHeader() {
-    return data;
+RawProgramHeader ProgramHeader::RawHeader() {
+    return *this;
 }

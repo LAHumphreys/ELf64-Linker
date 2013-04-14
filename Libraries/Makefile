@@ -3,5 +3,6 @@ MAKE_DIRS= libIOInterface \
 		   libUtils  \
 		   libLINK  \
 		   libElf  \
-		   libTest
+		   libRuntime \
+		   libTest 
 include ../makefile.include

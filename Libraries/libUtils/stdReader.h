@@ -9,7 +9,7 @@ using namespace std;
 
 class StdReader: public virtual FileLikeReader {
 public:
-    StdReader(ifstream&f );
+    StdReader(istream&f );
     virtual void Read(long offset, void *dest, long size) const;
     virtual void ReadString(long offset, std::string& dest)const;
     virtual unsigned char Get(long offset) const;
@@ -18,7 +18,7 @@ public:
     virtual long Next( long offset, unsigned char c) const;
     virtual long Last( long offset, unsigned char c) const;
 private:
-    ifstream& file;
+    istream& file;
     long length;
 };
 

@@ -4,20 +4,35 @@
 #include "elf.h"
 class BinaryReader;
 
-class Symbol {
+class RawSymbol: public Elf64_Sym { 
 public:
-    Symbol ( const BinaryReader& reader, 
-             const BinaryReader& stable );
-    size_t Size() { return sizeof(Elf64_Sym); }
-    Elf64_Addr& Value() { return symbol.st_value; }
-    uint16_t& SegmentIdx() { return symbol.st_shndx; }
+    RawSymbol(Elf64_Sym& other):Elf64_Sym(other){}
+    RawSymbol() = default;
+
+    Elf64_Section& SectionIndex() { return st_shndx;}
+    Elf64_Addr& Value() { return st_value;}
+    Elf64_Xword& Size() { return st_size;}
+};
+
+class Symbol: protected RawSymbol {
+public:
+    Symbol ( BinaryReader& reader, 
+             BinaryReader& stable );
+    Symbol ( BinaryReader&& r, 
+             BinaryReader&& s): Symbol(r,s){}
     bool IsLinkSymbol();
     void UpdateFlags();
     string LinkFormat();
+    string Name() { return name;}
+
+    using RawSymbol::Value;
+    using RawSymbol::SectionIndex;
+    using RawSymbol::Size;
+
+    const RawSymbol& RawItem() { return *this;}
 
 private:
     void ConfigureFlags();
-    Elf64_Sym symbol;
     string name;
     Flags type;
     Flags scope;
