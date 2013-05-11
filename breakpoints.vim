@@ -176,6 +176,9 @@ call AnnotateBreakPoints()
 " Define user commands to add / remove breakpoints
 command! BreakAdd call AddBreakPoint()
 command! BreakDel call RemoveBreakPoint()
+command! BAdd call AddBreakPoint()
+command! BDel call RemoveBreakPoint()
+command! BreakFile call OpenBreakFile()
 
 " Annotate new files, when they are opened
 au BufNewFile,BufRead * call AnnotateBreakPoints()
@@ -207,6 +210,11 @@ function! RemoveBreakPoint ( )
 python << endpython
 RemoveBreakpoint()
 endpython
+endfunction
+
+function! OpenBreakFile () 
+    let cmd = "sp " . g:breakpoints_file
+    exec cmd
 endfunction
 
 "
