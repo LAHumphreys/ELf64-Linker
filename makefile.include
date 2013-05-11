@@ -81,6 +81,7 @@ ifndef GDB_OPTIONS
    # Source the command file in the root directory 
    #  - define break points here
    #  - defines the code that auto-starts and cleans up the test
+   GDB_OPTIONS+=-x $(LINKER_DIR)/.gdb_breakpoints 
    GDB_OPTIONS+=-x $(LINKER_DIR)/.gdb_setup 
    # We want the test return code to test success
    GDB_OPTIONS+=-return-child-result

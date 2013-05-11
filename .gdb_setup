@@ -1,6 +1,3 @@
-# Configure break points / initialisation here
-break sectionHeader.cpp:29
-
 #
 # Code to auto-run and cleanup the session
 #
