@@ -23,7 +23,9 @@ public:
 	OFStreamWriter(const char *fname);
 	OFStreamWriter(const OFStreamWriter& rhs);
 	string Fname() { return fileName;}
-	virtual ~OFStreamWriter(){}
+	virtual ~OFStreamWriter() {
+        this->close();
+    }
 private:
     string fileName;
 };

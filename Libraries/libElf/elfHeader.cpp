@@ -12,6 +12,9 @@ ElfHeaderX86_64::ElfHeaderX86_64 (const BinaryReader &reader)
 }
 ElfHeaderX86_64::ElfHeaderX86_64 (string linkHeader)
      /*:validate("^ *[0-9]+ +[0-9]+ +[0-9]+$") */ {
+
+    memset(&data,'\0',sizeof(data));
+
     if ( false )  { // regex validation of linkHeader to prevent nastyness
         throw "Invalid LINK header: " + linkHeader;
     }
@@ -106,6 +109,7 @@ void ElfHeaderX86_64::PopulateLinuxConsts() {
 ElfHeaderX86_64 ElfHeaderX86_64::NewObjectFile() {
 
     ElfHeaderX86_64 header;
+    memset(&header,'\0',sizeof(header));
 
     //TODO: generalise this
     header.endian = LitleEndian;

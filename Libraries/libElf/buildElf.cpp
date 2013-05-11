@@ -29,7 +29,7 @@ ElfFile::ElfFile(ElfContent& data)
     file.Writer().Write(&header,header.Size());
 
     // clean up any extra data
-    file.resize( (long)sectionHeadersStart + 
+    file.Resize( (long)sectionHeadersStart + 
                  header.Sections() * header.SectionHeaderSize() );
 }
 
@@ -50,7 +50,7 @@ void ElfFile::InitialiseFile(ElfContent& data) {
     // allow room for alignments of loadable segments
     sectionDataLength += 16 * header.ProgramHeaders();
 
-    file.resize(  (long) dataSectionStart
+    file.Resize(  (long) dataSectionStart
                 + sectionDataLength
                 + header.SectionHeaderSize() * header.Sections());
 }

@@ -32,7 +32,7 @@ std::string BinaryDescribe::Describe(const BinaryReader& src, long len) {
             // Write the ascii char
             asciistr << GetAscii(c);
         }
-        // finsih off the ascii
+        // finish off the ascii
         asciistr << "|";
 
         // combine the strings

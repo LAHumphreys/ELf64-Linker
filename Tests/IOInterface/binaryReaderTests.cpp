@@ -16,7 +16,7 @@
 
 const int DATA_SIZE=128;
 DataVector data(DATA_SIZE);
-char * dataptr = (char *)data.data();
+char * dataptr = (char *)data.RawData();
 class TestError {
 public:
     TestError (string s, long i) {
@@ -254,20 +254,20 @@ int VerifyReads( stringstream& log) {
 
         log << " String tests" << endl;
         string s = rd.Begin().ReadString();
-        VerifyData(s.c_str(),(char *)dv.data(),21);
+        VerifyData(s.c_str(),(char *)dv.RawData(),21);
         if ( s.length() != 20)
             throw(TestError("String has invalid length",s.length()));
         log << "Read by ref" << endl;
         rd.Pos(21).ReadString(s);
-        VerifyData(s.c_str(),(char *)dv.data()+21,30);
+        VerifyData(s.c_str(),(char *)dv.RawData()+21,30);
         if ( s.length() != 29)
             throw(TestError("String has invalid length", s.length()));
         log << "Append to string" << endl;
         rd.Begin().AppendString(s);
         log << "Front" << endl;
-        VerifyData(s.c_str(),(char *)dv.data()+21,29);
+        VerifyData(s.c_str(),(char *)dv.RawData()+21,29);
         log << "Back" << endl;
-        VerifyData(s.c_str(),(char *)dv.data(),20);
+        VerifyData(s.c_str(),(char *)dv.RawData(),20);
         if ( s.length() != 49)
             throw(TestError("String has invalid length", s.length()));
 
@@ -292,7 +292,7 @@ int VerifyReads( stringstream& log) {
         r.Begin().Read(w,50);
         w+=10;
         r.Pos(25).Read(w,50);
-        VerifyData((char *)dataout.data()+10,dataptr+25, 50);
+        VerifyData((char *)dataout.RawData()+10,dataptr+25, 50);
 
 
     } catch (TestError& e) {

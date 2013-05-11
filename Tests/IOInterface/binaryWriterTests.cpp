@@ -331,17 +331,17 @@ int VerifyWrites( stringstream& log) {
         off2.FillTo(off.Begin() + out.Reader().Find(95),'c');
         
         log << "front" <<endl;
-        VerifyData((char *)out.data(),(char *)zeroes.data(),20);
+        VerifyData((char *)out.RawData(),(char *)zeroes.RawData(),20);
         log << "data" << endl;
-        VerifyData((char *)out.data()+20,(char *)data.data()+20,30);
+        VerifyData((char *)out.RawData()+20,(char *)data.RawData()+20,30);
         log << "twos" << endl;
-        VerifyData((char *)out.data()+50,(char *)twos.data(),20);
+        VerifyData((char *)out.RawData()+50,(char *)twos.RawData(),20);
         log << "padding" <<endl;
-        VerifyData((char *)out.data()+70,(char *)data.data()+70,5);
+        VerifyData((char *)out.RawData()+70,(char *)data.RawData()+70,5);
         log << "FillTo" <<endl;
-        VerifyData((char *)out.data()+75,(char *)cs.data()+75,20);
+        VerifyData((char *)out.RawData()+75,(char *)cs.RawData()+75,20);
         log << "back" <<endl;
-        VerifyData((char *)out.data()+95,(char *)data.data()+95,5);
+        VerifyData((char *)out.RawData()+95,(char *)data.RawData()+95,5);
 
 
         // Write
@@ -353,18 +353,18 @@ int VerifyWrites( stringstream& log) {
         BinaryWriter woff2 = beg.operator+(75);
 
 
-        wbeg.Write(data.data(),100);
-        woff.Write(zeroes.data(),20);
+        wbeg.Write(data.RawData(),100);
+        woff.Write(zeroes.RawData(),20);
         woff2.Write(cs.Reader().Begin(),20);
 
         log << "write" <<endl;
-        VerifyData((char *)out.data(),(char *)data.data(),50);
+        VerifyData((char *)out.RawData(),(char *)data.RawData(),50);
         log << "offset write" << endl;
-        VerifyData((char *)out.data()+50,(char *)zeroes.data(),20);
+        VerifyData((char *)out.RawData()+50,(char *)zeroes.RawData(),20);
         log << "Write reader" << endl;
-        VerifyData((char *)out.data()+75,(char *)cs.data(),20);
+        VerifyData((char *)out.RawData()+75,(char *)cs.RawData(),20);
         log << "back" << endl;
-        VerifyData((char *)out.data()+95,(char *)data.data()+95,5);
+        VerifyData((char *)out.RawData()+95,(char *)data.RawData()+95,5);
 
     } catch (TestError& e) {
         return e.Error(log);
@@ -395,23 +395,23 @@ int VerifyStringWrites(stringstream& log ) {
         w2.WriteString(out.Reader().Pos(50));
 
         log << "array write" << endl;
-        VerifyData((char *)out.data(),str,len);
+        VerifyData((char *)out.RawData(),str,len);
         log << "left alone" << endl;
-        VerifyData( (char *)out.data()+len, (char *)data.data() + len,
+        VerifyData( (char *)out.RawData()+len, (char *)data.RawData() + len,
                                             50-len);
         log << "string write" << endl;
-        VerifyData((char *)out.data()+50,stds.c_str(),stds.length()+1);
+        VerifyData((char *)out.RawData()+50,stds.c_str(),stds.length()+1);
         log << "back" << endl;
-        VerifyData( (char *)out.data() + 50 + stds.length() + 1,
-                    (char* )data.data()+ 50 + stds.length() + 1,
+        VerifyData( (char *)out.RawData() + 50 + stds.length() + 1,
+                    (char* )data.RawData()+ 50 + stds.length() + 1,
                     50 -1 - stds.length());
         log << "skipped" << endl;
-        VerifyData((char *)out2.data(),(char *)data.data(),10);
+        VerifyData((char *)out2.RawData(),(char *)data.RawData(),10);
         log << "reader write" << endl;
-        VerifyData((char *)out2.data()+10,stds.c_str(),stds.length());
+        VerifyData((char *)out2.RawData()+10,stds.c_str(),stds.length());
         log << "back (2) " << endl;
-        VerifyData( (char *)out2.data() + 10 + stds.length() + 1,
-                    (char *)data.data() + 10 + stds.length() + 1,
+        VerifyData( (char *)out2.RawData() + 10 + stds.length() + 1,
+                    (char *)data.RawData() + 10 + stds.length() + 1,
                     100 - 10 - stds.length() -1 );
 
     } catch (TestError& e) {
@@ -446,9 +446,9 @@ int VerifyStringPushes(stringstream& log ) {
         w3 << str << stds.c_str();
 
         log << "Checking separate pushes" << endl;
-        VerifyData((char*)out.data(),(char*)out2.data(),100);
+        VerifyData((char*)out.RawData(),(char*)out2.RawData(),100);
         log << "Checking single push" << endl;
-        VerifyData((char*)out.data(),(char*)out3.data(),100);
+        VerifyData((char*)out.RawData(),(char*)out3.RawData(),100);
 
     } catch (TestError& e) {
         return e.Error(log);

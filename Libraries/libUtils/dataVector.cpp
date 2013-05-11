@@ -68,3 +68,16 @@ long DataVector::Last( long offset, unsigned char c) const {
     }
     return i;
 }
+
+void DataVector::Resize(long size)
+{
+    long fillStart=0;
+    long toFill =0;
+    if ( size > this->Size() )
+    {
+        toFill = size - this->Size();
+        fillStart = this->Size();
+    }
+    this->resize(size);
+    this->Fill(fillStart,'\0',toFill);
+}

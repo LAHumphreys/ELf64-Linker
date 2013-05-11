@@ -18,7 +18,7 @@ class ElfHeaderX86_64 {
     friend class X86Parser;
 public:
     ElfHeaderX86_64 (string linkHeader);
-    ElfHeaderX86_64 (const BinaryReader &reader);
+    ElfHeaderX86_64 (const BinaryReader& reader);
     ElfHeaderX86_64 (BinaryReader&& r): ElfHeaderX86_64(r) {}
     void PopulateIdentity();
     void PopulateLinuxConsts();

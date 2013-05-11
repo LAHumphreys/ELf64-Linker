@@ -55,6 +55,7 @@ int main(int argc, const char *argv[])
     Test("ELF HEADERS",  (loggedTest)HeaderSizes).RunTest();
 	delete header;
 	delete p;
+
     return 0;
 }
 

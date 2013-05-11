@@ -29,10 +29,17 @@ public:
     // Access data
     virtual void Read(void *dest, long size) const;
     virtual void Read(BinaryWriter& dest, long size) const;
+    virtual void Read(BinaryWriter&& dest, long size) const {
+        Read(dest, size);
+    }
+
     virtual void AppendString(std::string& dest) const;
 
     virtual void ReadLine(void *dest,long max,char delim) const;
     virtual void ReadLine(BinaryWriter& ,long ,char ) const;
+    virtual void ReadLine(BinaryWriter&& w,long l,char c) const {
+        ReadLine(w,l,c);
+    };
 
     virtual void ReadString(std::string& dest) const;
     virtual std::string ReadString() const;

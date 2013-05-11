@@ -9,7 +9,10 @@ class DataLump: public virtual FileLikeObject, public DataWriter, public DataRea
 {
 public:
      DataLump(): DataWriter(rawData), 
-                 DataReader(rawData,size){};
+                 DataReader(rawData,size)
+    {
+        this->Fill(0,'\0',size);
+    }
 private:
      unsigned char rawData[size];
 };

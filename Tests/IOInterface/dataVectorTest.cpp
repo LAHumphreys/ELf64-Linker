@@ -226,12 +226,12 @@ int validateSearch( stringstream& log) {
 
 int validateResize( stringstream& log) {
     DataVector data(50);
-    data.resize(40);
-    data.resize(45);
-    data.resize(50);
-    data.resize(100);
+    data.Resize(40);
+    data.Resize(45);
+    data.Resize(50);
+    data.Resize(100);
     long large = 134136;
-    data.resize(large);
+    data.Resize(large);
     for (int i = 0; i < large; i++) {
         data[i] = 20;
     }

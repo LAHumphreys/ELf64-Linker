@@ -62,7 +62,6 @@ int main(int argc, const char *argv[])
     Test("Header format",(loggedTest)ValidHeader).RunTest();
     Test("Header format",(loggedTest)SectionNames).RunTest();
 
-
     return 0;
 }
 
@@ -83,11 +82,7 @@ int ValidHeader(stringstream& log ) {
 int SectionNames(stringstream& log ) {
     // new string table 
     BinaryReader newSReader(outfile,stringTableHeader->DataStart());
-    log << BinaryDescribe::Describe(outfile.Reader(),0x4d1) << endl;
-    log << endl;
-    log << BinaryDescribe::Describe( newSReader, 
-                                     stringTableHeader->Size());
-    log << endl;
+
     for ( auto& pair: *sectionMap) {
         // get the first and second elements
         string originalName = pair.first;
@@ -97,10 +92,14 @@ int SectionNames(stringstream& log ) {
         BinaryReader strTable(outfile,stringTableHeader->DataStart() + newHdr.NameOffset());
         string newName = strTable.ReadString();
         if ( newName != originalName ) {
-            log << "Name miss match: " << originalName << " -> " << newName << endl;
+            log << "(" << pair.second << ") Name miss match: ";
+            log  << originalName << " -> " << newName << endl;
             log << hex << oldHdr.DataStart() << " -> " << newHdr.DataStart() << endl;
-            //return 1;
+            return 1;
+        } else {
+            log << "(" << pair.second << ") Name match: ";
+            log <<  originalName << " -> " << newName << endl;
         }
     }
-    return 1;
+    return 0;
 }

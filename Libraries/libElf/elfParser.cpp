@@ -140,7 +140,7 @@ void ElfParser::WriteStringTable () {
     for ( Section* sec : sections ) {
         sec->NameOffset() = sh_strtab.AddString(sec->Name().c_str());
     }
-    Section* shtab = Section::MakeNewStringTable(sh_strtab, &sh_strtab, "sh_strtab");
+    Section* shtab = Section::MakeNewStringTable(sh_strtab, &sh_strtab, ".shstrtab");
     // Swap in the new string table
     delete sections[sectionMap[".shstrtab"]];
     sections[sectionMap[".shstrtab"]] = shtab;

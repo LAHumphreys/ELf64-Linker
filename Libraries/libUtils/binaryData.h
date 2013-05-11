@@ -15,7 +15,7 @@ public:
 
     BinaryWriter Writer(){return data.Writer();}
     BinaryReader Reader(){return data.Reader();}
-    const unsigned char * Raw() { return data.data(); }
+    const unsigned char * Raw() { return data.RawData(); }
     long Size() { return data.Size(); }
     string HexCode();
 private:
