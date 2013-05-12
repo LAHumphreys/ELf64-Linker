@@ -3,7 +3,8 @@ MAKE_DIRS= IOInterface\
      	   elf2elf \
     	   dataLump \
     	   StdWriter\
-		   binaryDescribe
+		   binaryDescribe\
+		   Utils
 
 
 include ../makefile.include

@@ -328,7 +328,7 @@ BUILD_AUTO_TESTS: $(TESTS_TO_BUILD)
 
 GEN_COVER: 
 	lcov --capture --directory $(LINKER_DIR) --output-file $(EXPORT_COVER_DIR)test.info
-	genhtml -f --demangle-cpp  --legend --num-spaces 4 -s test.info --output-directory $(EXPORT_COVER_DIR)
+	genhtml -f --demangle-cpp  --legend --num-spaces 4 -s $(EXPORT_COVER_DIR)test.info --output-directory $(EXPORT_COVER_DIR)
 
 VIEW_COVER:
 	$(WEB_VIEWER) $(EXPORT_COVER_DIR)index.html

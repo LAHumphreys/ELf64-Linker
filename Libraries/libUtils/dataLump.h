@@ -1,3 +1,5 @@
+#ifndef __DATA_LUMP_H
+#define __DATA_LUMP_H
 #include "dataReader.h"
 #include "dataWriter.h"
 #include "fileLikeObject.h"
@@ -24,3 +26,4 @@ public:
      DataIO(unsigned char* rawData, long size)
          : DataWriter(rawData), DataReader(rawData,size){}
 };
+#endif
