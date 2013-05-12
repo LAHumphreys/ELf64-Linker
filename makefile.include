@@ -16,10 +16,15 @@ EXPORT_INCLUDES_DIR=$(EXPORTS_DIR)includes/
 EXPORT_OBJS_DIR=$(EXPORTS_DIR)objs/
 EXPORT_LIB_DIR=$(EXPORTS_DIR)lib/
 EXPORT_PROFILE_DIR=$(EXPORTS_DIR)profs/
+EXPORT_COVER_DIR=$(EXPORTS_DIR)coverage/
 ifndef TAGS_DIR
     EXPORT_TAGS_DIR=$(EXPORTS_DIR)tags/
 else
     EXPORT_TAGS_DIR=$(TAGS_DIR)
+endif
+
+ifndef WEB_VIEWER
+    WEB_VIEWER=firefox
 endif
 
 
@@ -133,14 +138,18 @@ CPP_FLAGS+=-std=$(CPPSTD)
 
 # calculate variables used for macros 
 # DO NOT CHANGE THESE UNLESS YOU KNOW WHAT YOU ARE DOING
-BUILD_DEPS=BUILD_FOLDERS
+BUILD_DEPS=BUILD_FOLDERS 
 TO_CLEAN=FOLDERS_TO_CLEAN FILES_TO_CLEAN
 TO_BUILD=
 FILES_TO_CLEAN=
 FOLDERS_TO_CLEAN=
 LINKED_FILES=
 CPP_TAGS_TO_BUILD=
+TO_COPY=
 
+ifeq ($(findstring cover,$(MAKECMDGOALS)),cover)
+   $(shell mkdir -p $(EXPORT_COVER_DIR))
+endif
 
 ifdef SOURCES
    $(shell mkdir -p $(EXPORT_OBJS_DIR))
@@ -148,7 +157,11 @@ ifdef SOURCES
    FILES_TO_CLEAN+=$(addprefix $(EXPORT_OBJS_DIR),$(SOURCES:%.cpp=%.gcno))
    FILES_TO_CLEAN+=$(addprefix $(EXPORT_OBJS_DIR),$(SOURCES:%.cpp=%.gcda))
    FILES_TO_CLEAN+=$(addprefix $(EXPORT_OBJS_DIR),$(SOURCES:%.cpp=%.o))
-   FILES_TO_CLEAN+=$(shell rm *.gcov)
+   FILES_TO_CLEAN+=$(shell ls *.gcov)
+    ifeq ($(findstring cover,$(MAKECMDGOALS)),cover)
+        FILES_TO_CLEAN+=$(addprefix $(EXPORT_OBJS_DIR),$(SOURCES))
+        TO_COPY+=$(addprefix $(EXPORT_OBJS_DIR),$(SOURCES))
+    endif
 endif
 
 ifdef EXPORT_INCLUDES
@@ -193,8 +206,8 @@ ifdef BUILD_TIME_TESTS
    TESTS_TO_BUILD=$(addprefix $(EXPORT_TESTS_TO),$(BUILD_TIME_TESTS))
    TESTS_TO_RUN=$(TESTS_TO_BUILD)
    FILES_TO_CLEAN+=$(TESTS_TO_BUILD)
-   FILES_TO_CLEAN+=$(shell rm *.gcda)
-   FILES_TO_CLEAN+=$(shell rm *.gcno)
+   FILES_TO_CLEAN+=$(shell ls *.gcda)
+   FILES_TO_CLEAN+=$(shell ls *.gcno)
 endif
 
 ifdef LINKED_LIBS
@@ -214,15 +227,16 @@ else
 endif
 
 
-all: $(BUILD_DEPS)
+all: $(BUILD_DEPS) $(TO_COPY)
 memtest: all
 gdbtest: all
-cover:
+cover: all 
 profile: all
-coverview: BUILD_FOLDERS VIEW_COVERAGE
+coverbuild: GEN_COVER
+coverview: VIEW_COVER
 
 profileview:
-	firefox $(EXPORT_PROFILE_DIR)index.html
+	$(WEB_VIEWER) $(EXPORT_PROFILE_DIR)index.html
 
 clean: FOLDERS_TO_CLEAN 
 	$(CLEAN_CMD)
@@ -312,6 +326,14 @@ BUILD_PROFILE_PAGE: PROFILE_TESTS
 
 BUILD_AUTO_TESTS: $(TESTS_TO_BUILD)
 
+GEN_COVER: 
+	lcov --capture --directory $(LINKER_DIR) --output-file $(EXPORT_COVER_DIR)test.info
+	genhtml -f --demangle-cpp  --legend --num-spaces 4 -s test.info --output-directory $(EXPORT_COVER_DIR)
+
+VIEW_COVER:
+	$(WEB_VIEWER) $(EXPORT_COVER_DIR)index.html
+
+
 $(EXPORT_TESTS_TO)%: %.cpp $(LINKED_FILES)
 	g++ $(CPP_FLAGS) $(TEST_CPP_FLAGS) -o $@ $+ $(LINKED_FILES)
 
@@ -321,6 +343,10 @@ $(LIB_TO_BUILD): $(TO_BUILD)
 
 # Macro for moving include files to the includes directory. 
 $(EXPORT_INCLUDES_DIR)%: %
+	cp $+ $@
+
+# Macro for copying source code when using coverage testing
+$(EXPORT_OBJS_DIR)%.cpp: %.cpp
 	cp $+ $@
 
 # Macro for building object files
@@ -337,3 +363,25 @@ usage:
 	@echo "Set the base directory: export LINKER_DIR=<location of makefile.include>"
 	@echo "To add extra flags to g++: export CPP_FLAGS=<flags>"
 	@echo "To disable debug symbols: export DEBUG_ON=FALSE"
+	@echo "To change the web browser: export WEB_VIEWER=<viewer>"
+	@echo ""
+	@echo "Tests:"
+	@echo "tests defiend in the tests dicectory are exectuted automatically, every time the project is built"
+	@echo "There are some additional options when handling tests:"
+	@echo "   To valgrind tests: : make memtest"
+	@echo "       Works on an ordinary debug build, the build will fail if valgrind identifies any errors"
+	@echo "   To run gdb over the tests: make gdbtest"
+	@echo "       This exectutes all tests in a gdb enviroment that has source .gdb_setup and .gdb_breakpoints"
+	@echo "       The idea is two set a breakpoint at the test / function you are interested"
+	@echo "       breakpoints.vim has been confiured to make this trivial from inside the Vim editor"
+	@echo "   To coverage test the tests:"
+	@echo "       make cover       : standard build, but with coverage enabled (ideally should be a clean build)"
+	@echo "       make coverbuild  : Build the htmlpages from the coverage data (depends on lcov)"
+	@echo "       make coverview   : Open coverage data in a web browser"
+	@echo "   To profile the tests:"
+	@echo "       WARNING: In order to increase the accuracy of the profile, proifle build is configured to repeat tests"
+	@echo "                many times"
+	@echo "       WARNING: Profiling should be done with a clean build"
+	@echo "       WARNING: To be realistic, profiling disables debuging, and enabled basic optimisation: -O2 -march=natic"
+	@echo "       make profile     : Build the project, and profile the tests"
+	@echo "       make profileview : Open the profile data in a web browser"

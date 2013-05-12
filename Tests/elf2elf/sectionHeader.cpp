@@ -93,6 +93,7 @@ int Init(testLogger& log ) {
     }
 
     sections = header.Sections();
+    return 0;
 }
 
 int CompareSections(testLogger& log ) {
