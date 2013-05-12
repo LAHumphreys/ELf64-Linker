@@ -22,7 +22,7 @@ public:
 
 class BinaryReader {
 public:
-    BinaryReader(const FileLikeReader& f, long offset);
+    BinaryReader(const FileLikeReader& f, const long& offset);
     BinaryReader(const FileLikeReader& f);
     BinaryReader(const BinaryReader &other);
 

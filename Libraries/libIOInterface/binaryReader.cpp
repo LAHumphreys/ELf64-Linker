@@ -4,24 +4,13 @@
 using namespace std;
 
 BinaryReader::BinaryReader( const FileLikeReader &f) 
-: file(f)
-{
-    this->offset = 0;
-}
+: file(f), offset(0) { }
 
-BinaryReader::BinaryReader( const FileLikeReader &f, long offset) 
-: file(f)
-{
-    this->offset = offset;
-}
+BinaryReader::BinaryReader( const FileLikeReader &f, const long& offset) 
+: file(f), offset(offset) { }
 
 BinaryReader::BinaryReader(const BinaryReader &other) 
-: file(other.file)
-{
-    this->offset = other.Offset();
-    // TODO: Convert to delegated constructor when gcc 4.7 is
-    // available
-}
+: file(other.file), offset(other.Offset()) {}
 
 
 // Reposition the pointer

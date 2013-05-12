@@ -70,20 +70,20 @@ void Flags::SetFlags(string token) {
 
 void Flags::SetFlag(string flag, bool newStatus) {
     char cflag;
-    if ( names.count(flag) ) {
-        cflag = names[flag];
+    auto it = names.find(flag);
+    if ( it != names.end() ) {
+        cflag = it->second;
     } else {
         cflag = flag[0];
     }
-    if ( flags.count(cflag)) {
+    if ( it != names.end() ) {
         auto flagMask = flags[cflag];
         if ( newStatus ) {
             // Turn on this bit
             mask |= flagMask;
         } else {
             // switch off this bit
-            auto invertedMask = ~flagMask;
-            mask &=invertedMask;
+            mask &= ~flagMask;
         }
     }
 }
