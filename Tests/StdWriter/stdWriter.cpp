@@ -8,15 +8,15 @@ using namespace std;
 
 //Tests
 template<class Writer>
-long VerifyFill(stringstream& log);
+long VerifyFill(testLogger& log);
 
 //Validators
 bool ValidateMatch( const char *str1, const char *str2, 
                                       long len,
-                                      stringstream& log);
+                                      testLogger& log);
 bool ValidateWrite(OFStreamWriter& writer, const char *compString, 
                                            long len,
-                                           stringstream& log);
+                                           testLogger& log);
 
 
 int main(int argc, const char *argv[])
@@ -29,7 +29,7 @@ int main(int argc, const char *argv[])
 // The object need not be in a usable state after validation
 bool ValidateWrite(OFStreamWriter& writer, const char *compString, 
                                            long len,
-                                           stringstream& log) 
+                                           testLogger& log) 
 {
      writer.close();
 	 ifstream infile(writer.Fname());
@@ -42,7 +42,7 @@ bool ValidateWrite(OFStreamWriter& writer, const char *compString,
 
 bool ValidateMatch( const char *str1, const char *str2, 
                                       long len,
-                                      stringstream& log)  
+                                      testLogger& log)  
 {
     bool match = true;
     long i;
@@ -80,7 +80,7 @@ void Delete ( OFStreamWriter* writer ) {
 
 
 template<class Writer>
-long VerifyFill(stringstream& log) {
+long VerifyFill(testLogger& log) {
     long ret = 0;
 	Writer *writer = Generator();
 	log << "Writing a block, starting at 0" << endl;
@@ -110,7 +110,7 @@ long VerifyFill(stringstream& log) {
 }
 
 template<class Writer>
-long VerifyPut(stringstream& log) {
+long VerifyPut(testLogger& log) {
 	// Verify forward write
 	Writer("test.tmp");
 	const char * const testStr = "Hello World!\0Another String";

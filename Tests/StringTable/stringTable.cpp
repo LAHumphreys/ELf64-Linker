@@ -7,9 +7,9 @@
 
 using namespace std;
 
-int insert(stringstream& log);
-int tabSize(stringstream& log);
-int WriteTable(stringstream& log);
+int insert(testLogger& log);
+int tabSize(testLogger& log);
+int WriteTable(testLogger& log);
 
 const vector<const char *> testStrings = vector<const char *>( 
       {"STRING_1", "Test string two", "the same string", "the same string" });
@@ -22,7 +22,7 @@ int main(int argc, const char *argv[])
     return 0;
 }
 
-int insert(stringstream& log) {
+int insert(testLogger& log) {
     int lastLen=1;
     int lastLoc=0;
     StringTable tab;
@@ -46,7 +46,7 @@ int insert(stringstream& log) {
     return 0;
 }
 
-int tabSize (stringstream& log) {
+int tabSize (testLogger& log) {
     int lastLen=1;
     StringTable tab;
     for( const char * const & str: testStrings) {
@@ -68,7 +68,7 @@ int tabSize (stringstream& log) {
  * We're building this
  * "\0<string 1>\0<string 2>\0<string 3>\0"
  */
-int WriteTable (stringstream& log) {
+int WriteTable (testLogger& log) {
     int lastLen=1;
     StringTable tab;
 	log << "Writing string0" << endl;

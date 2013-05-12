@@ -8,8 +8,8 @@
 
 using namespace std;
 
-int ReaderOverload( stringstream& log);
-int WriteOverload ( stringstream& log);
+int ReaderOverload( testLogger& log);
+int WriteOverload ( testLogger& log);
   
 int main(int argc, const char *argv[])
 {
@@ -18,7 +18,7 @@ int main(int argc, const char *argv[])
     return 0;
 }
 
-int ReaderOverload( stringstream& log) {
+int ReaderOverload( testLogger& log) {
     DataVector data(50);
     BinaryReader read1(data);
     BinaryReader read2 = read1 + 5;
@@ -26,7 +26,7 @@ int ReaderOverload( stringstream& log) {
     return 0;
 }
 
-int WriteOverload( stringstream& log) {
+int WriteOverload( testLogger& log) {
     DataVector data(50);
     BinaryWriter write1(data);
     BinaryWriter write2 = write1 + 5;

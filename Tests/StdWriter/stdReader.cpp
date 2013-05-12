@@ -10,9 +10,9 @@ using namespace std;
 
 //Tests
 template<class Reader>
-long VerifyRead(stringstream& log);
+long VerifyRead(testLogger& log);
 template<class Reader>
-long VerifyReadString(stringstream& log);
+long VerifyReadString(testLogger& log);
 
 string quote = R"(
 There is a computer disease that anybody who works with computers knows about. 
@@ -26,12 +26,12 @@ const char secondString[] = "Oh look!, another string on the end..";
 //Validators
 bool ValidateMatch( const char *str1, const char *str2, 
                                       long len,
-                                      stringstream& log);
+                                      testLogger& log);
 
 template<class Reader>
-long VerifyGet(stringstream& log);
+long VerifyGet(testLogger& log);
 template<class Reader>
-long VerifyRead(stringstream& log);
+long VerifyRead(testLogger& log);
 
 int main(int argc, const char *argv[])
 {
@@ -43,7 +43,7 @@ int main(int argc, const char *argv[])
 
 bool ValidateMatch( const char *str1, const char *str2, 
                                       long len,
-                                      stringstream& log)  
+                                      testLogger& log)  
 {
     bool match = true;
     long i;
@@ -89,7 +89,7 @@ void Delete ( IFStreamReader* reader ) { remove(reader->Fname().c_str()); delete
 
 
 template<class Reader>
-long VerifyGet(stringstream& log) {
+long VerifyGet(testLogger& log) {
     long ret = 0;
 
 	Reader *reader = Generator();
@@ -116,7 +116,7 @@ long VerifyGet(stringstream& log) {
 }
 
 template<class Reader>
-long VerifyRead(stringstream& log) {
+long VerifyRead(testLogger& log) {
     long ret = 0;
 
 	Reader *reader = Generator();
@@ -149,7 +149,7 @@ long VerifyRead(stringstream& log) {
 }
 
 template<class Reader>
-long VerifyReadString(stringstream& log) {
+long VerifyReadString(testLogger& log) {
     long ret = 0;
 
 	Reader *reader = Generator();

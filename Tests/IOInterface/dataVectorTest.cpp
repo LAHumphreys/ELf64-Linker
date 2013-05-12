@@ -7,18 +7,18 @@
 
 using namespace std;
 
-int validateFill( stringstream& log);
-int validateFillAndGrow( stringstream& log);
-int validatePut( stringstream& log);
-int validatePutAndGrow( stringstream& log);
-int validateWrite( stringstream& log);
-int validateWriteAndGrow( stringstream& log);
-int validateResize( stringstream& log);
+int validateFill( testLogger& log);
+int validateFillAndGrow( testLogger& log);
+int validatePut( testLogger& log);
+int validatePutAndGrow( testLogger& log);
+int validateWrite( testLogger& log);
+int validateWriteAndGrow( testLogger& log);
+int validateResize( testLogger& log);
   
-int validateRead( stringstream& log);
-int validateReadString( stringstream& log);
-int validateGet( stringstream& log);
-int validateSearch( stringstream& log);
+int validateRead( testLogger& log);
+int validateReadString( testLogger& log);
+int validateGet( testLogger& log);
+int validateSearch( testLogger& log);
 
 int main(int argc, const char *argv[])
 {
@@ -36,7 +36,7 @@ int main(int argc, const char *argv[])
     return 0;
 }
 
-int validateFill( stringstream& log) {
+int validateFill( testLogger& log) {
     DataVector data(50);
     vector<unsigned char> v(50);
     FillContainer(v,50,'*');
@@ -58,7 +58,7 @@ int validateFill( stringstream& log) {
 
 }
 
-int validateFillAndGrow( stringstream& log) {
+int validateFillAndGrow( testLogger& log) {
     DataVector data(50);
     vector<unsigned char> v(100);
     FillContainer(v,100,'*');
@@ -80,7 +80,7 @@ int validateFillAndGrow( stringstream& log) {
     return 0;
 }
 
-int validatePut( stringstream& log) {
+int validatePut( testLogger& log) {
     DataVector data(50);
     vector<unsigned char> v(50);
     FillContainer(v,50,'*');
@@ -94,7 +94,7 @@ int validatePut( stringstream& log) {
     return 0;
 }
 
-int validatePutAndGrow( stringstream& log) {
+int validatePutAndGrow( testLogger& log) {
     DataVector data(50);
     vector<unsigned char> v(100);
     FillContainer(v,100,'*');
@@ -113,7 +113,7 @@ int validatePutAndGrow( stringstream& log) {
     return 0;
 }
 
-int validateWrite( stringstream& log){
+int validateWrite( testLogger& log){
     DataVector data(50);
     unsigned char *source = new unsigned char[100];
     FillContainer(source,100,'*');
@@ -134,7 +134,7 @@ int validateWrite( stringstream& log){
     return 0;
 }
 
-int validateWriteAndGrow( stringstream& log) {
+int validateWriteAndGrow( testLogger& log) {
     DataVector data(50);
     unsigned char *source = new unsigned char[100];
     FillContainer(source,100,'*');
@@ -154,7 +154,7 @@ int validateWriteAndGrow( stringstream& log) {
     return 0;
 }
 
-int validateRead( stringstream& log) {
+int validateRead( testLogger& log) {
     DataVector data(50);
     unsigned char *dest = new unsigned char[50];
     FillContainer(dest,50,'-');
@@ -178,7 +178,7 @@ int validateRead( stringstream& log) {
     return 0;
 }
 
-int validateReadString( stringstream& log) {
+int validateReadString( testLogger& log) {
     string source="Hello world!";
     string dest="I'll be over written";
     DataVector data(50);
@@ -194,7 +194,7 @@ int validateReadString( stringstream& log) {
         return 0;
 }
 
-int validateGet( stringstream& log) {
+int validateGet( testLogger& log) {
     DataVector data(50);
     FillContainer(data,50,'*');
     data[10] = '-';
@@ -204,7 +204,7 @@ int validateGet( stringstream& log) {
         return 0;
 }
 
-int validateSearch( stringstream& log) {
+int validateSearch( testLogger& log) {
     DataVector data(50);
     FillContainer(data,50,'*');
     data[10] = '-';
@@ -224,7 +224,7 @@ int validateSearch( stringstream& log) {
     return 0;
 }
 
-int validateResize( stringstream& log) {
+int validateResize( testLogger& log) {
     DataVector data(50);
     data.Resize(40);
     data.Resize(45);

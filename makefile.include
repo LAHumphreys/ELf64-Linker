@@ -105,6 +105,11 @@ else
 endif
 
 
+ifeq ($(findstring profile,$(MAKECMDGOALS)),profile)
+   CPP_FLAGS+=-pg -D__PROFILE__TESTS -O2 -march=native
+   DEBUG_ON=FALSE
+endif
+
 ifeq ($(FATAL_WARNINGS),YES)
   CPP_FLAGS+=-Werror
 endif
@@ -116,6 +121,11 @@ endif
 ifeq ($(USE_CPP11),YES)
   CPPSTD=c++0x
 endif
+
+ifeq ($(findstring cover,$(MAKECMDGOALS)),cover)
+   CPP_FLAGS+=--coverage
+endif
+
 
 CPP_FLAGS+=-std=$(CPPSTD)
 
@@ -132,8 +142,11 @@ CPP_TAGS_TO_BUILD=
 
 ifdef SOURCES
    $(shell mkdir -p $(EXPORT_OBJS_DIR))
-   TO_BUILD+=$(addprefix $(EXPORT_OBJS_DIR),$(addsuffix .o,$(SOURCES)))
-   FILES_TO_CLEAN+=$(TO_BUILD)
+   TO_BUILD+=$(addprefix $(EXPORT_OBJS_DIR),$(SOURCES:%.cpp=%.o))
+   FILES_TO_CLEAN+=$(addprefix $(EXPORT_OBJS_DIR),$(SOURCES:%.cpp=%.gcno))
+   FILES_TO_CLEAN+=$(addprefix $(EXPORT_OBJS_DIR),$(SOURCES:%.cpp=%.gcda))
+   FILES_TO_CLEAN+=$(addprefix $(EXPORT_OBJS_DIR),$(SOURCES:%.cpp=%.o))
+   FILES_TO_CLEAN+=$(shell rm *.gcov)
 endif
 
 ifdef EXPORT_INCLUDES
@@ -174,6 +187,8 @@ ifdef BUILD_TIME_TESTS
    TESTS_TO_BUILD=$(addprefix $(EXPORT_TESTS_TO),$(BUILD_TIME_TESTS))
    TESTS_TO_RUN=$(TESTS_TO_BUILD)
    FILES_TO_CLEAN+=$(TESTS_TO_BUILD)
+   FILES_TO_CLEAN+=$(shell rm *.gcda)
+   FILES_TO_CLEAN+=$(shell rm *.gcno)
 endif
 
 ifdef LINKED_LIBS
@@ -196,12 +211,22 @@ endif
 all: $(BUILD_DEPS)
 memtest: all
 gdbtest: all
+cover:
+profile:
+coverview: BUILD_FOLDERS VIEW_COVERAGE
 
 clean: FOLDERS_TO_CLEAN 
 	$(CLEAN_CMD)
 
 EXEC: $(TO_BUILD) $(LINKED_FILES)
 	g++ $(CPP_FLAGS) -o $(EXEC_TO_BUILD) $(TO_BUILD) $(LINKED_FILES)
+
+VIEW_COVERAGE:
+	@if [ "$(SOURCES)" != "" ]; \
+	then for f in $(SOURCES); do \
+		gcov -f -o $(EXPORT_OBJS_DIR) $$f | c++filt;\
+	done;\
+	fi
 
 FOLDERS_TO_CLEAN:
 	@for dir in $(FOLDERS_TO_BUILD); do  \
@@ -269,7 +294,7 @@ $(EXPORT_INCLUDES_DIR)%: %
 	cp $+ $@
 
 # Macro for building object files
-$(EXPORT_OBJS_DIR)%.o: %
+$(EXPORT_OBJS_DIR)%.o: %.cpp
 	g++  $(CPP_FLAGS) -c -o $@ $+
 
 ifneq ($(strip $(CPP_TAGS_TO_BUILD)),)

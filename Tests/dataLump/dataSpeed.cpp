@@ -7,15 +7,15 @@ using namespace std;
 #include "fileLikeObject.h"
 #include <sstream>
 
-long Arrays(stringstream& log);
-long ArraysStack (stringstream& log);
-long Inline(stringstream& log);
-long InlineHeap (stringstream& log);
-long Vtable (stringstream& log);
-long heapVtable (stringstream& log);
+long Arrays(testLogger& log);
+long ArraysStack (testLogger& log);
+long Inline(testLogger& log);
+long InlineHeap (testLogger& log);
+long Vtable (testLogger& log);
+long heapVtable (testLogger& log);
 long viaVtable (FileLikeObject& arr2s, FileLikeObject& arr5s, 
                                        FileLikeObject& both,
-                                       stringstream& log);
+                                       testLogger& log);
 
 const long MB = 1024*1024;
 const long maxCount = 0.0099*MB;
@@ -27,7 +27,7 @@ const long STACK_CUTOFF = 0.01*MB;
 int main(int argc, const char *argv[])
 {
     cout << "Validating dataLump object.." << endl;
-    stringstream log;
+    testLogger log;
     clock_t startTime, endTime;
     long result;
     double time;
@@ -97,7 +97,7 @@ int main(int argc, const char *argv[])
     return 0;
 }
 
-long heapVtable (stringstream& log) {
+long heapVtable (testLogger& log) {
     log << "3. Using virtual base class resolving to heap memory" << endl;
     DataLump<maxCount> *parr2s = new DataLump<maxCount>;
     DataLump<maxCount> *parr5s = new DataLump<maxCount>;
@@ -109,7 +109,7 @@ long heapVtable (stringstream& log) {
     return ret;
 }
 
-long Vtable (stringstream& log) {
+long Vtable (testLogger& log) {
     log << "5. Using virtual base class resolving to heap memory" << endl;
     DataLump<maxCount> arr2s;
     DataLump<maxCount> arr5s;
@@ -118,7 +118,7 @@ long Vtable (stringstream& log) {
     return ret;
 }
 
-long ArraysStack (stringstream& log) {
+long ArraysStack (testLogger& log) {
     log << "1. Using raw arrays: " << endl;
     double totTime = 0;
     clock_t startTime, endTime;
@@ -189,7 +189,7 @@ long ArraysStack (stringstream& log) {
     return result;
 }
 
-long Arrays (stringstream& log) {
+long Arrays (testLogger& log) {
     log << "1. Using raw arrays: " << endl;
     double totTime = 0;
     clock_t startTime, endTime;
@@ -263,7 +263,7 @@ long Arrays (stringstream& log) {
     return result;
 }
 
-long InlineHeap (stringstream& log) {
+long InlineHeap (testLogger& log) {
     log << "2. Using naked class (on the heap) with inlines: " << endl;
     double totTime = 0;
     clock_t startTime, endTime;
@@ -337,7 +337,7 @@ long InlineHeap (stringstream& log) {
     return result;
 }
 
-long Inline (stringstream& log) {
+long Inline (testLogger& log) {
     log << "4. Using naked class (on the stack) with inlines: " << endl;
     double totTime = 0;
     clock_t startTime, endTime;
@@ -408,7 +408,7 @@ long Inline (stringstream& log) {
 
 long viaVtable (FileLikeObject& arr2s, FileLikeObject& arr5s, 
                                        FileLikeObject& both,
-                                       stringstream& log) {
+                                       testLogger& log) {
     clock_t startTime, endTime;
     double time;
     double totTime = 0;

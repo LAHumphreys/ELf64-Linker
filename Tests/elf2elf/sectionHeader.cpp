@@ -15,10 +15,48 @@ Elf64_Shdr* oldSections;
 int sections;
 
 
-int CompareSections(stringstream& log );
+int CompareSections(testLogger& log );
+int Init(testLogger& log );
 
 int main(int argc, const char *argv[])
 {
+    // So that gprof can analyse the file building
+    Test("Initialising the data",(loggedTest)Init).RunTest();
+
+    ElfFileReader f("../elf2elf/isYes/isYes.o");
+    
+    ElfParser p(f);
+    
+    //parse the input file
+    ElfContent content = p.Content();
+
+    ElfFile file( content);
+    
+    // read in the section data
+    BinaryReader readPos(outfile);
+    ElfHeaderX86_64 header(readPos);
+    
+    newSections = new Elf64_Shdr[header.Sections()];
+    oldSections = new Elf64_Shdr[header.Sections()];
+    DEFER ( 
+       delete [] newSections; 
+       delete [] oldSections; 
+    ) 
+
+    BinaryReader newReader(outfile,header.SectionTableStart());
+
+    for ( int i=0; i< header.Sections(); i++ ) {
+        newReader >> newSections[i];
+        oldSections[i] = *(content.sections[i]);
+    }
+
+    sections = header.Sections();
+    Test("Validate section headers",(loggedTest)CompareSections).RunTest();
+
+    return 0;
+}
+
+int Init(testLogger& log ) {
     /*
      * Tests to validate the string table written by ElfFile
      */
@@ -38,13 +76,14 @@ int main(int argc, const char *argv[])
     // read in the section data
     BinaryReader readPos(outfile);
     ElfHeaderX86_64 header(readPos);
+
     newSections = new Elf64_Shdr[header.Sections()];
     oldSections = new Elf64_Shdr[header.Sections()];
-    
     DEFER ( 
        delete [] newSections; 
        delete [] oldSections; 
     ) 
+    
 
     BinaryReader newReader(outfile,header.SectionTableStart());
 
@@ -54,12 +93,9 @@ int main(int argc, const char *argv[])
     }
 
     sections = header.Sections();
-    Test("Validate section headers",(loggedTest)CompareSections).RunTest();
-
-    return 0;
 }
 
-int CompareSections(stringstream& log ) {
+int CompareSections(testLogger& log ) {
     for ( int i=0; i< sections; i++ ) {
         const SectionHeader& newHdr = newSections[i];
         const SectionHeader& oldHdr = oldSections[i];
@@ -149,4 +185,5 @@ int CompareSections(stringstream& log ) {
             return 1;
         }
     }
+    return 0;
 }

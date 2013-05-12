@@ -17,8 +17,8 @@ SectionHeader* stringTableHeader;
 std::map<string, int>* sectionMap;
 std::vector<Section *>* sectionHeaders;
 
-int ValidHeader(stringstream& log );
-int SectionNames(stringstream& log );
+int ValidHeader(testLogger& log );
+int SectionNames(testLogger& log );
 
 int main(int argc, const char *argv[])
 {
@@ -35,7 +35,6 @@ int main(int argc, const char *argv[])
 
     // old string table
     SectionHeader& oldHeader= *(content.sections[content.sectionMap[".shstrtab"]]);
-    cout << BinaryDescribe::Describe(BinaryReader(f,oldHeader.DataStart()),oldHeader.Size()) << endl;
 
     ElfFile file( content);
     
@@ -61,11 +60,10 @@ int main(int argc, const char *argv[])
 
     Test("Header format",(loggedTest)ValidHeader).RunTest();
     Test("Header format",(loggedTest)SectionNames).RunTest();
-
     return 0;
 }
 
-int ValidHeader(stringstream& log ) {
+int ValidHeader(testLogger& log ) {
     int retCode = 0;
 
     if ( stringTableHeader->sh_type != SHT_STRTAB ) {
@@ -79,7 +77,7 @@ int ValidHeader(stringstream& log ) {
     return retCode;
 }
 
-int SectionNames(stringstream& log ) {
+int SectionNames(testLogger& log ) {
     // new string table 
     BinaryReader newSReader(outfile,stringTableHeader->DataStart());
 

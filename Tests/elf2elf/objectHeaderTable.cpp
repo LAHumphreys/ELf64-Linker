@@ -8,15 +8,15 @@
 #include <elf.h>
 #include "dataLump.h"
 
-int magic( stringstream& log);
-int headerClass( stringstream& log);
-int tEI_DATA (stringstream& log);
-int tEI_VERSION (stringstream& log);
-int PAD (stringstream& log);
-int tEI_OSABI (stringstream& log);
-int te_type(stringstream& log);
-int machine(stringstream& log);
-int HeaderSizes(stringstream& log );
+int magic( testLogger& log);
+int headerClass( testLogger& log);
+int tEI_DATA (testLogger& log);
+int tEI_VERSION (testLogger& log);
+int PAD (testLogger& log);
+int tEI_OSABI (testLogger& log);
+int te_type(testLogger& log);
+int machine(testLogger& log);
+int HeaderSizes(testLogger& log );
 
 ElfParser *p;
 DataLump<5000> outfile;
@@ -62,7 +62,7 @@ int main(int argc, const char *argv[])
 /*
  *
  */
-int magic( stringstream& log) {
+int magic( testLogger& log) {
 	log << "0: >" << ELFMAG0 << "< , " << hdr->e_ident[0] << endl;
 	log << "1: >" << ELFMAG1 << "< , " << hdr->e_ident[1] << endl;
 	log << "2: >" << ELFMAG2 << "< , " << hdr->e_ident[2] << endl;
@@ -77,7 +77,7 @@ int magic( stringstream& log) {
 	return 0;
 }
 
-int headerClass (stringstream& log) {
+int headerClass (testLogger& log) {
 	if ( hdr->e_ident[EI_CLASS] != ELFCLASS64 ) {
 		log << "CLASS MISSMATCH" << endl;
 		log << hdr->e_ident[EI_CLASS] << " , " << ELFCLASS64 << endl;
@@ -87,7 +87,7 @@ int headerClass (stringstream& log) {
 	}
  }
 
-int tEI_DATA (stringstream& log) {
+int tEI_DATA (testLogger& log) {
 	if ( hdr->e_ident[EI_DATA] != ELFDATA2LSB ) {
 		log << "DATA MISSMATCH" << endl;
 		log << hdr->e_ident[EI_DATA] << " , " << ELFDATA2LSB << endl;
@@ -97,7 +97,7 @@ int tEI_DATA (stringstream& log) {
 	}
  }
 
-int tEI_VERSION (stringstream& log) {
+int tEI_VERSION (testLogger& log) {
 	if ( hdr->e_ident[EI_VERSION] != EV_CURRENT ) {
 		log << "VERSION MISSMATCH" << endl;
 		log << hdr->e_ident[EI_VERSION] << " , " << EV_CURRENT << endl;
@@ -107,7 +107,7 @@ int tEI_VERSION (stringstream& log) {
 	}
  }
 
-int tEI_OSABI (stringstream& log) {
+int tEI_OSABI (testLogger& log) {
 	if ( hdr->e_ident[EI_OSABI] != ELFOSABI_LINUX ) {
 		log << "APPLICATION BINARY INTERFACE  MISSMATCH" << endl;
 		log << hdr->e_ident[EI_OSABI] << " , " << ELFOSABI_LINUX << endl;
@@ -117,7 +117,7 @@ int tEI_OSABI (stringstream& log) {
 	}
 }
 
-int PAD (stringstream& log) {
+int PAD (testLogger& log) {
     for ( int i=EI_OSABI +1; i< EI_NIDENT; i++ ) {
         if ( hdr->e_ident[i] != 0 ) {
             log << "NON-ZERO PADDING in ELF_HEADER" << endl;
@@ -128,7 +128,7 @@ int PAD (stringstream& log) {
     return 0;
 }
 
-int te_type(stringstream& log) {
+int te_type(testLogger& log) {
     if ( hdr->e_type != ET_REL ) {
         log << "Invalid type for object file" << endl;
         log << hdr->e_type << " , " << ET_REL  << endl;
@@ -138,7 +138,7 @@ int te_type(stringstream& log) {
     }
 }
 
-int machine(stringstream& log) {
+int machine(testLogger& log) {
     if ( hdr->e_machine != EM_X86_64 ) {
         log << "Unexpected machine type" << endl;
         log << hdr->e_machine << " , " << EM_X86_64  << endl;
@@ -148,7 +148,7 @@ int machine(stringstream& log) {
     }
 }
 
-int HeaderSizes(stringstream& log ) {
+int HeaderSizes(testLogger& log ) {
     if ( hdr->e_shentsize != sizeof(Elf64_Shdr) ) {
         log << "Invalid section header size" << endl;
         log << hdr->e_shentsize << " , ";

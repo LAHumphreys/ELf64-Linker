@@ -23,7 +23,7 @@ public:
         this->err = s;
         this->errCode = i;
     };
-    int Error( stringstream& log) { 
+    int Error( testLogger& log) { 
         log << err << endl;
         return errCode==0? 255: errCode;
     }
@@ -33,13 +33,13 @@ private:
     long errCode;
 };
 
-int VerifyPositionFinders( stringstream& log);
-int VerifyAssignments( stringstream& log);
-int VerifyArithmetic( stringstream& log);
-int VerifySearch( stringstream& log);
-int VerifyReads( stringstream& log);
-int VerifyStringPull( stringstream& log);
-int VerifyPODPull( stringstream& log);
+int VerifyPositionFinders( testLogger& log);
+int VerifyAssignments( testLogger& log);
+int VerifyArithmetic( testLogger& log);
+int VerifySearch( testLogger& log);
+int VerifyReads( testLogger& log);
+int VerifyStringPull( testLogger& log);
+int VerifyPODPull( testLogger& log);
 
 using namespace std;
 int main(int argc, const char *argv[])
@@ -161,7 +161,7 @@ long VerifyOffset(const BinaryReader& reader, long offset,
     return VerifyOffset(reader,offset,msg,char(offset));
 }
 
-int VerifyPositionFinders( stringstream& log) {
+int VerifyPositionFinders( testLogger& log) {
     try {
         BinaryReader pos(data);
         BinaryReader other = pos.End();
@@ -181,7 +181,7 @@ int VerifyPositionFinders( stringstream& log) {
     return 0;
 }
 
-int VerifyAssignments( stringstream& log) {
+int VerifyAssignments( testLogger& log) {
     try {
         BinaryReader pos(data);
         BinaryReader other = pos.Pos(5);
@@ -202,7 +202,7 @@ int VerifyAssignments( stringstream& log) {
 }
 
 
-int VerifyArithmetic( stringstream& log) {
+int VerifyArithmetic( testLogger& log) {
     try {
         BinaryReader pos(data);
         pos+=1;
@@ -221,7 +221,7 @@ int VerifyArithmetic( stringstream& log) {
     return 0;
 }
 
-int VerifySearch( stringstream& log) {
+int VerifySearch( testLogger& log) {
     try {
         BinaryReader r(data);
         VerifyOffset(r.Find(25),25,"find");
@@ -234,7 +234,7 @@ int VerifySearch( stringstream& log) {
     return 0;
 }
 
-int VerifyReads( stringstream& log) {
+int VerifyReads( testLogger& log) {
     try {
         BinaryReader r(data);
         log << "Dup tests" << endl;
@@ -301,7 +301,7 @@ int VerifyReads( stringstream& log) {
     return 0;
 }
 
-int VerifyStringPull( stringstream& log) {
+int VerifyStringPull( testLogger& log) {
     try {
         DataVector dv(100);
 
@@ -371,7 +371,7 @@ int VerifyStringPull( stringstream& log) {
     return 0;
 }
 
-int VerifyPODPull( stringstream& log) {
+int VerifyPODPull( testLogger& log) {
     DataVector dv(100);
     
     dv.Fill(0,'*',100);

@@ -23,7 +23,7 @@ public:
         this->err = s;
         this->errCode = i;
     };
-    int Error( stringstream& log) { 
+    int Error( testLogger& log) { 
         log << err << endl;
         return errCode==0? 255: errCode;
     }
@@ -33,14 +33,14 @@ private:
     long errCode;
 };
 
-int VerifyPositionFinders( stringstream& log);
-int VerifyAssignments( stringstream& log);
-int VerifyArithmetic( stringstream& log);
-int VerifyWrites( stringstream& log);
-int VerifyStringWrites( stringstream& log);
-int VerifyBoundraryFinder( stringstream& log);
-int VerifyStringPushes( stringstream& log);
-int VerifyPODPush( stringstream& log);
+int VerifyPositionFinders( testLogger& log);
+int VerifyAssignments( testLogger& log);
+int VerifyArithmetic( testLogger& log);
+int VerifyWrites( testLogger& log);
+int VerifyStringWrites( testLogger& log);
+int VerifyBoundraryFinder( testLogger& log);
+int VerifyStringPushes( testLogger& log);
+int VerifyPODPush( testLogger& log);
 
 using namespace std;
 int main(int argc, const char *argv[])
@@ -206,7 +206,7 @@ long VerifyOffset(BinaryWriter& writer, long offset, string msg) {
     return VerifyOffset(writer,offset,msg,char(offset));
 }
 
-int VerifyPositionFinders( stringstream& log) {
+int VerifyPositionFinders( testLogger& log) {
     try {
         BinaryWriter pos(data);
         BinaryWriter other = pos.operator+(DATA_SIZE);
@@ -226,7 +226,7 @@ int VerifyPositionFinders( stringstream& log) {
     return 0;
 }
 
-int VerifyBoundraryFinder( stringstream& log) {
+int VerifyBoundraryFinder( testLogger& log) {
     BinaryWriter pos(data,50);
     if (   pos.NextBoundrary(10) != pos
         || pos.NextBoundrary(2) != pos
@@ -265,7 +265,7 @@ int VerifyBoundraryFinder( stringstream& log) {
     return 0;
 }
 
-int VerifyAssignments( stringstream& log) {
+int VerifyAssignments( testLogger& log) {
     try {
         BinaryWriter pos(data);
         BinaryWriter other = pos.Pos(5);
@@ -286,7 +286,7 @@ int VerifyAssignments( stringstream& log) {
 }
 
 
-int VerifyArithmetic( stringstream& log) {
+int VerifyArithmetic( testLogger& log) {
     try {
         BinaryWriter pos(data);
         pos+=1;
@@ -309,7 +309,7 @@ int VerifyArithmetic( stringstream& log) {
     return 0;
 }
 
-int VerifyWrites( stringstream& log) {
+int VerifyWrites( testLogger& log) {
     try {
         DataVector out(100);
         DataVector zeroes(100);
@@ -372,7 +372,7 @@ int VerifyWrites( stringstream& log) {
     return 0;
 }
 
-int VerifyStringWrites(stringstream& log ) {
+int VerifyStringWrites(testLogger& log ) {
     try {
         char str[] = "Hello World!\0++IGNORED++";
         //don't forget the null char
@@ -420,7 +420,7 @@ int VerifyStringWrites(stringstream& log ) {
     return 0;
 }
 
-int VerifyStringPushes(stringstream& log ) {
+int VerifyStringPushes(testLogger& log ) {
     try {
         const char *str = "Hello World!\0++IGNORED++";
         //don't forget the null char
@@ -456,7 +456,7 @@ int VerifyStringPushes(stringstream& log ) {
     return 0;
 }
 
-int VerifyPODPush( stringstream& log) {
+int VerifyPODPush( testLogger& log) {
     DataVector dv(100);
     
     dv.Fill(0,'*',100);
