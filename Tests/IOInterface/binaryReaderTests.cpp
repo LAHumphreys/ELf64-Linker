@@ -7,6 +7,8 @@
 #include <sstream>
 #include <string>
 #include <cstring>
+#include "defer.h"
+#include "dataWriter.h"
 
 /*
  * Tests should be run after the datavector object has been verified by the
@@ -40,6 +42,8 @@ int VerifySearch( testLogger& log);
 int VerifyReads( testLogger& log);
 int VerifyStringPull( testLogger& log);
 int VerifyPODPull( testLogger& log);
+int VerifyReadLine (testLogger& log);
+int  VerifyReadLineForWriter(testLogger& log);
 
 using namespace std;
 int main(int argc, const char *argv[])
@@ -55,6 +59,8 @@ int main(int argc, const char *argv[])
     Test("Verify Reads",  (loggedTest)VerifyReads).RunTest();
     Test("Verify String Pulls",  (loggedTest)VerifyStringPull).RunTest();
     Test("Verify POD Pulls",  (loggedTest)VerifyPODPull).RunTest();
+    Test("Verify ReadLine",  (loggedTest)VerifyReadLine).RunTest();
+    Test("Verify ReadLine using writer",  (loggedTest)VerifyReadLineForWriter).RunTest();
     return 0;
 }
 
@@ -523,5 +529,65 @@ int VerifyPODPull( testLogger& log) {
         return 1;
     }
 
+    return 0;
+}
+
+int VerifyReadLine (testLogger& log) {
+    try {
+        char * outData = new char [256];
+        char * nullData = new char [256];
+        DEFER (
+            delete [] outData; 
+            delete [] nullData; 
+        )
+
+        memset(outData,'*',256);
+        memset(nullData,'*',256);
+
+
+        // Verify max limit
+        BinaryReader r(data);
+        r.ReadLine((unsigned char *)outData,25,128);
+        VerifyData((char *)data.RawData(),outData,25);
+        VerifyData(nullData+25,outData+25,100);
+
+        r.ReadLine((unsigned char *)outData,256,128);
+        VerifyData((char *)data.RawData(),outData,128);
+        VerifyData(nullData+128,outData+128,100);
+
+    } catch (TestError& e) {
+        return e.Error(log);
+    }
+    return 0;
+}
+
+int VerifyReadLineForWriter (testLogger& log) {
+    try {
+        char * outData = new char [256];
+        char * nullData = new char [256];
+        DEFER (
+            delete [] outData; 
+            delete [] nullData; 
+        )
+
+        memset(outData,'*',256);
+        memset(nullData,'*',256);
+
+        DataWriter w(outData);
+
+
+        // Verify max limit
+        BinaryReader r(data);
+        r.ReadLine(w,25,128);
+        VerifyData((char *)data.RawData(),outData,25);
+        VerifyData(nullData+25,outData+25,100);
+
+        r.ReadLine(w,256,128);
+        VerifyData((char *)data.RawData(),outData,128);
+        VerifyData(nullData+128,outData+128,100);
+
+    } catch (TestError& e) {
+        return e.Error(log);
+    }
     return 0;
 }
