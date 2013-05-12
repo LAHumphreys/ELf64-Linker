@@ -8,12 +8,14 @@ ifndef LINKER_DIR
 endif
 EXPORTS_DIR=$(LINKER_DIR)exports/
 TEST_DIR=$(LINKER_DIR)Tests/
+SCRIPTS_DIR=$(LINKER_DIR)Scripts/
 
 # Define the internal file structure
 EXPORT_TESTS_TO=$(TEST_DIR)tests/
 EXPORT_INCLUDES_DIR=$(EXPORTS_DIR)includes/
 EXPORT_OBJS_DIR=$(EXPORTS_DIR)objs/
 EXPORT_LIB_DIR=$(EXPORTS_DIR)lib/
+EXPORT_PROFILE_DIR=$(EXPORTS_DIR)profs/
 ifndef TAGS_DIR
     EXPORT_TAGS_DIR=$(EXPORTS_DIR)tags/
 else
@@ -183,6 +185,10 @@ ifdef BUILD_TIME_TESTS
    ifeq ($(findstring gdbtest,$(MAKECMDGOALS)),gdbtest)
 	   testCmd=GDB_AUTO_TESTS
    endif
+   ifeq ($(findstring profile,$(MAKECMDGOALS)),profile)
+     $(shell mkdir -p $(EXPORT_PROFILE_DIR))
+     testCmd=BUILD_PROFILE_PAGE
+   endif
    BUILD_DEPS+=$(testCmd)
    TESTS_TO_BUILD=$(addprefix $(EXPORT_TESTS_TO),$(BUILD_TIME_TESTS))
    TESTS_TO_RUN=$(TESTS_TO_BUILD)
@@ -212,8 +218,11 @@ all: $(BUILD_DEPS)
 memtest: all
 gdbtest: all
 cover:
-profile:
+profile: all
 coverview: BUILD_FOLDERS VIEW_COVERAGE
+
+profileview:
+	firefox $(EXPORT_PROFILE_DIR)index.html
 
 clean: FOLDERS_TO_CLEAN 
 	$(CLEAN_CMD)
@@ -279,6 +288,27 @@ GDB_AUTO_TESTS: BUILD_AUTO_TESTS
 		fi \
 	done; \
 	echo "***********************************************************"; \
+
+PROFILE_TESTS: BUILD_AUTO_TESTS
+	@for test in $(TESTS_TO_RUN); do\
+		echo "***********************************************************"; \
+		echo "Running auto test: $$test";\
+		     $$test || exit;\
+		echo "Profiling: $$test";\
+		     gprof $$test > $(EXPORT_PROFILE_DIR)/$$(basename $$test).profile  || exit;\
+		echo "Generating profile html";\
+		     $(SCRIPTS_DIR)/prof2html.py $(EXPORT_PROFILE_DIR)/$$(basename $$test).profile || exit;\
+		echo "************************************************************"; \
+		rm gmon.out; \
+	done
+
+BUILD_PROFILE_PAGE: PROFILE_TESTS
+	@echo "<html> <body><h1> Test Profiles </h1>" > $(EXPORT_PROFILE_DIR)index.html;\
+	echo "<ul>" >> $(EXPORT_PROFILE_DIR)index.html;\
+	for f in $$(ls $(EXPORT_PROFILE_DIR)*.html); do\
+		echo "<li> <a href=\"$$f\"> $$(basename $$f .profile.html) </a> </li>" >> $(EXPORT_PROFILE_DIR)index.html;\
+	done;\
+	echo "</ul></body></html>" >> $(EXPORT_PROFILE_DIR)index.html
 
 BUILD_AUTO_TESTS: $(TESTS_TO_BUILD)
 
