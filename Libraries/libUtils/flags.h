@@ -14,27 +14,49 @@ using namespace std;
 class Flags {
 public:
     typedef std::map<string,char> nameMap;
+    typedef unsigned long Mask;
+    static const Mask EmptyMask = 0x0;
+
     // C'tor / D'tor
     Flags (const string flags, std::map<string ,char> &names);
     Flags (const string flags);
     Flags(const Flags& rhs);
 
     // Configure Flags object
-    bool AddFlag(const char flag);
-    bool AddFlag(const char flag, const string &name);
-    bool AddName(const char flag, const string &name);
+    Mask AddFlag(const char flag);
+    Mask AddFlag(const char flag, const string &name);
+    void AddName(const char flag, const string &name);
 
     // Set / unset flags
     void SetFlags(string token);
     void SetFlag(string token,bool newStatus);
 
+    // Turn on or off a subset of flags
+    inline void SetFlags(const Mask& flagMask,bool newStatus) {
+        if (newStatus) {
+            // Turn on the bit(s)
+            mask |= flagMask;
+        } else {
+            // Turn off the bit(s)
+            mask &= ~flagMask;
+        }
+    }
+    // Set the flags
+    inline void SetFlags(const Mask& flagMask) {
+        mask = flagMask;
+    }
+
     // Test flag exists
     bool operator[](const string &flag) const;
     bool operator[](char flag) const;
 
+    inline Mask operator[](const Mask& flagMask) const {
+        return flagMask & this->mask;
+    }
+
     // Masks
     string LinkMask();
-    void FromMask(unsigned long omask) { mask = omask; }
+    void FromMask(const Mask& omask) { mask = omask; }
 
 private:
     mutable std::map<char, long> flags;

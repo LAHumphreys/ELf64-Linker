@@ -28,33 +28,33 @@ Flags::Flags(const Flags& rhs):
     flags(rhs.flags) 
 { 
 }
-bool Flags::AddFlag(const char flag) {
+
+Flags::Mask Flags::AddFlag(const char flag) {
     if  (flagCount < 63) {
-        unsigned long base = 0x1;
-        flags[flag] = base << flagCount;
+        Flags::Mask base = 0x1;
         ++flagCount;
-        return true;
+        return flags[flag] = base << flagCount;
     } else {
-        return false;
+        return 0;
     }
 }
 
-bool Flags::AddFlag(const char flag, const string &name) {
-    if  (AddFlag(flag)) {
-        return AddName(flag,name);
-    } else {
-        return false;
+Flags::Mask Flags::AddFlag(const char flag, const string &name) {
+    const Flags::Mask& ret = AddFlag(flag);
+    if  (ret) {
+        AddName(flag,name);
     }
+    return ret;
 }
 
-bool Flags::AddName(const char flag, const string &name ) {
+void Flags::AddName(const char flag, const string &name ) {
     names[name] = flag;
-    return true;
 }
 
 bool Flags::operator[] (char flag) const {
     return flags[flag] & mask;
 }
+
 bool Flags::operator[] (const string &flag) const {
     char cflag;
     if ( names.count(flag) ) {

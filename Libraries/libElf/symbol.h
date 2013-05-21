@@ -37,6 +37,15 @@ protected:
     static const Flags& TypeFlags();
     static const Flags& ScopeFlags();
 
+    static Flags::Mask Flags_STT_NOTYPE;
+    static Flags::Mask Flags_STT_OBJECT;
+    static Flags::Mask Flags_STT_FUNC;
+    static Flags::Mask Flags_STT_SECTION;
+    static Flags::Mask Flags_STT_FILE;
+    static Flags::Mask Flags_STB_LOCAL;
+    static Flags::Mask Flags_STB_GLOBAL;
+    static Flags::Mask Flags_STB_WEAK;
+
 private:
     string name;
     Flags type;

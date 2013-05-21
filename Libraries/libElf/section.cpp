@@ -27,26 +27,33 @@ Section::Section( const BinaryReader& headerPos,
     SetFlags();
 }
 
+Flags::Mask Section::Flags_SHF_WRITE  = Flags::EmptyMask;
+Flags::Mask Section::Flags_SHF_ALLOC  = Flags::EmptyMask;
+Flags::Mask Section::Flags_SHF_EXECINSTR  = Flags::EmptyMask;
+
 const Flags& Section::TypeFlags() {
     static unique_ptr<Flags> flags = NULL;
 
     if ( !flags) {
         flags = unique_ptr<Flags>(new Flags(""));
 
-        flags->AddFlag('W', "SHF_WRITE");
-        flags->AddFlag('A', "SHF_ALLOC");
-        flags->AddFlag('C', "SHF_EXECINSTR");
+        Flags_SHF_WRITE = 
+            flags->AddFlag('W', "SHF_WRITE");
+        Flags_SHF_ALLOC = 
+            flags->AddFlag('A', "SHF_ALLOC");
+        Flags_SHF_EXECINSTR = 
+            flags->AddFlag('C', "SHF_EXECINSTR");
     }
     return *flags;
 }
 
 void Section::SetFlags() {
     if ( Writeable() ) 
-        sh_flags.SetFlag("SHF_WRITE",true);
+        sh_flags.SetFlags(Flags_SHF_WRITE,true);
     if ( Allocate() ) 
-        sh_flags.SetFlag("SHF_ALLOC",true);
+        sh_flags.SetFlags(Flags_SHF_ALLOC,true);
     if ( Executable() ) 
-        sh_flags.SetFlag("SHF_EXECINSTR",true);
+        sh_flags.SetFlags(Flags_SHF_EXECINSTR,true);
 }
 
 Section::~Section () {
@@ -146,7 +153,7 @@ Section * Section::MakeNewStringTable( StringTable &tab, StringTable* sectionNam
     // set up the various constant flags
     //
       
-    newSection->sh_flags.SetFlags("W"); // Only writeable
+    newSection->sh_flags.SetFlags(Flags_SHF_WRITE); // Only writeable
 
     newSection->ItemSize() = 0; //no fixed sized entries
 

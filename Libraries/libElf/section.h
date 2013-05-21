@@ -41,6 +41,9 @@ public:
 protected:
     static const Flags& TypeFlags();
     void SetFlags();
+    static Flags::Mask Flags_SHF_WRITE;
+    static Flags::Mask Flags_SHF_ALLOC;
+    static Flags::Mask Flags_SHF_EXECINSTR;
 private:
     Section ();
     Data * data;

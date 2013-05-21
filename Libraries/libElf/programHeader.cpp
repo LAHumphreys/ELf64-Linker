@@ -3,6 +3,7 @@
 #include <sstream>
 #include "binaryReader.h"
 #include <algorithm>
+#include <memory>
 
 using namespace std;
 
@@ -27,13 +28,33 @@ ProgramHeader::ProgramHeader ( BinaryReader& reader,
     InitialiseFlags();
 }
 
+Flags::Mask ProgramHeader::Flags_Executable  = Flags::EmptyMask;
+Flags::Mask ProgramHeader::Flags_Writeable   = Flags::EmptyMask;
+Flags::Mask ProgramHeader::Flags_Readable    = Flags::EmptyMask;
+
+const Flags& ProgramHeader::TypeFlags() {
+    static unique_ptr<Flags> flags = NULL;
+
+    if ( !flags) {
+        flags = unique_ptr<Flags>(new Flags(""));
+
+        ProgramHeader::Flags_Executable = 
+            flags->AddFlag('X', "Executable");
+        ProgramHeader::Flags_Writeable = 
+            flags->AddFlag('W', "Writeable");
+        ProgramHeader::Flags_Readable = 
+            flags->AddFlag('R', "Readable");
+    }
+    return *flags;
+}
+
 void ProgramHeader::InitialiseFlags() {
-    flags.AddFlag('X', "Executable");
-    flags.AddFlag('W', "Writeable");
-    flags.AddFlag('R', "Readable");
-    if ( this->p_flags & PF_X ) flags.SetFlag("X", 1);
-    if ( this->p_flags & PF_W ) flags.SetFlag("W", 1);
-    if ( this->p_flags & PF_R ) flags.SetFlag("R", 1);
+    if ( this->p_flags & PF_X ) 
+        flags.SetFlags(Flags_Executable, 1);
+    if ( this->p_flags & PF_W ) 
+        flags.SetFlags(Flags_Writeable, 1);
+    if ( this->p_flags & PF_R ) 
+        flags.SetFlags(Flags_Readable, 1);
 }
 
 // Format: align memsize addr flags sections..

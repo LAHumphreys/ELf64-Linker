@@ -78,6 +78,12 @@ public:
 
     // Calculated values
     Elf64_Off DataEnd() { return DataStart() + FileSize(); }
+protected:
+    static const Flags& TypeFlags();
+
+    static Flags::Mask Flags_Executable;
+    static Flags::Mask Flags_Writeable;
+    static Flags::Mask Flags_Readable;
 
 private:
     std::vector<string> sectionNames;

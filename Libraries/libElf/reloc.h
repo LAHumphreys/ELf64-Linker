@@ -26,6 +26,20 @@ public:
 protected:
     static const Flags& TypeFlags();
 
+    static Flags::Mask Flags_SHF_WRITE;
+    static Flags::Mask Flags_SHF_ALLOC;
+    static Flags::Mask Flags_SHF_EXECINSTR;
+    static Flags::Mask Flags_Absolute;
+    static Flags::Mask Flags_Relative;
+    static Flags::Mask Flags_Symbol;
+    static Flags::Mask Flags_1Byte;
+    static Flags::Mask Flags_2Byte;
+    static Flags::Mask Flags_4Byte;
+    static Flags::Mask Flags_8Byte;
+    static Flags::Mask Flags_HasAddendum;
+    static Flags::Mask Flags_ZeroExtended;
+    static Flags::Mask Flags_SignExtended;
+
 private:
     // helper functions
     void ConfigureFlags();
