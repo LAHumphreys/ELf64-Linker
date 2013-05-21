@@ -1,5 +1,6 @@
 #include <map>
 #include <string>
+#include <memory>
 #ifndef FLAGS_H
    #define FLAGS_H
 
@@ -13,15 +14,15 @@ using namespace std;
 */
 class Flags {
 public:
-    typedef std::map<string,char> nameMap;
     typedef unsigned long Mask;
     static const Mask EmptyMask = 0x0;
+    static const short maxItems = 8 * sizeof(Mask);
+
 
     // C'tor / D'tor
     Flags (const string flags, std::map<string ,char> &names);
     Flags (const string flags);
-    Flags(const Flags& rhs);
-
+    Flags(const Flags& rhs); 
     // Configure Flags object
     Mask AddFlag(const char flag);
     Mask AddFlag(const char flag, const string &name);
@@ -58,9 +59,13 @@ public:
     string LinkMask();
     void FromMask(const Mask& omask) { mask = omask; }
 
+protected:
+    typedef std::map<string,char> NameMap;
+    typedef std::map<char,Mask> MaskMap;
+
 private:
-    mutable std::map<char, long> flags;
-    mutable std::map<string, char> names;
+    shared_ptr<MaskMap> flags;
+    shared_ptr<NameMap> names;
     unsigned long mask;
     short flagCount;
 };

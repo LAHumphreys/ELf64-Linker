@@ -3,15 +3,19 @@
 #endif
 #include <sstream>
 #include <iostream>
-Flags::Flags (string flags) {
+Flags::Flags (string flags):
+    flags(new MaskMap),
+    names(new NameMap) 
+{
     flagCount=0;
     for (auto flag: flags ) {
         AddFlag(flag);
-        //cout << "processing" << flag << endl;
     }
 }
-Flags::Flags (string flags, std::map<string,char> &nameMap)
-    :/*Flags(flags),*/ names(nameMap)
+
+Flags::Flags (string flags, std::map<string,char> &nameMap) :
+     names(new NameMap),
+     flags(new MaskMap)
 {
     // TODO: delete this code and use c++11 delegated constructor
     // when gcc 4.7 is available on ubuntu next month...
@@ -30,10 +34,10 @@ Flags::Flags(const Flags& rhs):
 }
 
 Flags::Mask Flags::AddFlag(const char flag) {
-    if  (flagCount < 63) {
+    if  (flagCount < maxItems) {
         Flags::Mask base = 0x1;
         ++flagCount;
-        return flags[flag] = base << flagCount;
+        return (*flags)[flag] = base << flagCount;
     } else {
         return 0;
     }
@@ -48,42 +52,45 @@ Flags::Mask Flags::AddFlag(const char flag, const string &name) {
 }
 
 void Flags::AddName(const char flag, const string &name ) {
-    names[name] = flag;
+    (*names)[name] = flag;
 }
 
 bool Flags::operator[] (char flag) const {
-    return flags[flag] & mask;
+    return (*flags)[flag] & mask;
 }
 
 bool Flags::operator[] (const string &flag) const {
     char cflag;
-    if ( names.count(flag) ) {
-        cflag = names[flag];
+    auto it = names->find(flag);
+    if ( it != names->end() ) {
+        cflag = it->second;
     } else { 
-        cflag = names[0];
+        return false;
     }
-    auto flagmask = flags[cflag];
+
+    auto flagmask = (*flags)[cflag];
     return mask & flagmask;
 }
 
 void Flags::SetFlags(string token) {
     for (auto flag: token) {
-        if ( flags.count(flag)) {
-            mask |= flags[flag];
+        auto it = flags->find(flag);
+        if ( it != flags->end() ) {
+            mask |= it->second;
         }
     }
 }
 
 void Flags::SetFlag(string flag, bool newStatus) {
     char cflag;
-    auto it = names.find(flag);
-    if ( it != names.end() ) {
+    auto it = names->find(flag);
+    if ( it != names->end() ) {
         cflag = it->second;
     } else {
         cflag = flag[0];
     }
-    if ( it != names.end() ) {
-        auto flagMask = flags[cflag];
+    if ( it != names->end() ) {
+        auto flagMask = (*flags)[cflag];
         if ( newStatus ) {
             // Turn on this bit
             mask |= flagMask;
@@ -96,7 +103,7 @@ void Flags::SetFlag(string flag, bool newStatus) {
 
 string Flags::LinkMask() {
     ostringstream mask;
-    for (auto flag: flags) {
+    for (auto flag: *flags) {
         if (this->operator[](flag.first)) mask << flag.first;
     }
     return mask.str();
