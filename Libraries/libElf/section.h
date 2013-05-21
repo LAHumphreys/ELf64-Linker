@@ -39,7 +39,7 @@ public:
 
 
 protected:
-    void ConfigureFlags();
+    static const Flags& TypeFlags();
     void SetFlags();
 private:
     Section ();

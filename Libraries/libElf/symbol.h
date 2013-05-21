@@ -31,8 +31,13 @@ public:
 
     const RawSymbol& RawItem() { return *this;}
 
+protected:
+    // If we don't do this, we have to re-hash and bit manipulate the same
+    // 8 strings for every single symbol object we instantiate
+    static const Flags& TypeFlags();
+    static const Flags& ScopeFlags();
+
 private:
-    void ConfigureFlags();
     string name;
     Flags type;
     Flags scope;

@@ -23,6 +23,9 @@ public:
         return ELF64_R_TYPE(reloc.r_info);
     }
 
+protected:
+    static const Flags& TypeFlags();
+
 private:
     // helper functions
     void ConfigureFlags();

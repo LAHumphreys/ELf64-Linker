@@ -6,16 +6,16 @@
 #include "binaryReader.h"
 #include "dataVector.h"
 #include "binaryData.h"
+#include <memory>
 
 Section::Section( ) 
-    : sh_flags(""), stringTable(NULL), data(NULL)
+    : sh_flags(TypeFlags()), stringTable(NULL), data(NULL)
 {
-    ConfigureFlags();
 }
 
 Section::Section( const BinaryReader& headerPos, 
                   const BinaryReader& strings ) 
-    : SectionHeader(headerPos), sh_flags("")
+    : SectionHeader(headerPos), sh_flags(TypeFlags())
 {
     // Get our name
     name = (strings + (long)NameOffset()).ReadString();
@@ -24,15 +24,20 @@ Section::Section( const BinaryReader& headerPos,
     data = new Data( headerPos.Begin().operator+(DataStart()) , 
                      DataSize());
 
-    ConfigureFlags();
     SetFlags();
 }
 
+const Flags& Section::TypeFlags() {
+    static unique_ptr<Flags> flags = NULL;
 
-void Section::ConfigureFlags() {
-    sh_flags.AddFlag('W', "SHF_WRITE");
-    sh_flags.AddFlag('A', "SHF_ALLOC");
-    sh_flags.AddFlag('C', "SHF_EXECINSTR");
+    if ( !flags) {
+        flags = unique_ptr<Flags>(new Flags(""));
+
+        flags->AddFlag('W', "SHF_WRITE");
+        flags->AddFlag('A', "SHF_ALLOC");
+        flags->AddFlag('C', "SHF_EXECINSTR");
+    }
+    return *flags;
 }
 
 void Section::SetFlags() {
@@ -49,9 +54,8 @@ Section::~Section () {
 }
 
 Section::Section(string header, StringTable * stable)
-    : sh_flags(""), data(NULL) {
+    : sh_flags(TypeFlags()), data(NULL) {
     this->stringTable = stable;
-    ConfigureFlags();
 
     // Build the flags
     stringstream s(header);

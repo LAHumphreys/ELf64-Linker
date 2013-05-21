@@ -17,6 +17,7 @@ public:
     // C'tor / D'tor
     Flags (const string flags, std::map<string ,char> &names);
     Flags (const string flags);
+    Flags(const Flags& rhs);
 
     // Configure Flags object
     bool AddFlag(const char flag);

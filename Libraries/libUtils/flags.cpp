@@ -19,9 +19,15 @@ Flags::Flags (string flags, std::map<string,char> &nameMap)
     for (auto flag: flags ) {
         AddFlag(flag);
     }
-
 }
 
+Flags::Flags(const Flags& rhs):
+    flagCount(rhs.flagCount),
+    mask(rhs.mask),
+    names(rhs.names),
+    flags(rhs.flags) 
+{ 
+}
 bool Flags::AddFlag(const char flag) {
     if  (flagCount < 63) {
         unsigned long base = 0x1;

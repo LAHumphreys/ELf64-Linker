@@ -1,13 +1,13 @@
 #include "symbol.h"
 #include <sstream>
 #include "binaryReader.h"
+#include <memory>
 using namespace std;
 
 
 Symbol::Symbol ( BinaryReader& reader,
                  BinaryReader& stable )
-: type(""), scope(""){ 
-    ConfigureFlags();
+: type(TypeFlags()), scope(ScopeFlags()) { 
     reader >> (RawSymbol&) *this;
 
     // pull our name out of the string table
@@ -16,16 +16,33 @@ Symbol::Symbol ( BinaryReader& reader,
 
 }
 
-void Symbol::ConfigureFlags() {
-    type.AddFlag('U',"STT_NOTYPE");
-    type.AddFlag('O',"STT_OBJECT");
-    type.AddFlag('P',"STT_FUNC");
-    type.AddFlag('S',"STT_SECTION");
-    type.AddFlag('F',"STT_FILE");
+const Flags& Symbol::TypeFlags() {
+    static unique_ptr<Flags> flags = NULL;
 
-    scope.AddFlag('L',"STB_LOCAL");
-    scope.AddFlag('G',"STB_GLOBAL");
-    scope.AddFlag('W',"STB_WEAK");
+    if ( !flags) {
+        flags = unique_ptr<Flags>(new Flags(""));
+
+        flags->AddFlag('U',"STT_NOTYPE");
+        flags->AddFlag('O',"STT_OBJECT");
+        flags->AddFlag('P',"STT_FUNC");
+        flags->AddFlag('S',"STT_SECTION");
+        flags->AddFlag('F',"STT_FILE");
+    }
+    return *flags;
+}
+
+const Flags& Symbol::ScopeFlags() {
+    static unique_ptr<Flags> flags = NULL;
+
+    if ( !flags) {
+        flags = unique_ptr<Flags>(new Flags(""));
+
+        flags->AddFlag('L',"STB_LOCAL");
+        flags->AddFlag('G',"STB_GLOBAL");
+        flags->AddFlag('W',"STB_WEAK");
+    }
+
+    return *flags;
 }
 
 void Symbol::UpdateFlags() {

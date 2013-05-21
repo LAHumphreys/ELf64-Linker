@@ -4,33 +4,41 @@
 #include "elf.h"
 #include "binaryReader.h"
 #include "reloc.h"
+#include <memory>
 
 using namespace std;
 
 Relocation::Relocation ( const BinaryReader &reader, 
                          const string section)
-    : type("")
+    : type(TypeFlags())
 {
-    ConfigureFlags();
     reader.Read(&reloc, Size());
     this->section = section;
 }
 
-void Relocation::ConfigureFlags() {
-    type.AddFlag('W', "SHF_WRITE");
-    type.AddFlag('A', "SHF_ALLOC");
-    type.AddFlag('C', "SHF_EXECINSTR");
-    type.AddFlag('A',"Absolute");
-    type.AddFlag('R',"Relative");
-    type.AddFlag('S',"Symbol");
-    type.AddFlag('1',"1Byte");
-    type.AddFlag('2',"2Byte");
-    type.AddFlag('4',"4Byte");
-    type.AddFlag('8',"8Byte");
-    type.AddFlag('+',"HasAddendum");
-    type.AddFlag('Z',"ZeroExtended");
-    type.AddFlag('I',"SignExtended");
+const Flags& Relocation::TypeFlags() {
+    static unique_ptr<Flags> flags = NULL;
+
+    if ( !flags) {
+        flags = unique_ptr<Flags>(new Flags(""));
+
+        flags->AddFlag('W', "SHF_WRITE");
+        flags->AddFlag('A', "SHF_ALLOC");
+        flags->AddFlag('C', "SHF_EXECINSTR");
+        flags->AddFlag('A',"Absolute");
+        flags->AddFlag('R',"Relative");
+        flags->AddFlag('S',"Symbol");
+        flags->AddFlag('1',"1Byte");
+        flags->AddFlag('2',"2Byte");
+        flags->AddFlag('4',"4Byte");
+        flags->AddFlag('8',"8Byte");
+        flags->AddFlag('+',"HasAddendum");
+        flags->AddFlag('Z',"ZeroExtended");
+        flags->AddFlag('I',"SignExtended");
+    }
+    return *flags;
 }
+
 
 void Relocation::ConvertFromElf () {
     // In this type all relocations are for symbols
