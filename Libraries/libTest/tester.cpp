@@ -3,16 +3,10 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <chrono>
+#include <ctime>
 
 
 using namespace std;
-
-Test::Test(string description, std::function<int(void)> test) {
-    this->test = test;
-    this->testType = BASIC;
-    this->description = description;
-}
 
 Test::Test(string description, std::function<int(testLogger& log)> test) {
     this->testLogged = test;
@@ -24,41 +18,41 @@ void Test::RunTest() {
     cout << description << ": ";
     testLogger log;
     #ifdef __PROFILE__TESTS
-        auto start = chrono::high_resolution_clock::now();
+        auto start = clock();
     #endif
-
-    int result;
-    if ( testType == BASIC ) {
-        result = test();
-    } else {
-        result = testLogged(log);
-    }
+    int result = testLogged(log);
     #ifdef __PROFILE__TESTS
-        auto stop = chrono::high_resolution_clock::now();
+        // we don't want to mess around in the invoke function
+        using TestPtr = int(*)(testLogger&);
+        TestPtr f = *testLogged.target<TestPtr>();
+        int count =1;
+        while ( clock() == start ) {
+            f(log);
+            count++;
+        }
+        auto stop = clock();
         if (result == 0 ) {
-            long TICKS_PER_SECOND = 100000000;
-            double duration = chrono::duration_cast<chrono::duration<double> >(stop - start).count();
-            if ( duration == 0 ) {
-                duration = 1.0 / TICKS_PER_SECOND;
-            }
-            long target = 15 * TICKS_PER_SECOND; 
-            long dur    = duration * TICKS_PER_SECOND +1;
-            cout << duration << " , "  << target << " , " << dur << endl;
-            for ( long t = dur; t < target; t+=dur )
-            {
-                testLogged(log);
-            }
+            long TICKS_PER_SECOND = CLOCKS_PER_SEC;
+            double duration = stop +1 - start;
+            long target = __PROFILE_CLOCK_SECS__ * TICKS_PER_SECOND; 
 
+            cout << duration << " (x"  << count << "), " << target;
+            cout << " , " << TICKS_PER_SECOND;
+            cout << "( " << stop << " - " << start << " )" << endl;
+
+            for ( long t = duration; t < target; t+=duration ) {
+                for ( int i=0; i<count; i++) {
+                    f(log);
+                }
+            }
         }
     #endif
     if (result == 0 ) {
         cout << "TEST PASSED" << endl;
     } else {
         cout << "TEST FAILED" << endl;
-        if ( testType == LOGGED ) {
-            cout << "Log follows: " << endl;
-            cout << log.str() << endl;
-        }
+        cout << "Log follows: " << endl;
+        cout << log.str() << endl;
         exit(result);
     }
 }

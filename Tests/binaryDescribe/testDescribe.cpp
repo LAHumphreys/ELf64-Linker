@@ -86,7 +86,7 @@ R"(00000000  7f 45 4c 46 02 01 01 00  00 00 00 00 00 00 00 00  |.ELF............
 000004d0  02 00 00 00 02 00 00 00  00 00 00 00 00 00 00 00  |................|
 )";
 
-long VerifyRead(testLogger& log);
+int VerifyRead(testLogger& log);
 
 int main(int argc, const char *argv[])
 {
@@ -94,7 +94,7 @@ int main(int argc, const char *argv[])
     return 0;
 }
 
-long VerifyRead(testLogger& log) {
+int VerifyRead(testLogger& log) {
     IFStreamReader file("../binaryDescribe/isYes/isYes.o");
     BinaryReader reader(file);
     string got = BinaryDescribe::Describe(reader,0x4d1);

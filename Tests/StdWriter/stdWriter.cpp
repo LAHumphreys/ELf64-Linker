@@ -8,7 +8,7 @@ using namespace std;
 
 //Tests
 template<class Writer>
-long VerifyFill(testLogger& log);
+int VerifyFill(testLogger& log);
 
 //Validators
 bool ValidateMatch( const char *str1, const char *str2, 
@@ -80,7 +80,7 @@ void Delete ( OFStreamWriter* writer ) {
 
 
 template<class Writer>
-long VerifyFill(testLogger& log) {
+int VerifyFill(testLogger& log) {
     long ret = 0;
 	Writer *writer = Generator();
 	log << "Writing a block, starting at 0" << endl;

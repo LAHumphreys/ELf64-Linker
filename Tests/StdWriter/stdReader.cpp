@@ -10,9 +10,9 @@ using namespace std;
 
 //Tests
 template<class Reader>
-long VerifyRead(testLogger& log);
+int VerifyRead(testLogger& log);
 template<class Reader>
-long VerifyReadString(testLogger& log);
+int VerifyReadString(testLogger& log);
 
 string quote = R"(
 There is a computer disease that anybody who works with computers knows about. 
@@ -29,9 +29,9 @@ bool ValidateMatch( const char *str1, const char *str2,
                                       testLogger& log);
 
 template<class Reader>
-long VerifyGet(testLogger& log);
+int VerifyGet(testLogger& log);
 template<class Reader>
-long VerifyRead(testLogger& log);
+int VerifyRead(testLogger& log);
 
 int main(int argc, const char *argv[])
 {
@@ -89,7 +89,7 @@ void Delete ( IFStreamReader* reader ) { remove(reader->Fname().c_str()); delete
 
 
 template<class Reader>
-long VerifyGet(testLogger& log) {
+int VerifyGet(testLogger& log) {
     long ret = 0;
 
 	Reader *reader = Generator();
@@ -116,7 +116,7 @@ long VerifyGet(testLogger& log) {
 }
 
 template<class Reader>
-long VerifyRead(testLogger& log) {
+int VerifyRead(testLogger& log) {
     long ret = 0;
 
 	Reader *reader = Generator();
@@ -149,7 +149,7 @@ long VerifyRead(testLogger& log) {
 }
 
 template<class Reader>
-long VerifyReadString(testLogger& log) {
+int VerifyReadString(testLogger& log) {
     long ret = 0;
 
 	Reader *reader = Generator();
