@@ -1,14 +1,7 @@
 Overview 
 ========
 
-Linkers and Loaders (John Levine, see: http://www.iecc.com/linker/ ) provides an interesting introduction to linkers and proposes a project to build your own linker. Sadly the online code and object files are not complete. 
-
-This project has two parts
-
-1. A python implementation of the linker that reads LINK files, links them and writes a new LINK file. The implementation passes the examples for which data exists at http://www.iecc.com/linker/
-2. A C++ library that can read in ELF64 libraries (targeting linux x86-64) and writes LINK files. It will also be able to read in a valid LINK file and create a valid ELF binary
-
-Using these components it will be possible to link basic binaries. Note however that the LINK format is just a teaching tool, and is hopelessly in-efficient. Once the implementation completes the book, the C++ library will be enhanced to do the linking itself.
+Pure C++ tools for linking binaries targeting the x86_64 platform running a modern Linux OS
 
 Current State (May 2013)
 ==========================
