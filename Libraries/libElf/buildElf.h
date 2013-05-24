@@ -41,6 +41,7 @@ struct ElfContent {
 class ElfFile{
 public:
     ElfFile(ElfContent &data);
+    ElfFile(ElfContent &&data): ElfFile(data){}
     void MakeNewHeader(ElfContent &data);
     BinaryWriter ProcessProgHeaders(ElfContent& data);
     BinaryWriter WriteDataSections( ElfContent& data, 
