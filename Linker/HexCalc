@@ -1,8 +1,0 @@
-#!/usr/bin/python
-
-import sys
-import linker
-
-a1 = sys.argv[1]
-a2 = sys.argv[2]
-print linker.Hex(a1) + linker.Hex(a2)

@@ -1,4 +1,4 @@
 break objectHeaderTable.cpp:39
-break dataVectorTest.cpp:198
+break binaryReaderTests.cpp:534
 break elfStringTable.cpp:13
 break elfStringTable.cpp:66
