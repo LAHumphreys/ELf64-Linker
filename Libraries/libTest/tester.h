@@ -51,17 +51,14 @@ public:
 #endif
 
 enum TEST_TEMPLATE { BASIC, LOGGED };
-typedef std::function<int(void)> test;
 typedef std::function<int(testLogger&)> loggedTest ;
 
 class Test {
 public:
-    Test (string description, std::function<int(void)> test);
     Test (string description, std::function<int(testLogger&)> test);
     void RunTest();
 
 private:
-    std::function<int(void)> test;
     std::function<int(testLogger& )> testLogged;
     string description;
 	TEST_TEMPLATE testType;

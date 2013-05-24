@@ -113,7 +113,10 @@ endif
 
 
 ifeq ($(findstring profile,$(MAKECMDGOALS)),profile)
-   CPP_FLAGS+=-pg -D__PROFILE__TESTS -O2 -march=native
+   CPP_FLAGS+=-pg -D__PROFILE__TESTS -D__PROFILE_CLOCK_SECS__=$(PROFILE_SECS) -O2 -march=native
+   ifndef PROFILE_SECS
+      PROFILE_SECS=5
+   endif
    DEBUG_ON=FALSE
 endif
 
@@ -126,7 +129,7 @@ ifeq ($(DEBUG_ON),YES)
 endif
 
 ifeq ($(USE_CPP11),YES)
-  CPPSTD=c++0x
+  CPPSTD=c++11
 endif
 
 ifeq ($(findstring cover,$(MAKECMDGOALS)),cover)
@@ -370,14 +373,17 @@ usage:
 	@echo "There are some additional options when handling tests:"
 	@echo "   To valgrind tests: : make memtest"
 	@echo "       Works on an ordinary debug build, the build will fail if valgrind identifies any errors"
+	@echo ""
 	@echo "   To run gdb over the tests: make gdbtest"
 	@echo "       This exectutes all tests in a gdb enviroment that has source .gdb_setup and .gdb_breakpoints"
 	@echo "       The idea is two set a breakpoint at the test / function you are interested"
 	@echo "       breakpoints.vim has been confiured to make this trivial from inside the Vim editor"
+	@echo ""
 	@echo "   To coverage test the tests:"
 	@echo "       make cover       : standard build, but with coverage enabled (ideally should be a clean build)"
 	@echo "       make coverbuild  : Build the htmlpages from the coverage data (depends on lcov)"
 	@echo "       make coverview   : Open coverage data in a web browser"
+	@echo ""
 	@echo "   To profile the tests:"
 	@echo "       WARNING: In order to increase the accuracy of the profile, proifle build is configured to repeat tests"
 	@echo "                many times"
@@ -385,3 +391,5 @@ usage:
 	@echo "       WARNING: To be realistic, profiling disables debuging, and enabled basic optimisation: -O2 -march=natic"
 	@echo "       make profile     : Build the project, and profile the tests"
 	@echo "       make profileview : Open the profile data in a web browser"
+	@echo ""
+	@echo "       export PROFILE_SECS=<seconds=5>: Time to loop over tests for to build up a better profile "
