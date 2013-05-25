@@ -5,7 +5,7 @@ LINKED_LIBS= libElf    \
 			 libIOInterface \
 			 libTest
 
-BUILD_TIME_TESTS=objectHeaderTable elfStringTable sectionHeader unitialisedMemory
+BUILD_TIME_TESTS=objectHeaderTable elfStringTable sectionHeader unitialisedMemory symbols
 CPP_TAGS_FILE=testelf2elf-c++.tags
 
 include ../../makefile.include

@@ -34,11 +34,13 @@ public:
     int RelocCount() { return 0; /*not yet implemented */}
 
     ElfContent Content();
+
 protected:
     void ReadSymbols();
     void ReadProgramHeaders();
     void ReadSections();
     void WriteStringTable ();
+    void UpdateSymbolTable ();
 
 private:
     BinaryReader reader;

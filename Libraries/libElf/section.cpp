@@ -21,8 +21,9 @@ Section::Section( const BinaryReader& headerPos,
     name = (strings + (long)NameOffset()).ReadString();
 
     // Get our data
-    data = new Data( headerPos.Begin().operator+(DataStart()) , 
-                     DataSize());
+    data = shared_ptr<Data>(
+               new Data( headerPos.Begin() + DataStart(), 
+                         DataSize()));
 
     SetFlags();
 }
@@ -57,7 +58,6 @@ void Section::SetFlags() {
 }
 
 Section::~Section () {
-    if (data) delete data;
 }
 
 Section::Section(string header, StringTable * stable)
@@ -157,7 +157,7 @@ Section * Section::MakeNewStringTable( StringTable &tab, StringTable* sectionNam
 
     newSection->ItemSize() = 0; //no fixed sized entries
 
-    newSection->Alignment() = 0; //no addresses
+    newSection->Alignment() = 1; //no addresses
 
     newSection->RawInfo() = 0; // man elf ( not 4 strings)
 
@@ -167,7 +167,7 @@ Section * Section::MakeNewStringTable( StringTable &tab, StringTable* sectionNam
     //
     // Finally copy across the string table data
     //
-    newSection->data = new Data(tab.Size());
+    newSection->data = shared_ptr<Data> (new Data(tab.Size()));
     tab.WriteTable(newSection->data->Writer());
     newSection->DataSize() = newSection->data->Size();
 

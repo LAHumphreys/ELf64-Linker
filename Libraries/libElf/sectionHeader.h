@@ -19,6 +19,7 @@ public:
     inline bool IsSymTable() const { return sh_type ==  SHT_SYMTAB; }
     inline bool IsStringTable() const {return sh_type ==  SHT_STRTAB; }
     inline bool IsRelocTable() const {return sh_type ==  SHT_RELA; }
+    inline bool IsNull() const { return sh_type == SHT_NULL; }
     inline Elf64_Xword& Alignment() { return sh_addralign; }
     
     // Data properties

@@ -115,14 +115,45 @@ BinaryWriter ElfFile::WriteUnloadedDataSections( ElfContent& data,
     //  - This may be all in a .o file
     for ( int i =0; i< header.Sections(); i++ ) {
         Section& sec = *(data.sections[i]);
-        if ( !dataWritten[i] && sec.HasFileData()) {
-            sec.DataStart() = dataWritePos;
-            sec.WriteRawData(dataWritePos);
-            // These are not loadable, we have no responsibility to 
-            // align them
+        if (   !dataWritten[i] 
+            && sec.HasFileData() 
+            && !sec.IsRelocTable())
+        {
+            if ( sec.IsNull() ) {
+                sec.DataStart() = 0;
+            } else {
+                // Align start position
+                if ( sec.Alignment() != 0 )  {
+                    dataWritePos.Offset() = 
+                        dataWritePos.NextBoundrary(sec.Alignment());
+                }
+
+                sec.DataStart() = dataWritePos;
+                sec.WriteRawData(dataWritePos);
+            }
             dataWritePos = (long)dataWritePos + sec.DataSize();
+            dataWritten[i] = true;
         }
     }
+
+    // The relocation tables go on the end:
+    for ( int i =0; i< header.Sections(); i++ ) {
+        Section& sec = *(data.sections[i]);
+        if (   !dataWritten[i] && sec.IsRelocTable())
+        {
+            // Align start position
+            if ( sec.Alignment() != 0 )  {
+                dataWritePos.Offset() = 
+                    dataWritePos.NextBoundrary(sec.Alignment());
+            }
+
+            sec.DataStart() = dataWritePos;
+            sec.WriteRawData(dataWritePos);
+            dataWritePos = (long)dataWritePos + sec.DataSize();
+            dataWritten[i] = true;
+        }
+    }
+
     return dataWritePos;
 }
 
@@ -150,6 +181,8 @@ BinaryWriter ElfFile::WriteDataSections( ElfContent &data,
             }
             writePos = (long)writer + section->Address() 
                                     - prog.Address();
+
+            section->DataStart() = writePos;
             section->WriteRawData(writePos);
             if (end <=  section->DataSize() + writePos)
                  end =  section->DataSize() + writePos;

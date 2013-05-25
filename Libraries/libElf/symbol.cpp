@@ -92,3 +92,36 @@ string Symbol::LinkFormat() {
 bool Symbol::IsLinkSymbol () {
     return name != "";
 }
+
+string RawSymbol::Describe () const {
+    stringstream description;
+
+    unsigned char infoMask = st_info;
+    unsigned char bindMask = ELF64_ST_BIND(infoMask);
+    unsigned char typeMask = ELF64_ST_TYPE(infoMask);
+    bool Flags_STT_NOTYPE = typeMask == STT_NOTYPE ;
+    bool Flags_STT_OBJECT = typeMask == STT_OBJECT ;
+    bool Flags_STT_FUNC = typeMask == STT_FUNC ;
+    bool Flags_STT_SECTION = typeMask == STT_SECTION ;
+    bool Flags_STT_FILE = typeMask == STT_FILE ; 
+    bool Flags_STB_LOCAL = bindMask == STB_LOCAL ;
+    bool Flags_STB_GLOBAL = bindMask == STB_GLOBAL ;
+    bool Flags_STB_WEAK = bindMask == STB_WEAK ;
+
+    description << " Symbol name, index in string tbl : " << st_name << endl;		    
+    description << " Type and binding attributes : " << st_info << endl;	
+    description << " No defined meaning, 0 : " << st_other << endl;	
+    description << " Associated section index : " << st_shndx << endl;		
+    description << " Value of the symbol : " << st_value << endl;		
+    description << " Type Falgs: " << endl;
+    description << "    " <<  "NOTYPE: " << Flags_STT_NOTYPE << endl;
+    description << "    " <<  "OBJECT: " << Flags_STT_OBJECT << endl;
+    description << "    " <<  "FUNC: " << Flags_STT_FUNC << endl;
+    description << "    " <<  "SECTION: " << Flags_STT_SECTION << endl;
+    description << "    " <<  "FILE: " << Flags_STT_FILE << endl;
+    description << " Scope Falgs: " << endl;
+    description << "    " <<  "LOCAL: " << Flags_STB_LOCAL << endl;
+    description << "    " <<  "GLOBAL: " << Flags_STB_GLOBAL << endl;
+    description << "    " <<  "WEAK: " << Flags_STB_WEAK << endl;
+    return description.str();
+}

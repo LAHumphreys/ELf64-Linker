@@ -12,6 +12,10 @@ Data::Data (const BinaryReader &p, long size):data(size) {
 Data::Data(long size):data(size) {
 }
 
+void Data::Resize(long size) {
+    this->data.Resize(size);
+}
+
 string Data::HexCode() { 
     ostringstream hexstring;
     for ( long i=0; i< data.Size(); ++i) { 

@@ -1,4 +1,3 @@
-using namespace std;
 #ifndef SectionX86_64
 #define SectionX86_64
 #include <string>
@@ -7,9 +6,11 @@ using namespace std;
 #include "elf.h"
 #include "binaryData.h"
 #include "sectionHeader.h"
+#include <memory>
 
 class StringTable;
 class BinaryReader;
+using namespace std;
 
 class Section: public SectionHeader{
     friend class X86Parser;
@@ -33,6 +34,8 @@ public:
     bool IsLInkSection();
     string Name() { return name; }
 
+    shared_ptr<Data> GetData() { return data; }
+
     // The caller is repsonsible for destruction
     static Section* MakeNewStringTable( StringTable &tab, StringTable *sectionNames, string name);
 
@@ -46,7 +49,7 @@ protected:
     static Flags::Mask Flags_SHF_EXECINSTR;
 private:
     Section ();
-    Data * data;
+    shared_ptr<Data> data;
     StringTable *stringTable;
     string name;
     Flags sh_flags;

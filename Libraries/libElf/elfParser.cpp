@@ -4,9 +4,10 @@ using namespace std;
 #include <sstream>
 
 #include "elfParser.h"
+#include <memory>
 
-ElfParser::ElfParser(const FileLikeReader &f) 
-  : reader(f), stringTable(reader), headerStrings(reader)
+ElfParser::ElfParser(const FileLikeReader &f): 
+   reader(f), stringTable(reader), headerStrings(reader)
 
 {
     linkSections=0;
@@ -23,6 +24,7 @@ ElfParser::ElfParser(const FileLikeReader &f)
     ReadSymbols();
 
     WriteStringTable();
+    UpdateSymbolTable();
 
 }
 
@@ -138,10 +140,30 @@ ElfContent ElfParser::Content() {
 
 void ElfParser::WriteStringTable () {
     for ( Section* sec : sections ) {
-        sec->NameOffset() = sh_strtab.AddString(sec->Name().c_str());
+        if ( sec->Name().length() > 0 )
+            sec->NameOffset() = sh_strtab.AddString(sec->Name().c_str());
+        else
+            sec->NameOffset() = 0;
     }
     Section* shtab = Section::MakeNewStringTable(sh_strtab, &sh_strtab, ".shstrtab");
     // Swap in the new string table
     delete sections[sectionMap[".shstrtab"]];
     sections[sectionMap[".shstrtab"]] = shtab;
+}
+
+void ElfParser::UpdateSymbolTable() {
+    Section& symTable = *sections[sectionMap[".symtab"]];
+
+    if ( symbols.size() == 0 ) {
+        symTable.DataSize() = 0;
+    } else {
+        symTable.DataSize() = symbols.size() * symTable.ItemSize();
+    }
+    // Now write the new data
+    shared_ptr<Data> data = symTable.GetData();
+    data->Resize(symTable.DataSize());
+    BinaryWriter w = data->Writer();
+    for ( int i=0; i<symTable.NumItems(); ++i) {
+        w << symbols[i]->RawItem();
+    }
 }

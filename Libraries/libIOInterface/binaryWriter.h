@@ -65,6 +65,7 @@ public:
     template<class T>
     inline BinaryWriter& operator<<(const T&);
 
+    virtual long& Offset() {return offset;}
     virtual long Offset() const {return offset;}
     virtual operator long() const { return offset;}
 private: 

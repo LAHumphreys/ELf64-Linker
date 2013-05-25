@@ -12,6 +12,8 @@ public:
     Elf64_Section& SectionIndex() { return st_shndx;}
     Elf64_Addr& Value() { return st_value;}
     Elf64_Xword& Size() { return st_size;}
+
+    string Describe () const;
 };
 
 class Symbol: protected RawSymbol {

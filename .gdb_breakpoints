@@ -1,4 +1,3 @@
-break objectHeaderTable.cpp:39
-break binaryReaderTests.cpp:534
-break elfStringTable.cpp:13
-break elfStringTable.cpp:66
+break binaryWriterTests.cpp:213
+break sectionHeader.cpp:29
+break sectionHeader.cpp:104

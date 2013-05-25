@@ -8,10 +8,15 @@
 #include <elf.h>
 #include "dataLump.h"
 #include "defer.h"
+#include "binaryDescribe.h"
+#include <string>
+
+using namespace std;
 
 DataLump<5000> outfile;
 Elf64_Shdr* newSections;
 Elf64_Shdr* oldSections;
+string* names;
 int sections;
 
 
@@ -33,24 +38,30 @@ int main(int argc, const char *argv[])
     ElfFile file( content);
     
     // read in the section data
-    BinaryReader readPos(outfile);
-    ElfHeaderX86_64 header(readPos);
+    ElfHeaderX86_64 header(outfile);
+    ElfHeaderX86_64 oldHeader(f);
     
     newSections = new Elf64_Shdr[header.Sections()];
     oldSections = new Elf64_Shdr[header.Sections()];
+    names = new string[header.Sections()];
     DEFER ( 
        delete [] newSections; 
        delete [] oldSections; 
+       delete [] names;
     ) 
 
     BinaryReader newReader(outfile,header.SectionTableStart());
+    BinaryReader oldReader(f,oldHeader.SectionTableStart());
 
     for ( int i=0; i< header.Sections(); i++ ) {
         newReader >> newSections[i];
-        oldSections[i] = *(content.sections[i]);
+        oldReader >> oldSections[i];
+        names[i] = p.Content().sections[i]->Name();
+        
     }
 
     sections = header.Sections();
+
     Test("Validate section headers",(loggedTest)CompareSections).RunTest();
 
     return 0;
@@ -100,7 +111,7 @@ int CompareSections(testLogger& log ) {
     for ( int i=0; i< sections; i++ ) {
         const SectionHeader& newHdr = newSections[i];
         const SectionHeader& oldHdr = oldSections[i];
-        log << i << ": " << endl;
+        log << i << ": " << names[i] << endl;
         log << "*********************************************************" << endl;
         log << "***        NEW                                      *****" << endl;
         log << newHdr.Descripe() << endl;
@@ -159,17 +170,38 @@ int CompareSections(testLogger& log ) {
         }
 
         if ( newHdr.DataStart() != oldHdr.DataStart() ) {
-            log << "DataStart() missmatch: ";
-            log << newHdr.DataStart() << " , ";
-            log  << oldHdr.DataStart() << endl;
-            return 1;
+            bool fail = true;
+            if (   oldHdr.IsRelocTable() 
+                || oldHdr.IsStringTable() 
+                || oldHdr.IsSymTable()) 
+            {
+                log << "Our builder doens't put any padding between the end of data";
+                log << " and the start of the special sections" << endl;
+                log << " Ignoring data-start missmatch: ";
+                log << newHdr.DataStart() << " , ";
+                log  << oldHdr.DataStart() << endl;
+                fail = false;
+            }
+            if (fail) { 
+                log << "DataStart() missmatch: ";
+                log << newHdr.DataStart() << " , ";
+                log  << oldHdr.DataStart();
+                return 1;
+            }
         }
 
         if ( newHdr.DataSize() != oldHdr.DataSize() ) {
-            log << "DataSize missmatch: ";
-            log << newHdr.DataSize() << " , ";
-            log  << oldHdr.DataSize() << endl;
-            return 1;
+            if ( oldHdr.IsStringTable() ) {
+                log << "Ignoring DataSize missmatch in string table ";
+                log << newHdr.DataSize() << " , ";
+                log  << oldHdr.DataSize() << endl;
+            }
+            else {
+                log << "DataSize missmatch: ";
+                log << newHdr.DataSize() << " , ";
+                log  << oldHdr.DataSize() << endl;
+                return 1;
+            }
         }
 
         if ( newHdr.ItemSize() != oldHdr.ItemSize() ) {
