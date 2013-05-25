@@ -69,7 +69,6 @@ void ElfParser::ReadProgramHeaders() {
 
     for ( int i=0; i<header->ProgramHeaders(); ++i) {
        progHeaders[i] = new ProgramHeader( readPos, sections);
-       readPos += hdrSize;
     }
 }
 

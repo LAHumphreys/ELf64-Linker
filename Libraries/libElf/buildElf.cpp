@@ -89,8 +89,10 @@ BinaryWriter ElfFile::ProcessProgHeaders(ElfContent &data ) {
     for ( auto ph: headers ) {
         // We need to align the program segment: (see comment in .h)
         // Calculate boundrary location
-        dataEnd= (long)dataWritePos.NextBoundrary( ph->Alignment()) 
-                + (ph->Address() % ph->Alignment());
+        if ( ph->Alignment() != 0 ) {
+            dataEnd= (long)dataWritePos.NextBoundrary( ph->Alignment()) 
+                    + (ph->Address() % ph->Alignment());
+        }
         // move to the boundrary
         dataWritePos.FillTo(dataEnd);
         dataWritePos = (long)dataEnd;

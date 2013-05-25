@@ -272,10 +272,14 @@ BUILD_FOLDERS :
 	done
 
 RUN_AUTO_TEST: BUILD_AUTO_TESTS
-	@for test in $(TESTS_TO_RUN); do \
+	@ulimit -c unlimited; \
+	for test in $(TESTS_TO_RUN); do \
+		if [ -e core ]; then \
+			rm core;\
+		fi;\
 		echo "***********************************************************"; \
 		echo "Running auto test: $$test";\
-		$$test || exit;\
+		$$test || if [ -e core ]; then gdb $$test core; exit; fi;\
 		echo "************************************************************"; \
 	done
 
