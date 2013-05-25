@@ -77,13 +77,12 @@ void ElfParser::ReadSymbols() {
     Section * symTable = sections[symidx];
     symbols.resize(symTable->NumItems());
 
-    BinaryReader readPos = reader.Begin().operator+
-                           (symTable->DataStart());
+    BinaryReader readPos = reader.Begin() + 
+                             symTable->DataStart();
 
     for ( int i=0; i < symTable->NumItems(); ++i) {
         symbols[i] = new Symbol(readPos,stringTable);
         if ( symbols[i]->IsLinkSymbol() ) ++linkSymbols;
-        readPos += symTable->ItemSize();
         symbolMap[symbols[i]->Name()] = i;
     }
 }
