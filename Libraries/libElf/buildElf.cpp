@@ -39,7 +39,7 @@ void ElfFile::InitialiseFile(ElfContent& data) {
     programHeadersStart = header.Size();
     dataSectionStart = (long) programHeadersStart + 
                        (  header.ProgramHeaderSize() 
-                        * data.progHeaders.size() );
+                        * header.ProgramHeaders() );
                          
     // Reserve space for data, plus room for alignment 
     // ( the idea is to allocate too much and resize back down )
@@ -75,39 +75,51 @@ void ElfFile::InitialiseHeader(ElfContent &data) {
 }
 
 BinaryWriter ElfFile::ProcessProgHeaders(ElfContent &data ) {
+
+
     // we need a local copy to sort
-    auto headers = data.progHeaders;
+    vector<ProgramHeader *> codeHeaders(data.progHeaders);
 
-    BinaryWriter dataWritePos = dataSectionStart;
-    auto dataEnd = dataWritePos;
-    auto pheaderWritePos = programHeadersStart;
+    SortByAddress(codeHeaders.begin(),codeHeaders.end());
 
-    headers.reserve(headers.size());
+    BinaryWriter dataPos = dataSectionStart;
+    BinaryWriter headerPos = programHeadersStart;
+    WriteProgHeaders(data,codeHeaders,dataPos,headerPos);
 
-    SortByAddress(headers.begin(),headers.end());
+    return headerPos;
+}
 
+void ElfFile::WriteProgHeaders ( 
+                     ElfContent& data,
+                     vector<ProgramHeader *>& headers,
+                     BinaryWriter&  dataPos,
+                     BinaryWriter&  headersPos)
+{
+    BinaryWriter dataEnd = dataPos;
+
+    // OK first insert the code headers
     for ( auto ph: headers ) {
         // We need to align the program segment: (see comment in .h)
         // Calculate boundrary location
         if ( ph->Alignment() != 0 ) {
-            dataEnd= (long)dataWritePos.NextBoundrary( ph->Alignment()) 
-                    + (ph->Address() % ph->Alignment());
+            dataEnd.Offset() = dataPos.NextBoundrary( ph->Alignment()) 
+                             + (ph->Address() % ph->Alignment());
         }
         // move to the boundrary
-        dataWritePos.FillTo(dataEnd);
-        dataWritePos = (long)dataEnd;
+        dataPos.FillTo(dataEnd);
+        dataPos.Offset() = dataEnd;
 
         // write the section data
-        dataEnd = (long)WriteDataSections( data, *ph, dataWritePos);
+        dataEnd.Offset() = WriteDataSections( data, *ph, dataPos);
 
         // Set the file position in the program header
-        ph->DataStart() = dataWritePos;
-        ph->FileSize() = dataEnd - dataWritePos;
+        ph->DataStart() = dataPos;
+        ph->FileSize() = dataEnd - dataPos;
 
-        pheaderWritePos.Write(ph,header.ProgramHeaderSize());
-        pheaderWritePos += header.ProgramHeaderSize();
+        headersPos << ph->RawHeader();
     }
-    return pheaderWritePos;
+
+    dataPos.Offset() = dataEnd;
 }
 
 BinaryWriter ElfFile::WriteUnloadedDataSections( ElfContent& data,

@@ -57,6 +57,9 @@ protected:
     template<class T>
     void SortByAddress(T start, T end);
     void WriteSpecial(ElfContent&, string name, long&, BinaryWriter&);
+    void WriteProgHeaders ( ElfContent&, vector<ProgramHeader *>& , 
+                                         BinaryWriter&,
+                                         BinaryWriter&  );
 
     BinaryWriter WriteUnloadedDataSections( ElfContent& data,
                                             BinaryWriter& dataWritePos);

@@ -63,9 +63,8 @@ void ElfParser::ReadProgramHeaders() {
     progHeaders.resize(header->ProgramHeaders());
 
     // Read in the section constants
-    BinaryReader readPos = reader.Begin().operator+ 
-                           (header->ProgramHeadersStart());
-    long hdrSize =  header->ProgramHeaderSize();
+    BinaryReader readPos =   reader.Begin() 
+                           + header->ProgramHeadersStart();
 
     for ( int i=0; i<header->ProgramHeaders(); ++i) {
        progHeaders[i] = new ProgramHeader( readPos, sections);

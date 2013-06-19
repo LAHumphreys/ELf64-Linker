@@ -279,7 +279,7 @@ RUN_AUTO_TEST: BUILD_AUTO_TESTS
 		fi;\
 		echo "***********************************************************"; \
 		echo "Running auto test: $$test";\
-		$$test || if [ -e core ]; then gdb $$test core; exit; fi;\
+		$$test || if [ -e core ]; then gdb $$test core; exit; else exit; fi;\
 		echo "************************************************************"; \
 	done
 

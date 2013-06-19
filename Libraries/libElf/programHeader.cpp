@@ -4,11 +4,13 @@
 #include "binaryReader.h"
 #include <algorithm>
 #include <memory>
+#include <iomanip>
 
 using namespace std;
 
 RawProgramHeader::RawProgramHeader(const Elf64_Phdr& other) 
     : Elf64_Phdr(other) {}
+
 
 ProgramHeader::ProgramHeader ( BinaryReader& reader, 
                                const SECTION_ARRAY& sections ) 
@@ -73,6 +75,65 @@ string ProgramHeader::WriteLink() {
      return link.str();
 }
 
-RawProgramHeader ProgramHeader::RawHeader() {
+RawProgramHeader& ProgramHeader::RawHeader() {
     return *this;
+}
+
+string RawProgramHeader::Describe() const {
+    stringstream description;
+    description << "DataStart: ";
+    description << hex << DataStart() << endl;
+
+    description << "Alignment: ";
+    description << hex << Alignment() << endl;
+
+    description << "FileSize: ";
+    description << hex << FileSize() << endl;
+
+    description << "Size In Memory: ";
+    description << hex << SizeInMemory() << endl;
+
+    description << "Address: ";
+    description << hex << Address() << endl;
+
+    description << "Is Null: ";
+    description << IsNull() << endl;
+
+    description << "Is Loadable Segment: ";
+    description << IsLoadableSegment() << endl;
+
+    description << "Is Dynamic Linking: ";
+    description << IsDynamicLinking() << endl;
+
+    description << "Is Interpreter: ";
+    description << IsInterpreter() << endl;
+
+    description << "Is Note: ";
+    description << IsNote() << endl;
+
+    description << "Is Program Headers: ";
+    description << IsProgramHeaders() << endl;
+
+    description << "Is Thread Local Storage: ";
+    description << IsThreadLocalStorage() << endl;
+
+    description << "GNUIs Exception Frame: ";
+    description << GNUIsExceptionFrame() << endl;
+
+    description << "GNUIs Executable: ";
+    description << GNUIsExecutable() << endl;
+
+    description << "GNUIs Read Only After Reloc: ";
+    description << GNUIsReadOnlyAfterReloc() << endl;
+
+    description << "Is Executable: ";
+    description << IsExecutable() << endl;
+
+    description << "Is Readable: ";
+    description << IsReadable() << endl;
+
+    description << "Is Writeable: ";
+    description << IsWriteable() << endl;
+
+    return description.str();
 }

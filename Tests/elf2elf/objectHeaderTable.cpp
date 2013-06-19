@@ -7,6 +7,7 @@
 #include "tester.h"
 #include <elf.h>
 #include "dataLump.h"
+#include "defer.h"
 
 int magic( testLogger& log);
 int headerClass( testLogger& log);
@@ -19,9 +20,12 @@ int machine(testLogger& log);
 int HeaderSizes(testLogger& log );
 
 ElfParser *p;
-DataLump<5000> outfile;
+unsigned char * buf = new unsigned char[50000000];
+DEFER ( delete [] buf;)
+DataIO outfile(buf,5000000);
 ElfHeaderX86_64 *header;
-Elf64_Ehdr *hdr;
+Elf64_Ehdr hdr;
+Elf64_Ehdr ohdr;
 
 using namespace std;
 
@@ -30,7 +34,7 @@ using namespace std;
  */
 int main(int argc, const char *argv[])
 {
-    ElfFileReader f("../elf2elf/isYes/isYes.o");
+    ElfFileReader f(argv[0]);
     
     p = new ElfParser(f);
     
@@ -42,7 +46,8 @@ int main(int argc, const char *argv[])
     file.WriteToFile(outfile.Writer());
 
 	header = new ElfHeaderX86_64(outfile.Reader());
-	hdr = (Elf64_Ehdr *) outfile.Reader().Dup(sizeof(Elf64_Ehdr));
+	outfile.Reader().Read(&hdr,sizeof(Elf64_Ehdr));
+	BinaryReader(f).Read(&ohdr,sizeof(Elf64_Ehdr));
 
     Test("ELF MAGIC",  (loggedTest)magic).RunTest();
     Test("ELF CLASS",  (loggedTest)headerClass).RunTest();
@@ -63,14 +68,14 @@ int main(int argc, const char *argv[])
  *
  */
 int magic( testLogger& log) {
-	log << "0: >" << ELFMAG0 << "< , " << hdr->e_ident[0] << endl;
-	log << "1: >" << ELFMAG1 << "< , " << hdr->e_ident[1] << endl;
-	log << "2: >" << ELFMAG2 << "< , " << hdr->e_ident[2] << endl;
-	log << "3: >" << ELFMAG3 << "< , " << hdr->e_ident[3] << endl;
-	if (    ELFMAG0 != hdr->e_ident[0] 
-		 || ELFMAG1 != hdr->e_ident[1] 
-		 || ELFMAG2 != hdr->e_ident[2]  
-		 || ELFMAG3 != hdr->e_ident[3]  ) {
+	log << "0: >" << ELFMAG0 << "< , " << hdr.e_ident[0] << endl;
+	log << "1: >" << ELFMAG1 << "< , " << hdr.e_ident[1] << endl;
+	log << "2: >" << ELFMAG2 << "< , " << hdr.e_ident[2] << endl;
+	log << "3: >" << ELFMAG3 << "< , " << hdr.e_ident[3] << endl;
+	if (    ELFMAG0 != hdr.e_ident[0] 
+		 || ELFMAG1 != hdr.e_ident[1] 
+		 || ELFMAG2 != hdr.e_ident[2]  
+		 || ELFMAG3 != hdr.e_ident[3]  ) {
 			log << "MAGIC FAILED!" << endl;
 			return 1;
 	}
@@ -78,9 +83,9 @@ int magic( testLogger& log) {
 }
 
 int headerClass (testLogger& log) {
-	if ( hdr->e_ident[EI_CLASS] != ELFCLASS64 ) {
+	if ( hdr.e_ident[EI_CLASS] != ELFCLASS64 ) {
 		log << "CLASS MISSMATCH" << endl;
-		log << hdr->e_ident[EI_CLASS] << " , " << ELFCLASS64 << endl;
+		log << hdr.e_ident[EI_CLASS] << " , " << ELFCLASS64 << endl;
 		return 1;
 	} else {
 	    return 0;
@@ -88,9 +93,9 @@ int headerClass (testLogger& log) {
  }
 
 int tEI_DATA (testLogger& log) {
-	if ( hdr->e_ident[EI_DATA] != ELFDATA2LSB ) {
+	if ( hdr.e_ident[EI_DATA] != ELFDATA2LSB ) {
 		log << "DATA MISSMATCH" << endl;
-		log << hdr->e_ident[EI_DATA] << " , " << ELFDATA2LSB << endl;
+		log << hdr.e_ident[EI_DATA] << " , " << ELFDATA2LSB << endl;
 		return 1;
 	} else {
 	    return 0;
@@ -98,9 +103,9 @@ int tEI_DATA (testLogger& log) {
  }
 
 int tEI_VERSION (testLogger& log) {
-	if ( hdr->e_ident[EI_VERSION] != EV_CURRENT ) {
+	if ( hdr.e_ident[EI_VERSION] != EV_CURRENT ) {
 		log << "VERSION MISSMATCH" << endl;
-		log << hdr->e_ident[EI_VERSION] << " , " << EV_CURRENT << endl;
+		log << hdr.e_ident[EI_VERSION] << " , " << EV_CURRENT << endl;
 		return 1;
 	} else {
 	    return 0;
@@ -108,9 +113,9 @@ int tEI_VERSION (testLogger& log) {
  }
 
 int tEI_OSABI (testLogger& log) {
-	if ( hdr->e_ident[EI_OSABI] != ELFOSABI_LINUX ) {
+	if ( hdr.e_ident[EI_OSABI] != ELFOSABI_LINUX ) {
 		log << "APPLICATION BINARY INTERFACE  MISSMATCH" << endl;
-		log << hdr->e_ident[EI_OSABI] << " , " << ELFOSABI_LINUX << endl;
+		log << hdr.e_ident[EI_OSABI] << " , " << ELFOSABI_LINUX << endl;
 		return 1;
 	} else {
 	    return 0;
@@ -119,9 +124,9 @@ int tEI_OSABI (testLogger& log) {
 
 int PAD (testLogger& log) {
     for ( int i=EI_OSABI +1; i< EI_NIDENT; i++ ) {
-        if ( hdr->e_ident[i] != 0 ) {
+        if ( hdr.e_ident[i] != 0 ) {
             log << "NON-ZERO PADDING in ELF_HEADER" << endl;
-            log << hdr->e_ident[i] << " , " << 0 << endl;
+            log << hdr.e_ident[i] << " , " << 0 << endl;
             return 1;
         }
     }
@@ -129,9 +134,9 @@ int PAD (testLogger& log) {
 }
 
 int te_type(testLogger& log) {
-    if ( hdr->e_type != ET_REL ) {
+    if ( hdr.e_type != ET_REL ) {
         log << "Invalid type for object file" << endl;
-        log << hdr->e_type << " , " << ET_REL  << endl;
+        log << hdr.e_type << " , " << ET_REL  << endl;
         return 1;
     } else {
         return 0;
@@ -139,9 +144,9 @@ int te_type(testLogger& log) {
 }
 
 int machine(testLogger& log) {
-    if ( hdr->e_machine != EM_X86_64 ) {
+    if ( hdr.e_machine != EM_X86_64 ) {
         log << "Unexpected machine type" << endl;
-        log << hdr->e_machine << " , " << EM_X86_64  << endl;
+        log << hdr.e_machine << " , " << EM_X86_64  << endl;
         return 1;
     } else {
         return 0;
@@ -149,17 +154,26 @@ int machine(testLogger& log) {
 }
 
 int HeaderSizes(testLogger& log ) {
-    if ( hdr->e_shentsize != sizeof(Elf64_Shdr) ) {
+    if ( hdr.e_shentsize != sizeof(Elf64_Shdr) ) {
         log << "Invalid section header size" << endl;
-        log << hdr->e_shentsize << " , ";
+        log << hdr.e_shentsize << " , ";
         log  << sizeof(Elf64_Shdr)  << endl;
         return 1;
-    } else if ( hdr->e_phentsize != sizeof(Elf64_Phdr) ){
+    } else if ( hdr.e_phentsize != sizeof(Elf64_Phdr) ){
         log << "Invalid program header size" << endl;
-        log << hdr->e_phentsize << " , ";
+        log << hdr.e_phentsize << " , ";
         log  << sizeof(Elf64_Phdr)  << endl;
         return 1;
-    } else {
-        return 0;
+    } else if ( hdr.e_shnum != ohdr.e_shnum ){
+        log << "Unexpected change in # of sections" << endl;
+        log << ohdr.e_shnum << " , ";
+        log  << hdr.e_shnum << endl;
+        return 1;
+    } else if ( hdr.e_phnum != ohdr.e_phnum ){
+        log << "Unexpected change in # of program section" << endl;
+        log << ohdr.e_phnum << " , ";
+        log  << hdr.e_phnum << endl;
+        return 1;
     }
+    return 0;
 }

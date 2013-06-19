@@ -16,7 +16,7 @@ void ExecBuilder::MakeDataExecutable() {
     BinaryWriter pwriter = writer + header.ProgramHeadersStart();
 
     for ( int i=0; i<header.ProgramHeaders(); i++ ) {
-        RawProgramHeader&& segment = (progHeaders[i])->RawHeader();
+        RawProgramHeader& segment = (progHeaders[i])->RawHeader();
 
         // Look for the writeable load segment
         if (segment.IsLoadableSegment() && segment.IsWriteable() ) {
