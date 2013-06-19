@@ -15,6 +15,8 @@ public:
     {
         this->Fill(0,'\0',size);
     }
+    const unsigned char* RawData() const;
+    unsigned char* RawData();
 private:
      unsigned char rawData[size];
 };
