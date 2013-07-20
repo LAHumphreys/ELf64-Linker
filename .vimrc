@@ -1,5 +1,5 @@
 " Configure this appropriately
-let g:linker_dir = "/home/lhumphreys/Linker/elf-2-link/"
+let g:linker_dir = "/home/luke/Linker/elf-2-link/"
 
 " Configure the valgrind plugin
 let g:valgrind_command = 'make'

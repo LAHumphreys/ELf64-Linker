@@ -75,10 +75,6 @@ string ProgramHeader::WriteLink() {
      return link.str();
 }
 
-RawProgramHeader& ProgramHeader::RawHeader() {
-    return *this;
-}
-
 string RawProgramHeader::Describe() const {
     stringstream description;
     description << "DataStart: ";
@@ -136,4 +132,42 @@ string RawProgramHeader::Describe() const {
     description << IsWriteable() << endl;
 
     return description.str();
+}
+
+int RawProgramHeader::FileRank() const {
+    if ( IsProgramHeaders() )  {
+        return 10;
+    } else if ( IsInterpreter() ) {
+        return 20;
+    } else if ( IsLoadableSegment() ) {
+        return 30;
+    } else if ( IsDynamicLinking() ) {
+        return 40;
+    } else if ( IsNote() ) {
+        return 50;
+    } else if ( GNUIsExceptionFrame() ) {
+        return 1000;
+    } else if ( GNUIsExecutable() ) {
+        return 1010;
+    } else if ( GNUIsReadOnlyAfterReloc() ) {
+        return 1020;
+    } else {
+        // By default, strange segments can be tagged on to the end
+        return 99999999;
+    }
+    // Can't get here
+}
+
+void ProgramHeader::SetAdditionalMemory( const Elf64_Off& space ) {
+        RawProgramHeader::SizeInMemory() = FileSize() + space;
+}
+
+const Elf64_Off ProgramHeader::GetAdditionalMemory() const 
+{ 
+    return SizeInMemory() - FileSize();
+}
+
+void ProgramHeader::SetFileSize( const Elf64_Off& size ) {
+        RawProgramHeader::SizeInMemory() += size - FileSize();
+        RawProgramHeader::FileSize() = size;
 }

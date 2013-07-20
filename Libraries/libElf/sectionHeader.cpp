@@ -14,15 +14,15 @@ SectionHeader::SectionHeader() {
 
 string SectionHeader::Descripe () const {
     stringstream description;
-    description << "sh_name:    : " << sh_name << endl;
-    description << "sh_type     : " << sh_type << endl;
-    description << "sh_flags    : " << sh_flags << endl;	
-    description << "sh_addr     : " << sh_addr << endl;
-    description << "sh_offset   : " << sh_offset << endl;
-    description << "sh_size     : " << sh_size << endl;
-    description << "sh_link     : " << sh_link << endl;
-    description << "sh_info     : " << sh_info << endl;
-    description << "sh_addralign: " << sh_addralign << endl;
-    description << "sh_entsize  : " << sh_entsize << endl;	
+    description << "sh_name:    : " << hex << sh_name << endl;
+    description << "sh_type     : " << hex << sh_type << endl;
+    description << "sh_flags    : " << hex << sh_flags << endl;	
+    description << "sh_addr     : " << hex << sh_addr << endl;
+    description << "sh_offset   : " << hex << sh_offset << endl;
+    description << "sh_size     : " << hex << sh_size << endl;
+    description << "sh_link     : " << hex << sh_link << endl;
+    description << "sh_info     : " << hex << sh_info << endl;
+    description << "sh_addralign: " << hex << sh_addralign << endl;
+    description << "sh_entsize  : " << hex << sh_entsize << endl;	
     return description.str();
 }

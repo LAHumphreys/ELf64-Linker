@@ -7,7 +7,6 @@
 
 ElfFile::ElfFile(ElfContent& data) 
      : file(1024) , 
-       programHeadersStart(file),
        dataSectionStart(file),
        sectionHeadersStart(file),
        header(ElfHeaderX86_64::NewObjectFile())
@@ -36,10 +35,7 @@ ElfFile::ElfFile(ElfContent& data)
 void ElfFile::InitialiseFile(ElfContent& data) {
     long sectionDataLength = 0;
     
-    programHeadersStart = header.Size();
-    dataSectionStart = (long) programHeadersStart + 
-                       (  header.ProgramHeaderSize() 
-                        * header.ProgramHeaders() );
+    dataSectionStart.Offset() = header.Size();
                          
     // Reserve space for data, plus room for alignment 
     // ( the idea is to allocate too much and resize back down )
@@ -53,6 +49,7 @@ void ElfFile::InitialiseFile(ElfContent& data) {
     file.Resize(  (long) dataSectionStart
                 + sectionDataLength
                 + header.SectionHeaderSize() * header.Sections());
+    file.Fill(0,'\0',file.Size());
 }
 
 void ElfFile::InitialiseHeader(ElfContent &data) {
@@ -80,28 +77,54 @@ BinaryWriter ElfFile::ProcessProgHeaders(ElfContent &data ) {
     // we need a local copy to sort
     vector<ProgramHeader *> codeHeaders(data.progHeaders);
 
-    SortByAddress(codeHeaders.begin(),codeHeaders.end());
+    if (codeHeaders.size() == 0 ) {
+        // Some elf files have no prog. headers
+        return dataSectionStart;
+    }
+
+    auto lt = [] (ProgramHeader* lhs, ProgramHeader* rhs) -> bool {
+                  int lrank = lhs->RawHeader().FileRank();
+                  int rrank = rhs->RawHeader().FileRank();
+                  if ( lrank == rrank ) {
+                      return lhs->Address() < rhs->Address();
+                  } else {
+                      return lrank < rrank;
+                  }
+                  //Can't get here
+              };
+    sort(codeHeaders.begin(),codeHeaders.end(),lt);
 
     BinaryWriter dataPos = dataSectionStart;
-    BinaryWriter headerPos = programHeadersStart;
-    WriteProgHeaders(data,codeHeaders,dataPos,headerPos);
+    WriteProgHeaders(data,codeHeaders,dataPos);
 
-    return headerPos;
+    return dataPos;
 }
 
 void ElfFile::WriteProgHeaders ( 
                      ElfContent& data,
                      vector<ProgramHeader *>& headers,
-                     BinaryWriter&  dataPos,
-                     BinaryWriter&  headersPos)
+                     BinaryWriter&  dataPos)
 {
+    BinaryWriter headerPos = dataPos;
     BinaryWriter dataEnd = dataPos;
 
-    // OK first insert the code headers
-    for ( auto ph: headers ) {
+    auto it = headers.begin();
+    ProgramHeader* ph;
+
+    // First handle the program-headers header
+    ph = *it;
+    ph->DataStart() = dataPos;
+    ph->SetFileSize(ph->Size() * header.ProgramHeaders());
+    headerPos << ph->RawHeader();
+    
+    // Now iterate through the remaing sections
+    dataPos = ph->DataStart() + ph->FileSize();
+    for (it++; it != headers.end(); ++it) {
+        ph = *it;
+
         // We need to align the program segment: (see comment in .h)
         // Calculate boundrary location
-        if ( ph->Alignment() != 0 ) {
+        if ( ph->Alignment() != 0 && !ph->IsLoadableSegment()) {
             dataEnd.Offset() = dataPos.NextBoundrary( ph->Alignment()) 
                              + (ph->Address() % ph->Alignment());
         }
@@ -113,13 +136,16 @@ void ElfFile::WriteProgHeaders (
         dataEnd.Offset() = WriteDataSections( data, *ph, dataPos);
 
         // Set the file position in the program header
-        ph->DataStart() = dataPos;
-        ph->FileSize() = dataEnd - dataPos;
+        if ( ph->IsLoadableSegment() && ph->DataStart() == 0 ) {
+            // The first loadable segment load the first block of the file
+        } else {
+            ph->DataStart() = dataPos;
+        }
+        ph->SetFileSize(dataEnd - dataPos);
+        headerPos << ph->RawHeader();
 
-        headersPos << ph->RawHeader();
+        dataPos.Offset() += ph->SizeInMemory();
     }
-
-    dataPos.Offset() = dataEnd;
 }
 
 BinaryWriter ElfFile::WriteUnloadedDataSections( ElfContent& data,

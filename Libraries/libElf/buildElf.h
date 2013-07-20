@@ -54,12 +54,9 @@ protected:
     void InitialiseFile(ElfContent& data);
     void InitialiseHeader(ElfContent& data);
     bool IsSpecialSection(Section& s);
-    template<class T>
-    void SortByAddress(T start, T end);
     void WriteSpecial(ElfContent&, string name, long&, BinaryWriter&);
     void WriteProgHeaders ( ElfContent&, vector<ProgramHeader *>& , 
-                                         BinaryWriter&,
-                                         BinaryWriter&  );
+                                         BinaryWriter&);
 
     BinaryWriter WriteUnloadedDataSections( ElfContent& data,
                                             BinaryWriter& dataWritePos);
@@ -71,22 +68,10 @@ private:
 
     // utility data
     long sectionDataLength;
-    BinaryWriter programHeadersStart;
     BinaryWriter dataSectionStart;
     BinaryWriter sectionHeadersStart;
     vector<bool> dataWritten;
 };
-
-template<class T> 
-void ElfFile::SortByAddress(T start, T end) {
-    typedef typename std::iterator_traits<T>::value_type item;
-    auto lt = [] (item lhs, item rhs) -> bool 
-                 {
-                     return lhs->Address() < rhs->Address();
-                 };
-    sort(start,end,lt);
-}
-
 
 
 /*

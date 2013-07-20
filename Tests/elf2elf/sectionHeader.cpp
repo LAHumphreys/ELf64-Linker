@@ -28,7 +28,7 @@ int main(int argc, const char *argv[])
     // So that gprof can analyse the file building
     Test("Initialising the data",(loggedTest)Init).RunTest();
 
-    ElfFileReader f("../elf2elf/isYes/isYes.o");
+    ElfFileReader f(argv[0]);
     
     ElfParser p(f);
     

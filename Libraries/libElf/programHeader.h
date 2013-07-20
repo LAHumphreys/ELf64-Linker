@@ -23,11 +23,13 @@ public:
     Elf64_Xword& FileSize() { return p_filesz; }
     Elf64_Xword& SizeInMemory() { return p_memsz; }
     Elf64_Addr& Address() { return p_vaddr; }
-    const Elf64_Off DataStart() const { return p_offset; }
-    const Elf64_Xword Alignment() const { return p_align; }
-    const Elf64_Xword FileSize() const { return p_filesz; }
-    const Elf64_Xword SizeInMemory() const { return p_memsz; }
-    const Elf64_Addr Address() const { return p_vaddr; }
+
+    // Constant access
+    const Elf64_Off& DataStart() const { return p_offset; }
+    const Elf64_Xword& Alignment() const { return p_align; }
+    const Elf64_Xword& FileSize() const { return p_filesz; }
+    const Elf64_Xword& SizeInMemory() const { return p_memsz; }
+    const Elf64_Addr& Address() const { return p_vaddr; }
 
     // Check Flags
     const bool IsNull() const { return p_type == PT_NULL;}
@@ -57,7 +59,7 @@ public:
     void RemoveWriteable() { p_flags &= ~PF_W; }
 
     string Describe() const;
-
+    int FileRank() const;
 };
 
 class ProgramHeader: protected RawProgramHeader {
@@ -74,8 +76,6 @@ public:
     using RawProgramHeader::Size;
     using RawProgramHeader::DataStart;
     using RawProgramHeader::Alignment;
-    using RawProgramHeader::FileSize;
-    using RawProgramHeader::SizeInMemory;
     using RawProgramHeader::Address;
     using RawProgramHeader::IsNull;
     using RawProgramHeader::IsExecutable;
@@ -88,17 +88,34 @@ public:
     using RawProgramHeader::RemoveExecutable;
     using RawProgramHeader::RemoveReadable;
     using RawProgramHeader::RemoveWriteable;
+    // Constant Access
+    inline const Elf64_Xword& FileSize() const { 
+        return RawProgramHeader::FileSize(); 
+    }
+    inline const Elf64_Xword& SizeInMemory() const { 
+        return RawProgramHeader::SizeInMemory(); 
+    }
+    
 
     // Methods
     string WriteLink();
     void InitialiseFlags();
-    RawProgramHeader& RawHeader();
+    const RawProgramHeader& RawHeader() const { return *this;}
       
 
     const std::vector<string>& SectionNames(){return sectionNames;}
 
     // Calculated values
     Elf64_Off DataEnd() { return DataStart() + FileSize(); }
+
+    // Don't loose track of implicit memorry when re-sizing in 
+    // the file
+    const Elf64_Off GetAdditionalMemory() const; 
+    void SetAdditionalMemory(const Elf64_Off& space);
+    inline void AddAdditionalMemory(const Elf64_Off& space) {
+        SetAdditionalMemory(space + GetAdditionalMemory());
+    }
+    void SetFileSize(const Elf64_Off& size);
 protected:
     static const Flags& TypeFlags();
 

@@ -16,7 +16,7 @@ void ExecBuilder::MakeDataExecutable() {
     BinaryWriter pwriter = writer + header.ProgramHeadersStart();
 
     for ( int i=0; i<header.ProgramHeaders(); i++ ) {
-        RawProgramHeader& segment = (progHeaders[i])->RawHeader();
+        ProgramHeader& segment = *progHeaders[i];
 
         // Look for the writeable load segment
         if (segment.IsLoadableSegment() && segment.IsWriteable() ) {
@@ -47,7 +47,7 @@ long ExecBuilder::InflateData(long newAllocation) {
             if (segment.IsLoadableSegment() && segment.IsWriteable() ) {
                 oldStopAddress =   segment.Address() 
                                  + segment.SizeInMemory();
-                segment.SizeInMemory() += newAllocation;
+                segment.AddAdditionalMemory(newAllocation);
                 allocated = true;
             }
         } else {
