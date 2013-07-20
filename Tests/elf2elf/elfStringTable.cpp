@@ -10,7 +10,9 @@
 #include "defer.h"
 #include "binaryDescribe.h"
 
-DataLump<5000> outfile;
+unsigned char * buf = new unsigned char[50000000];
+DEFER ( delete [] buf;)
+DataIO outfile(buf,5000000);
 SectionHeader* stringheaders;
 Elf64_Shdr* sections;
 SectionHeader* stringTableHeader;
@@ -25,7 +27,7 @@ int main(int argc, const char *argv[])
     /*
      * Tests to validate the string table written by ElfFile
      */
-    ElfFileReader f("../elf2elf/isYes/isYes.o");
+    ElfFileReader f(argv[0]);
     
     ElfParser p(f);
     

@@ -18,6 +18,8 @@ int tEI_OSABI (testLogger& log);
 int te_type(testLogger& log);
 int machine(testLogger& log);
 int HeaderSizes(testLogger& log );
+int HeaderStarts(testLogger& log);
+
 
 ElfParser *p;
 unsigned char * buf = new unsigned char[50000000];
@@ -57,7 +59,8 @@ int main(int argc, const char *argv[])
     Test("ELF PAD",  (loggedTest)PAD).RunTest();
     Test("ELF TYPE",  (loggedTest)te_type).RunTest();
     Test("ELF MACHINE",  (loggedTest)machine).RunTest();
-    Test("ELF HEADERS",  (loggedTest)HeaderSizes).RunTest();
+    Test("ELF HEADERS (SIZES)",  (loggedTest)HeaderSizes).RunTest();
+    Test("ELF HEADERS (STARTS)",  (loggedTest)HeaderStarts).RunTest();
 	delete header;
 	delete p;
 
@@ -173,6 +176,21 @@ int HeaderSizes(testLogger& log ) {
         log << "Unexpected change in # of program section" << endl;
         log << ohdr.e_phnum << " , ";
         log  << hdr.e_phnum << endl;
+        return 1;
+    }
+    return 0;
+}
+
+int HeaderStarts(testLogger& log ) {
+    if ( hdr.e_shoff != ohdr.e_shoff ) {
+        log << "Missmatch in section headers start" << endl;
+        log << hdr.e_shoff << ", ";
+        log << ohdr.e_shoff << endl ;
+        return 1;
+    } else if ( hdr.e_phoff != hdr.e_shoff ){
+        log << "Missmatch in program headers data start" << endl;
+        log << hdr.e_phoff << " , ";
+        log << ohdr.e_phoff << endl;;
         return 1;
     }
     return 0;
