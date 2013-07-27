@@ -25,9 +25,10 @@ ElfParser *p;
 unsigned char * buf = new unsigned char[50000000];
 DEFER ( delete [] buf;)
 DataIO outfile(buf,5000000);
-ElfHeaderX86_64 *header;
 Elf64_Ehdr hdr;
 Elf64_Ehdr ohdr;
+ElfHeaderX86_64 *header;
+ElfHeaderX86_64* newHeader;
 
 using namespace std;
 
@@ -42,12 +43,14 @@ int main(int argc, const char *argv[])
     
     //parse the input file
     ElfContent content = p->Content();
+    header = &(content.header);
+
     ElfFile file( content);
     
     // Write out the data
     file.WriteToFile(outfile.Writer());
 
-	header = new ElfHeaderX86_64(outfile.Reader());
+	newHeader = new ElfHeaderX86_64(outfile.Reader());
 	outfile.Reader().Read(&hdr,sizeof(Elf64_Ehdr));
 	BinaryReader(f).Read(&ohdr,sizeof(Elf64_Ehdr));
 
@@ -61,7 +64,8 @@ int main(int argc, const char *argv[])
     Test("ELF MACHINE",  (loggedTest)machine).RunTest();
     Test("ELF HEADERS (SIZES)",  (loggedTest)HeaderSizes).RunTest();
     Test("ELF HEADERS (STARTS)",  (loggedTest)HeaderStarts).RunTest();
-	delete header;
+
+	delete newHeader;
 	delete p;
 
     return 0;
@@ -182,13 +186,22 @@ int HeaderSizes(testLogger& log ) {
 }
 
 int HeaderStarts(testLogger& log ) {
-    if ( hdr.e_shoff != ohdr.e_shoff ) {
-        log << "Missmatch in section headers start" << endl;
-        log << hdr.e_shoff << ", ";
+    // Parsed File
+    if ( header->SectionTableStart() != ohdr.e_shoff ) {
+        log << "Missmatch in parsed section header start " << endl;
+        log << newHeader->SectionTableStart() << ", ";
         log << ohdr.e_shoff << endl ;
-        return 1;
-    } else if ( hdr.e_phoff != hdr.e_shoff ){
-        log << "Missmatch in program headers data start" << endl;
+        return 2;
+    } else if ( header->ProgramHeadersStart() != ohdr.e_phoff ){
+        log << "Missmatch in parsed program  headers start" << endl;
+        log << ohdr.e_phoff << " -> "; 
+        log << hdr.e_phoff;
+        return 2;
+    }
+
+    // Written File
+    if ( newHeader->ProgramHeadersStart() != ohdr.e_phoff ){
+        log << "Missmatch in program headers start" << endl;
         log << hdr.e_phoff << " , ";
         log << ohdr.e_phoff << endl;;
         return 1;

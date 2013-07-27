@@ -9,7 +9,9 @@ ElfFile::ElfFile(ElfContent& data)
      : file(1024) , 
        dataSectionStart(file),
        sectionHeadersStart(file),
-       header(ElfHeaderX86_64::NewObjectFile())
+       header(data.progHeaders.size() > 0 ? 
+                 ElfHeaderX86_64::NewExecutable() :
+                 ElfHeaderX86_64::NewObjectFile())
 {
     InitialiseHeader(data);
     InitialiseFile(data);

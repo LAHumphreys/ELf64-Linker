@@ -56,6 +56,7 @@ void ElfHeaderX86_64::PopulateIdentity() {
     memcpy(data.e_ident,&ELFMAG,4);
     //ELF class
     data.e_ident[EI_CLASS] = ELFCLASS64;
+
     //Data format
     if ( endian == LitleEndian ) {
         data.e_ident[EI_DATA] = ELFDATA2LSB;
@@ -109,7 +110,7 @@ void ElfHeaderX86_64::PopulateLinuxConsts() {
 ElfHeaderX86_64 ElfHeaderX86_64::NewObjectFile() {
 
     ElfHeaderX86_64 header;
-    memset(&header,'\0',sizeof(header));
+    memset(&header.data,'\0',sizeof(header.data));
 
     //TODO: generalise this
     header.endian = LitleEndian;
@@ -117,5 +118,15 @@ ElfHeaderX86_64 ElfHeaderX86_64::NewObjectFile() {
     header.PopulateIdentity();
     header.PopulateLinuxConsts();
     header.data.e_type = ET_REL;
+
+    return header;
+}
+
+ElfHeaderX86_64 ElfHeaderX86_64::NewExecutable() {
+
+    ElfHeaderX86_64 header(NewObjectFile());
+
+    header.ProgramHeadersStart() = sizeof(data);
+
     return header;
 }

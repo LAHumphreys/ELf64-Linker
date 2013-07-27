@@ -37,6 +37,7 @@ public:
 
     void GetHeader(Elf64_Ehdr& out);
     static ElfHeaderX86_64 NewObjectFile();
+    static ElfHeaderX86_64 NewExecutable();
 
     // Calculated Flags
     string LinkFlags();
