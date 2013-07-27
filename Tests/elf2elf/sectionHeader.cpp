@@ -29,7 +29,7 @@ int Init(testLogger& log );
 int main(int argc, const char *argv[])
 {
     // So that gprof can analyse the file building
-    Test("Initialising the data",(loggedTest)Init).RunTest();
+    //Test("Initialising the data",(loggedTest)Init).RunTest();
 
     ElfFileReader f(argv[0]);
     
@@ -57,9 +57,21 @@ int main(int argc, const char *argv[])
     BinaryReader newReader(outfile,header.SectionTableStart());
     BinaryReader oldReader(f,oldHeader.SectionTableStart());
 
+    SLOG ( LOG_VERBOSE,
+          "Reading new sections from: "
+          << header.SectionTableStart()  << endl
+          << "Reading old sections from: "
+          << oldHeader.SectionTableStart();
+      )
+
     for ( int i=0; i< header.Sections(); i++ ) {
         newReader >> newSections[i];
         oldReader >> oldSections[i];
+        SLOG ( LOG_VERY_VERBOSE,
+              "Section: " << i << endl
+              << SectionHeader(oldSections[i]).Descripe() << endl
+              << SectionHeader(newSections[i]).Descripe() << endl
+          )
         names[i] = p.Content().sections[i]->Name();
         
     }

@@ -20,8 +20,24 @@ ElfFile::ElfFile(ElfContent& data)
     // Process the program headers
     BinaryWriter dataWritePos =  ProcessProgHeaders( data);
 
+    
+    SLOG_FROM ( 
+         LOG_VERY_VERBOSE, 
+         "ElfFile::ElfFile", 
+         "Finsihed writing programHeaders, offset is now: " 
+         <<  dataWritePos.Offset()
+    )
+
     // Write any additional data, not required at run time
     sectionHeadersStart = (long)WriteUnloadedDataSections(data, dataWritePos);
+
+    SLOG_FROM ( 
+         LOG_VERY_VERBOSE, 
+         "ElfFile::ElfFile", 
+         "Finsihed writing section data, offset is now: " 
+         <<  sectionHeadersStart.Offset()
+    )
+
     header.SectionTableStart() = (long)sectionHeadersStart;
 
 
@@ -109,7 +125,7 @@ void ElfFile::WriteProgHeaders (
                      BinaryWriter&  dataPos)
 {
     BinaryWriter headerPos = dataPos;
-    BinaryWriter dataEnd = dataPos;
+    BinaryWriter& dataEnd = dataPos;
 
 
     auto it = headers.begin();
@@ -258,10 +274,11 @@ BinaryWriter ElfFile::WriteDataSections( ElfContent &data,
                      end =  section->DataSize() + writePos;
                 dataWritten[sindex] = true;
 
-                LOG_FROM ( 
+                SLOG_FROM ( 
                      LOG_VERY_VERBOSE, 
                      "ElfFile::WriteDataSections", 
-                       "Section Written" 
+                       "Section Written, end is now: " 
+                       << end.Offset()
                 )
             }
 

@@ -70,7 +70,6 @@ int main(int argc, const char *argv[])
     }
 
     Test("Validate program headers",(loggedTest)CompareHeaders).RunTest();
-    Test("Validate segment data",(loggedTest)CompareData).RunTest();
 
     return 0;
 }
@@ -112,13 +111,10 @@ int CompareHeaders(testLogger& log ) {
             return 1;
         } 
 
-        if ( newHdr.FileSize() != oldHdr.FileSize() ) { 
-            log << "Missmatch in FileSize for program headers: " << i << endl;
-            return 1;
-        } 
-
-        if ( newHdr.SizeInMemory() != oldHdr.SizeInMemory() ) { 
-            log << "Missmatch in SizeInMemory for program headers: " << i << endl;
+        if (    ( newHdr.SizeInMemory() - newHdr.FileSize() ) 
+             != ( oldHdr.SizeInMemory() - oldHdr.FileSize() ) )
+        { 
+            log << "Filesize has changed, but the memorry size has not been updated correctly!" << i << endl;
             return 1;
         } 
 
