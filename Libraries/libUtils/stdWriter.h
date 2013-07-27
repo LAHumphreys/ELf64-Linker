@@ -20,6 +20,9 @@ private:
 
 class OFStreamWriter: public ofstream, public StdWriter {
 public:
+	OFStreamWriter(const string& s ): 
+        OFStreamWriter(s.c_str()) {}
+
 	OFStreamWriter(const char *fname);
 	OFStreamWriter(const OFStreamWriter& rhs);
 	string Fname() { return fileName;}

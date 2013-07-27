@@ -3,8 +3,7 @@
 #include <sstream>
 
 Time::Time() {
-    gettimeofday(&tv,NULL);
-    localtime_r(&tv.tv_sec,&time);
+    SetNow();
 }
 
 Time::Time(const Time& rhs) {
@@ -17,10 +16,24 @@ Time& Time::operator=(const Time& rhs) {
     return *this;
 }
 
+Time& Time::SetNow() {
+    gettimeofday(&tv,NULL);
+    localtime_r(&tv.tv_sec,&time);
+    return *this;
+}
+
 string Time::Timestamp() const {
     stringstream strtime;
     strtime << Year() << "-" << Month() << "-" << MDay();
     strtime << " " << Hour() << ":" << Minute() << ":" << Second();
     strtime << "." << USec();
+    return strtime.str();
+}
+
+string Time::FileTimestamp() const {
+    stringstream strtime;
+    strtime << Year() << "-" << Month() << "-" << MDay();
+    strtime << "_" << Hour() << ":" << Minute() << ":" << Second();
+    strtime << "-" << USec();
     return strtime.str();
 }

@@ -9,6 +9,7 @@
 #include "dataLump.h"
 #include "defer.h"
 #include "binaryDescribe.h"
+#include "util_time.h"
 #include <string>
 
 using namespace std;
@@ -67,7 +68,6 @@ int main(int argc, const char *argv[])
 
     Test("Validate parsed headers",(loggedTest)CompareContent).RunTest();
     Test("Validate generated headers",(loggedTest)CompareSections).RunTest();
-
     return 0;
 }
 

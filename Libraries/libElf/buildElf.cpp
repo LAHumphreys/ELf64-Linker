@@ -1,4 +1,5 @@
 #include "buildElf.h"
+#include "logger.h"
 #include "programHeader.h"
 #include <cstring>
 #include <iostream>
@@ -58,7 +59,7 @@ void ElfFile::InitialiseHeader(ElfContent &data) {
     
     header.ProgramHeaders() = data.progHeaders.size();
     header.Sections()  = data.sections.size();
-    
+
     // If there is no load table, progheader start is defined to be 0 by 
     // the elf standard
     if ( header.ProgramHeaders() == 0 ) {

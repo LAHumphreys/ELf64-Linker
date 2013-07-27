@@ -17,6 +17,8 @@
 #include <sstream>
 #include "tester.h"
 #include "dataLump.h"
+#include "util_time.h"
+#include "defer.h"
 
 ElfParser *p;
 DataLump<5000> outfile;

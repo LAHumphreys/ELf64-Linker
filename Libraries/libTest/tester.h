@@ -3,6 +3,9 @@
 #include <functional>
 #include <string>
 #include <sstream>
+#include "logger.h"
+#include "util_time.h"
+
 
 using namespace std;
 
@@ -31,7 +34,7 @@ public:
          return stream;
      }
 
-     typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
+    typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
 
     // this is the function signature of std::endl
     typedef CoutType& (*StandardManip)(CoutType&);
@@ -44,10 +47,72 @@ public:
     }
 };
 
+class DefaultTestLogger: LogDevice {
+public:
+    DefaultTestLogger();
+    virtual ~DefaultTestLogger();
+
+    static DefaultTestLogger& RunTimeLog();
+
+    virtual void Log( const string& message,
+                      const string& context, 
+                      const Time& time,
+                      LOG_LEVEL level);
+
+     template<class T>
+     DefaultTestLogger& operator<<(const T& a) { 
+         testoutput << a;
+         overview_log << a;
+         full_log << a;
+         return *this;
+     }
+
+     template<class T>
+     inline DefaultTestLogger& operator<<(const char* s) { 
+         testoutput << s;
+         overview_log << s;
+         full_log << s;
+         return *this;
+     }
+     inline string str() const { 
+         return testoutput.str(); 
+     }
+
+     // Handle endl
+     static DefaultTestLogger& endl(DefaultTestLogger& stream)
+     {
+         stream.testoutput << std::endl;
+         stream.overview_log << std::endl;
+         stream.full_log << std::endl;
+         return stream;
+     }
+
+    typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
+
+    // this is the function signature of std::endl
+    typedef CoutType& (*StandardManip)(CoutType&);
+
+    // define an operator<< to take in std::endl
+    DefaultTestLogger& operator<<(StandardManip manip)
+    {
+        testoutput << manip;
+        overview_log << manip;
+        full_log << manip;
+        return *this;
+    }
+
+    void WriteLog(const string& fname, const Time& time);
+private:
+     static DefaultTestLogger GLOBAL_LOG;
+     stringstream testoutput;
+     stringstream overview_log;
+     stringstream full_log;
+};
+
 #ifdef __PROFILE__TESTS
     typedef dummyLog testLogger;
 #else
-    typedef stringstream testLogger;
+    typedef DefaultTestLogger testLogger;
 #endif
 
 enum TEST_TEMPLATE { BASIC, LOGGED };
@@ -62,6 +127,7 @@ private:
     std::function<int(testLogger& )> testLogged;
     string description;
 	TEST_TEMPLATE testType;
+    Time startTime;
 };
 
 

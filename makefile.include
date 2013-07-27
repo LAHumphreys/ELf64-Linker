@@ -277,6 +277,8 @@ RUN_AUTO_TEST: BUILD_AUTO_TESTS
 		if [ -e core ]; then \
 			rm core;\
 		fi;\
+		rm -f OverviewLog_*; \
+		rm -f FullLog_*; \
 		echo "***********************************************************"; \
 		echo "Running auto test: $$test";\
 		$$test || if [ -e core ]; then gdb $$test core; exit; else exit; fi;\

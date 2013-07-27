@@ -11,6 +11,7 @@
 #include "binaryDescribe.h"
 #include <string>
 #include <iomanip>
+#include "logger.h"
 
 using namespace std;
 
@@ -217,16 +218,18 @@ int CompareData (testLogger& log ) {
             nstart = newHdr.DataStart() + headers*sizeof(Elf64_Phdr) + sizeof(Elf64_Ehdr);
         }
 
-        log << "New Data: " << endl;
-        log << newHdr.Describe() << endl;
-        log << BinaryDescribe::Describe( 
-                   BinaryReader(*infile,ostart),
-                   newHdr.FileSize());
-        log << "Old Data: " << endl;
-        log << oldHdr.Describe() << endl;
-        log << BinaryDescribe::Describe( 
-                   BinaryReader(outfile,oldHdr.DataStart()),
-                   nstart);
+        LOG( LOG_VERBOSE,
+                            newHdr.Describe() 
+                          + BinaryDescribe::Describe(
+                                BinaryReader(*infile,ostart),
+                                newHdr.FileSize()) 
+                 )
+        LOG( LOG_VERBOSE,
+                            oldHdr.Describe() 
+                          + BinaryDescribe::Describe(
+                                BinaryReader(outfile,oldHdr.DataStart()),
+                                oldHdr.FileSize()) 
+                 )
 
         for (int j = 0; j + ostart < oldHdr.FileSize(); j++) {
             if  (    outfile.Get(j+nstart) 

@@ -4,9 +4,60 @@
 #include <iostream>
 #include <sstream>
 #include <ctime>
+#include "util_time.h"
+#include "stdWriter.h"
 
+DefaultTestLogger DefaultTestLogger::GLOBAL_LOG;
 
 using namespace std;
+DefaultTestLogger& DefaultTestLogger::RunTimeLog() {
+    return GLOBAL_LOG;
+}
+
+DefaultTestLogger::DefaultTestLogger() {
+    Logger::Instance().RegisterLog(*this);
+
+    // Prevent Logging directly to stdout / stderr
+    Logger::Instance().RemoveLog(LogFactory::CERR());
+    Logger::Instance().RemoveLog(LogFactory::CLOG());
+    Logger::Instance().RemoveLog(LogFactory::COUT());
+
+    Logger::Instance().LogEnabled( LOG_DEFAULT, true);
+    Logger::Instance().LogEnabled( LOG_OVERVIEW, true);
+    Logger::Instance().LogEnabled( LOG_VERBOSE, true);
+    Logger::Instance().LogEnabled( LOG_VERY_VERBOSE, true);
+    Logger::Instance().LogEnabled( LOG_WARNING, true);
+    Logger::Instance().LogEnabled( LOG_ERROR, true);
+}
+
+DefaultTestLogger::~DefaultTestLogger() {
+    Logger::Instance().RemoveLog(*this);
+}
+
+void DefaultTestLogger::WriteLog(const string& fname, const Time& time) {
+    OFStreamWriter("OverviewLog_" + time.FileTimestamp() + fname) << overview_log.str();
+    OFStreamWriter("FullLog_" + time.FileTimestamp() + fname) << full_log.str();
+}
+
+void DefaultTestLogger::Log( const string& message,
+                             const string& context, 
+                             const Time& time,
+                             LOG_LEVEL level) {
+    if ( level == LOG_DEFAULT ) {
+        testoutput << message <<endl;
+        overview_log << message <<endl;
+        full_log << message <<endl;
+
+    } else if (    level == LOG_ERROR
+                || level == LOG_WARNING
+                || level == LOG_OVERVIEW) 
+    {
+        overview_log << GenericFormatLogger::Format(message,context,time,level);
+        full_log << GenericFormatLogger::Format(message,context,time,level);
+    } else {
+        full_log << GenericFormatLogger::Format(message,context,time,level);
+    }
+}
 
 Test::Test(string description, std::function<int(testLogger& log)> test) {
     this->testLogged = test;
@@ -17,6 +68,7 @@ Test::Test(string description, std::function<int(testLogger& log)> test) {
 void Test::RunTest() {
     cout << description << ": ";
     testLogger log;
+    startTime.SetNow();
     #ifdef __PROFILE__TESTS
         auto start = clock();
     #endif
@@ -51,8 +103,11 @@ void Test::RunTest() {
         cout << "TEST PASSED" << endl;
     } else {
         cout << "TEST FAILED" << endl;
-        cout << "Log follows: " << endl;
+        cout << "Run Time Log:" << endl;
+        cout << "Test Log follows: " << endl;
         cout << log.str() << endl;
+        DefaultTestLogger::RunTimeLog().WriteLog("TestRuntimeLog", startTime);
+        log.WriteLog(description, startTime);
         exit(result);
     }
 }

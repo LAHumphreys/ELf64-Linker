@@ -12,6 +12,8 @@ public:
     Time (const Time& othertime);
     Time& operator=(const Time& rhs);
 
+    Time& SetNow();
+
     int Year()   const { return time.tm_year + 1900;}
     int Month()  const { return time.tm_mon;}
     int MDay()   const { return time.tm_mday;}
@@ -22,6 +24,7 @@ public:
     int USec()   const { return tv.tv_usec;}
 
     string Timestamp() const;
+    string FileTimestamp() const;
 private:
     struct timeval tv;
     struct tm time;

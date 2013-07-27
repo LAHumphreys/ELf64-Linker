@@ -62,7 +62,6 @@ int main(int argc, const char *argv[])
     sections = header.Sections();
 
     Test("Validate section data",(loggedTest)CompareSections).RunTest();
-
     return 0;
 }
 

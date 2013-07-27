@@ -7,42 +7,6 @@
 
 using namespace std;
 
-/*
- * Wrapper class for use in set
- */
-class LogDeviceKey {
-
-public:
-    LogDeviceKey(LogDevice& logDevice): log(&logDevice){}
-
-    void Log( const string& message, 
-              const string& context, 
-              const Time& time,
-              LOG_LEVEL level) const {
-        log->Log(message, context ,time, level);
-    }
-
-    // Comparator
-    class Less {
-    public:
-        bool operator()( const LogDeviceKey& lhs, 
-                         const LogDeviceKey& rhs) {
-            return   lhs.log->LogDevice_Id 
-                   < rhs.log->LogDevice_Id;
-        }
-    };
-private:
-   LogDevice* log;
-};
-
-
-/*
- * Static Data
- */
-
-bool Logger::enabled[__NUM_LOG_LEVELS];
-
-
 LogDevice::LogDevice() {
     static unsigned long nextId =0;
     this->LogDevice_Id = nextId;
@@ -95,31 +59,19 @@ class LogDevice_CLOG: public LogDevice {
 } _CLOG;
 
 LogDevice& LogFactory::COUT() {
-    return _COUT;
+    static LogDevice_COUT _cout;
+    return _cout;
 }
 
 LogDevice& LogFactory::CERR() {
-    return _CERR;
+    static LogDevice_CERR _cerr;
+    return _cerr;
 }
 
 LogDevice& LogFactory::CLOG() {
-    return _CLOG;
+    static LogDevice_CLOG _clog;
+    return _clog;
 }
-
-/*
- * Internal Data
- */
-namespace {
-    set<LogDeviceKey,LogDeviceKey::Less> devices;
-    vector<string> logLevelNames;
-    Logger GLOBAL_LOGGER;
-    LogDevice_COUT _COUT;
-    LogDevice_CLOG _CLOG;
-    LogDevice_CERR _CERR;
-}
-
-
-
 
 /*
  * Logger Implementation
@@ -184,7 +136,7 @@ string GenericFormatLogger::Format( const string& message,
                                     LOG_LEVEL level) {
     stringstream log;
     log << "\n";
-    log << "[" << logLevelNames[level] << "] " 
+    log << "[" << Logger::Instance().GetName(level) << "] " 
         << Time().Timestamp() << " - " 
         << context << ": " << "\n";
     log << message << "\n";
