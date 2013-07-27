@@ -18,6 +18,7 @@ ProgramHeader::ProgramHeader ( BinaryReader& reader,
 {
     reader >> (Elf64_Phdr&)(*this);
 
+
     // While this isn't terribly efficient, there's only going to
     // be 20-30 sections a file...
     for ( auto s : sections) {
@@ -57,22 +58,6 @@ void ProgramHeader::InitialiseFlags() {
         flags.SetFlags(Flags_Writeable, 1);
     if ( this->p_flags & PF_R ) 
         flags.SetFlags(Flags_Readable, 1);
-}
-
-// Format: align memsize addr flags sections..
-string ProgramHeader::WriteLink() {
-     ostringstream link;
-     link << dec << Alignment() << " ";
-     link << hex << SizeInMemory() << " ";
-     link << hex << Address() << " ";
-     link << flags.LinkMask() << " ";
-       
-     link << "\"";
-     for_each( sectionNames.begin(), 
-               sectionNames.end(), 
-               [&] (string &s) { link << name << " "; });
-     link << "\"";
-     return link.str();
 }
 
 string RawProgramHeader::Describe() const {

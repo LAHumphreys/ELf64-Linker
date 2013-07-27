@@ -111,6 +111,7 @@ void ElfFile::WriteProgHeaders (
     BinaryWriter headerPos = dataPos;
     BinaryWriter dataEnd = dataPos;
 
+
     auto it = headers.begin();
     ProgramHeader* ph;
 
@@ -124,6 +125,12 @@ void ElfFile::WriteProgHeaders (
     dataPos = ph->DataStart() + ph->FileSize();
     for (it++; it != headers.end(); ++it) {
         ph = *it;
+
+        LOG_FROM ( 
+             LOG_VERBOSE, 
+             "ElfFile::WriteProgHeaders", 
+             "Handling a new Prog. Header" + ph->RawHeader().Describe()
+        )
 
         // We need to align the program segment: (see comment in .h)
         // Calculate boundrary location
@@ -208,7 +215,19 @@ BinaryWriter ElfFile::WriteDataSections( ElfContent &data,
     BinaryWriter writePos = writer;
     Section * section;
     for ( auto sname: prog.SectionNames() ) {
-        section = data.sections[data.sectionMap[sname]];
+
+        int sindex = data.sectionMap[sname];
+        section = data.sections[sindex];
+
+        SLOG_FROM ( 
+             LOG_VERY_VERBOSE, 
+             "ElfFile::WriteDataSections", 
+               "Looking to write section: (" 
+               << sindex << ") " 
+               << sname << "\n" 
+               << section->Descripe()
+        )
+
         if ( prog.Address() != 0 ) {
             if ( section->DataSize() == 0 ) { 
                 // don't care
@@ -222,13 +241,29 @@ BinaryWriter ElfFile::WriteDataSections( ElfContent &data,
                 error += "( " + sname + " )";
                 throw error;
             }
-            writePos = (long)writer + section->Address() 
-                                    - prog.Address();
+            if ( dataWritten[sindex] ) 
+            { 
+                LOG_FROM ( 
+                     LOG_VERY_VERBOSE, 
+                     "ElfFile::WriteDataSections", 
+                       "I've written this section already, I shan't be writing it again!" 
+                )
+            } else {
+                writePos = (long)writer + section->Address() 
+                                        - prog.Address();
 
-            section->DataStart() = writePos;
-            section->WriteRawData(writePos);
-            if (end <=  section->DataSize() + writePos)
-                 end =  section->DataSize() + writePos;
+                section->DataStart() = writePos;
+                section->WriteRawData(writePos);
+                if (end <=  section->DataSize() + writePos)
+                     end =  section->DataSize() + writePos;
+                dataWritten[sindex] = true;
+
+                LOG_FROM ( 
+                     LOG_VERY_VERBOSE, 
+                     "ElfFile::WriteDataSections", 
+                       "Section Written" 
+                )
+            }
 
         } else {
             writePos = (long)end;

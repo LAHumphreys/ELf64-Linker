@@ -6,6 +6,7 @@
 #include <ctime>
 #include "util_time.h"
 #include "stdWriter.h"
+#include "env.h"
 
 DefaultTestLogger DefaultTestLogger::GLOBAL_LOG;
 
@@ -52,10 +53,15 @@ void DefaultTestLogger::Log( const string& message,
                 || level == LOG_WARNING
                 || level == LOG_OVERVIEW) 
     {
+        testoutput << GenericFormatLogger::Format(message,context,time,level);
         overview_log << GenericFormatLogger::Format(message,context,time,level);
         full_log << GenericFormatLogger::Format(message,context,time,level);
     } else {
         full_log << GenericFormatLogger::Format(message,context,time,level);
+
+        if ( ENV::IsSet("ELF_64_TEST_FULL_TEST_LOG") ) {
+            testoutput << GenericFormatLogger::Format(message,context,time,level);
+        }
     }
 }
 
@@ -108,6 +114,9 @@ void Test::RunTest() {
         cout << log.str() << endl;
         DefaultTestLogger::RunTimeLog().WriteLog("TestRuntimeLog", startTime);
         log.WriteLog(description, startTime);
+        if ( ENV::IsSet("ELF_64_TEST_FULL_TEST_LOG") ) {
+            cout << DefaultTestLogger::RunTimeLog().str() << endl;
+        }
         exit(result);
     }
 }

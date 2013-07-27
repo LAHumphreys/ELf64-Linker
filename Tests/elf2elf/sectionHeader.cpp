@@ -173,27 +173,6 @@ int CompareContent(testLogger& log ) {
             return 1;
         }
 
-        if ( newHdr.DataStart() != oldHdr.DataStart() ) {
-            bool fail = true;
-            if (   oldHdr.IsRelocTable() 
-                || oldHdr.IsStringTable() 
-                || oldHdr.IsSymTable()) 
-            {
-                log << "Our builder doens't put any padding between the end of data";
-                log << " and the start of the special sections" << endl;
-                log << " Ignoring data-start missmatch: ";
-                log << newHdr.DataStart() << " , ";
-                log  << oldHdr.DataStart() << endl;
-                fail = false;
-            }
-            if (fail) { 
-                log << "DataStart() missmatch: ";
-                log << newHdr.DataStart() << " , ";
-                log  << oldHdr.DataStart();
-                return 1;
-            }
-        }
-
         if ( newHdr.DataSize() != oldHdr.DataSize() ) {
             if ( oldHdr.IsStringTable() ) {
                 log << "Ignoring DataSize missmatch in string table ";

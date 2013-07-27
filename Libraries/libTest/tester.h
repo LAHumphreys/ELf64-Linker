@@ -61,17 +61,15 @@ public:
 
      template<class T>
      DefaultTestLogger& operator<<(const T& a) { 
-         testoutput << a;
-         overview_log << a;
-         full_log << a;
+         stringstream s;
+         s << a;
+         PRINT ( s.str() )
          return *this;
      }
 
      template<class T>
      inline DefaultTestLogger& operator<<(const char* s) { 
-         testoutput << s;
-         overview_log << s;
-         full_log << s;
+         PRINT ( s )
          return *this;
      }
      inline string str() const { 
@@ -81,9 +79,7 @@ public:
      // Handle endl
      static DefaultTestLogger& endl(DefaultTestLogger& stream)
      {
-         stream.testoutput << std::endl;
-         stream.overview_log << std::endl;
-         stream.full_log << std::endl;
+         PRINT ("\n")
          return stream;
      }
 
@@ -98,6 +94,7 @@ public:
         testoutput << manip;
         overview_log << manip;
         full_log << manip;
+        PRINT ("\n")
         return *this;
     }
 

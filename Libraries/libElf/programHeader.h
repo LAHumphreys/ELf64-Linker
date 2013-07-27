@@ -67,7 +67,7 @@ public:
     typedef std::vector<Section*> SECTION_ARRAY;
     ProgramHeader ( BinaryReader&& r, const SECTION_ARRAY& s)
         : ProgramHeader(r,s){};
-    ProgramHeader ( BinaryReader&, 
+    ProgramHeader ( BinaryReader&,
                     const SECTION_ARRAY&);
     virtual ~ProgramHeader (){};
 
@@ -98,7 +98,6 @@ public:
     
 
     // Methods
-    string WriteLink();
     void InitialiseFlags();
     const RawProgramHeader& RawHeader() const { return *this;}
       
@@ -125,7 +124,6 @@ protected:
 
 private:
     std::vector<string> sectionNames;
-    string name;
     Flags flags;
 };
 

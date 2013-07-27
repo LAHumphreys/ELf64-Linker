@@ -5,6 +5,7 @@ using namespace std;
 
 #include "elfParser.h"
 #include <memory>
+#include "logger.h"
 
 ElfParser::ElfParser(const FileLikeReader &f): 
    reader(f), stringTable(reader), headerStrings(reader)
@@ -54,6 +55,14 @@ void ElfParser::ReadSections() {
        if (sections[i]->IsLInkSection() ) ++linkSections;
        sectionMap[sections[i]->Name()] = i;
        nextSection += hdrSize;
+
+       LOG_FROM ( 
+            LOG_VERY_VERBOSE, 
+            "ElfParser::ReadSections", 
+              "Read a new section:" 
+             + sections[i]->Name() 
+             + "\n" + sections[i]->Descripe()
+       )
     }
     stringTable = sections[stridx]->DataStart();
 }
