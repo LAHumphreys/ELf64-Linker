@@ -73,9 +73,9 @@ class LogDevice_CERR: public LogDevice {
                       LOG_LEVEL level) {
 
         if ( level == LOG_DEFAULT ) {
-            cout << message << endl;
+            cerr << message << endl;
         } else {
-            cout << GenericFormatLogger::Format(message,context,time,level);
+            cerr << GenericFormatLogger::Format(message,context,time,level);
         }
     }
 } _CERR;
@@ -87,9 +87,9 @@ class LogDevice_CLOG: public LogDevice {
                       LOG_LEVEL level) {
 
         if ( level == LOG_DEFAULT ) {
-            cout << message << endl;
+            clog << message << endl;
         } else {
-            cout << GenericFormatLogger::Format(message,context,time,level);
+            clog << GenericFormatLogger::Format(message,context,time,level);
         }
     }
 } _CLOG;
