@@ -19,12 +19,54 @@ DataVector inherits from std::vector and can be used as such - but provides the 
 
 <tr><td>dataWriter</td><td>DataWriter</td><td>(Write only) array implementation of the IO interface - initialised with the location of the already allocated array</td><tr>
 
+<tr>
+    <td> 
+        env
+    </td>
+    <td>
+        ENV
+    </td>
+    <td>
+        Provides utilities for access environmental variables.
+    </td>
+</tr>
+
+
 <tr><td>flags</td><td>Flags</td><td>Bitmap flag implementation. 
 
 By defining a map, provides translation methods to and from LINK ASCII flags</td><tr>
 
+<tr>
+    <td> 
+        logger
+    </td>
+    <td>
+- Logger, 
+- LogDevice,
+- LogFactory,
+- LogDevice_BinaryWriter,
+- GenericFormater
+    </td>
+    <td>
+        Logging utilities. 
+        Called through supplied Macros, which check if logging is enabled before executing any code:
++ PRINT:     Equivalent to a print statement
++ LOG        Log at the specified level
++ LOG_FROM   Log at the specified level, specifying a context
+
+Supplied Objects:
+
++ Logger -  Singleton responsible for dispatching Log messages. 
++ LogDevice -  Interface which must be inplmented by objects wishing to register with Logger
++ LogFactory - provides access to the cout / cerr /clog LogDevices
++ LogDevice_BinaryWriter is an implementation that can be used by any binary writer. All output is passed through Generic Formater
++ Gneric Formater can handle a log message and return a formated string
+        
+    </td>
+</tr>
+
 <tr><td>stdReader</td><td> 
-StdReader
+StdReader,
 IFStreamReader
 </td><td>
 
@@ -35,7 +77,7 @@ IFStreamReader
 </td><tr>
 
 <tr><td>stdWriter</td><td> 
-StdWriter
+StdWriter,
 OFStreamWriter
 </td><td>
 
@@ -43,6 +85,18 @@ OFStreamWriter
   + Provides a wrtier implementation of the IO interface, based on a reference to a std::ostream
 - OFStreamWriter
   + Extends the ofstream reader object to implement the writer IO interface
-</td><tr>
+</td></tr>
+
+<tr>
+    <td> 
+        util_time
+    </td>
+    <td>
+        Time
+    </td>
+    <td>
+        Provides basic time functions, e.g Timestamp()
+    </td>
+</tr>
 
 <table> 
