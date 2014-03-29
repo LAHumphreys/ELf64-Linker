@@ -1,8 +1,8 @@
 #include "execBuilder.h"
 ExecBuilder::ExecBuilder(FileLikeObject& f, ElfContent& c)
-     : content(c), 
-       reader(f), 
+     : reader(f), 
        writer(f),
+       content(c), 
        symTabHeader(*c.GetSection(".symtab")) { }
 
 void ExecBuilder::MakeDataExecutable() {

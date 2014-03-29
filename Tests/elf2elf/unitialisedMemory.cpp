@@ -58,7 +58,7 @@ int main(int argc, const char *argv[])
     ElfFile file( content);
     
     // Write out the data
-    file.WriteToFile(outfile.Writer());
+    file.WriteToFile(outfile);
 
 	delete header;
 	delete p;

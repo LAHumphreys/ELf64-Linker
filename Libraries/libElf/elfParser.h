@@ -3,7 +3,6 @@
 #include <vector>
 #include "symbol.h"
 #include "programHeader.h"
-#include "reader.h"
 #include <forward_list>
 #include "reloc.h"
 #include "binaryReader.h"

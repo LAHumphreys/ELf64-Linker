@@ -98,7 +98,7 @@ int Init(testLogger& log ) {
     
     // Write out the data
     outfile.Fill(0,'\0',5000);
-    file.WriteToFile(outfile.Writer());
+    file.WriteToFile(outfile);
 
     // read in the section data
     BinaryReader readPos(outfile);

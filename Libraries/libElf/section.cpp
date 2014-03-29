@@ -9,7 +9,9 @@
 #include <memory>
 
 Section::Section( ) 
-    : sh_flags(TypeFlags()), stringTable(NULL), data(NULL)
+    :  data(NULL), 
+       stringTable(NULL), 
+       sh_flags(TypeFlags())
 {
 }
 
@@ -61,7 +63,9 @@ Section::~Section () {
 }
 
 Section::Section(string header, StringTable * stable)
-    : sh_flags(TypeFlags()), data(NULL) {
+    : data(NULL),
+    sh_flags(TypeFlags()) 
+{
     this->stringTable = stable;
 
     // Build the flags

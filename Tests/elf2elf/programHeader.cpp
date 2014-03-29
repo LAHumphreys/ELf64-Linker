@@ -227,7 +227,7 @@ int CompareData (testLogger& log ) {
                                 oldHdr.FileSize()) 
                  )
 
-        for (int j = 0; j + ostart < oldHdr.FileSize(); j++) {
+        for (size_t j = 0; j + ostart < oldHdr.FileSize(); j++) {
             if  (    outfile.Get(j+nstart) 
                   != infile->Get(j+ostart) ) 
             {

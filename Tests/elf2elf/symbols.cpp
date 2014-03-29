@@ -27,7 +27,7 @@ int BinaryComp(testLogger& log ) {
     DEFER(delete [] oldSymbols;)
 
     BinaryReader oldReader(f, symTab.DataStart());
-    for (int i=0; i< symTab.NumItems(); i++ ) {
+    for (size_t i=0; i< symTab.NumItems(); i++ ) {
         oldReader >> oldSymbols[i];
     }
     
@@ -43,7 +43,7 @@ int BinaryComp(testLogger& log ) {
     DEFER(delete [] newSymbols;)
 
     BinaryReader newReader(outfile, nsymTab.DataStart());
-    for (int i=0; i< symTab.NumItems(); i++ ) {
+    for (size_t i=0; i< symTab.NumItems(); i++ ) {
         newReader >> newSymbols[i];
         string name = p.Content().symbols[i]->Name();
         log << "Checking symbol " << i << ": " << name << endl;

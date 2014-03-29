@@ -47,4 +47,6 @@ int Elf2Elf(testLogger& log) {
     
     // Output the data
     BinaryReader readPos(BinaryWriter(of));
+    
+    return 0;
 }

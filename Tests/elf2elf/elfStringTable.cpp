@@ -35,14 +35,11 @@ int main(int argc, const char *argv[])
     ElfContent content = p.Content();
     sectionMap = &content.sectionMap;
 
-    // old string table
-    SectionHeader& oldHeader= *(content.sections[content.sectionMap[".shstrtab"]]);
-
     ElfFile file( content);
     
     // Write out the data
     outfile.Fill(0,'\0',5000);
-    file.WriteToFile(outfile.Writer());
+    file.WriteToFile(outfile);
 
     // read in the section data
     BinaryReader readPos(outfile);

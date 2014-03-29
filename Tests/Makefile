@@ -1,10 +1,7 @@
-MAKE_DIRS= IOInterface\
-           StringTable \
+MAKE_DIRS= StringTable \
      	   elf2elf \
-    	   dataLump \
-    	   StdWriter\
-		   binaryDescribe\
-		   Utils
+		   binaryDescribe
 
 
+MODE=CPP
 include ../makefile.include

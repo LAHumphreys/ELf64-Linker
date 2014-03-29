@@ -19,7 +19,6 @@ ElfHeaderX86_64::ElfHeaderX86_64 (string linkHeader)
         throw "Invalid LINK header: " + linkHeader;
     }
     long nsections;
-    long nprog;
     long nsyms;
     long nrelocs;
     readPtr = (char * ) & data;

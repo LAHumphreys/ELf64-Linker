@@ -1,8 +1,5 @@
-MAKE_DIRS= libIOInterface \
-           libArchive \
-		   libUtils  \
+MAKE_DIRS= libArchive \
 		   libLINK  \
 		   libElf  \
-		   libRuntime \
-		   libTest 
+		   libRuntime
 include ../makefile.include

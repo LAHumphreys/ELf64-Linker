@@ -48,10 +48,10 @@ int main(int argc, const char *argv[])
     ElfFile file( content);
     
     // Write out the data
-    file.WriteToFile(outfile.Writer());
+    file.WriteToFile(outfile);
 
-	newHeader = new ElfHeaderX86_64(outfile.Reader());
-	outfile.Reader().Read(&hdr,sizeof(Elf64_Ehdr));
+	newHeader = new ElfHeaderX86_64(outfile);
+	BinaryReader(outfile).Read(&hdr,sizeof(Elf64_Ehdr));
 	BinaryReader(f).Read(&ohdr,sizeof(Elf64_Ehdr));
 
     Test("ELF MAGIC",  (loggedTest)magic).RunTest();

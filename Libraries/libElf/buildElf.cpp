@@ -7,12 +7,13 @@
 
 
 ElfFile::ElfFile(ElfContent& data) 
-     : file(1024) , 
-       dataSectionStart(file),
-       sectionHeadersStart(file),
+     : 
        header(data.progHeaders.size() > 0 ? 
                  ElfHeaderX86_64::NewExecutable() :
-                 ElfHeaderX86_64::NewObjectFile())
+                 ElfHeaderX86_64::NewObjectFile()),
+       file(1024) , 
+       dataSectionStart(file),
+       sectionHeadersStart(file)
 {
     InitialiseHeader(data);
     InitialiseFile(data);
@@ -85,7 +86,7 @@ void ElfFile::InitialiseHeader(ElfContent &data) {
     }
 
     dataWritten.resize(header.Sections());
-    for ( int sec=0; sec<dataWritten.size(); sec++ ) {
+    for ( size_t sec=0; sec<dataWritten.size(); sec++ ) {
         dataWritten[sec] = false;
     }
 }
@@ -270,8 +271,11 @@ BinaryWriter ElfFile::WriteDataSections( ElfContent &data,
 
                 section->DataStart() = writePos;
                 section->WriteRawData(writePos);
-                if (end <=  section->DataSize() + writePos)
+                if (static_cast<size_t>(end) <=  
+                     section->DataSize() + static_cast<size_t>(writePos)) 
+                {
                      end =  section->DataSize() + writePos;
+                }
                 dataWritten[sindex] = true;
 
                 SLOG_FROM ( 

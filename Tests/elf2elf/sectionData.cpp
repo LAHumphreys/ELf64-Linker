@@ -84,7 +84,7 @@ int CompareSections(testLogger& log ) {
                    BinaryReader(outfile,oldHdr.DataStart()),
                    oldHdr.DataSize());
 
-        for (int j = 0; j < oldHdr.DataSize(); j++) {
+        for (size_t j = 0; j < oldHdr.DataSize(); j++) {
             if  (    outfile.Get(j+newHdr.DataStart()) 
                   != infile->Get(j+oldHdr.DataStart()) ) 
             {

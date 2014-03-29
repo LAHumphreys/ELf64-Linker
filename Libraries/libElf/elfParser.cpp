@@ -87,7 +87,7 @@ void ElfParser::ReadSymbols() {
     BinaryReader readPos = reader.Begin() + 
                              symTable->DataStart();
 
-    for ( int i=0; i < symTable->NumItems(); ++i) {
+for ( size_t i=0; i < symTable->NumItems(); ++i) {
         symbols[i] = new Symbol(readPos,stringTable);
         if ( symbols[i]->IsLinkSymbol() ) ++linkSymbols;
         symbolMap[symbols[i]->Name()] = i;
@@ -169,7 +169,7 @@ void ElfParser::UpdateSymbolTable() {
     shared_ptr<Data> data = symTable.GetData();
     data->Resize(symTable.DataSize());
     BinaryWriter w = data->Writer();
-    for ( int i=0; i<symTable.NumItems(); ++i) {
+    for ( size_t i=0; i<symTable.NumItems(); ++i) {
         w << symbols[i]->RawItem();
     }
 }

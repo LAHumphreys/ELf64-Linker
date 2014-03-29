@@ -69,7 +69,6 @@ int tabSize (testLogger& log) {
  * "\0<string 1>\0<string 2>\0<string 3>\0"
  */
 int WriteTable (testLogger& log) {
-    int lastLen=1;
     StringTable tab;
 	log << "Writing string0" << endl;
 	int idx0 = tab.AddString(testStrings[0]);
@@ -93,7 +92,7 @@ int WriteTable (testLogger& log) {
 	 log << "declare data lump" << endl;
 	 DataLump<100> outTable;
 	 log << "copying table....";
-	 tab.WriteTable(outTable.Writer());
+	 tab.WriteTable(outTable);
 	 log << "done" << endl;
 
      

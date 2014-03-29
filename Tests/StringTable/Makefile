@@ -5,5 +5,6 @@ LINKED_LIBS= libElf\
 
 BUILD_TIME_TESTS=stringTable
 CPP_TAGS_FILE=testStringTable-c++.test
+MODE=CPP
 
 include ../../makefile.include
