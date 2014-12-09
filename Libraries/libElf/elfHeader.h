@@ -35,6 +35,11 @@ public:
     uint16_t& SectionHeaderSize() { return data.e_shentsize; }
     uint16_t& StringTableIndex() { return data.e_shstrndx; }
 
+    /**
+     * The (virtual) address at which program execution should begin
+     */
+    Elf64_Addr& EntryAddress() { return data.e_entry; }
+
     void GetHeader(Elf64_Ehdr& out);
     static ElfHeaderX86_64 NewObjectFile();
     static ElfHeaderX86_64 NewExecutable();

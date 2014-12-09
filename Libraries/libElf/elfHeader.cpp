@@ -70,6 +70,9 @@ void ElfHeaderX86_64::PopulateIdentity() {
     // Only the linux kernel is supported
     data.e_ident[EI_OSABI] = ELFOSABI_LINUX;
 
+    // This should be zero, as per "man elf"
+    data.e_ident[EI_ABIVERSION] = 0;
+
     // Reserved for some future standard
     memset(data.e_ident+EI_OSABI+1,0,EI_NIDENT - EI_OSABI);
 }
@@ -126,6 +129,8 @@ ElfHeaderX86_64 ElfHeaderX86_64::NewExecutable() {
     ElfHeaderX86_64 header(NewObjectFile());
 
     header.ProgramHeadersStart() = sizeof(data);
+
+    header.data.e_type = ET_EXEC;
 
     return header;
 }

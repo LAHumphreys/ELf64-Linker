@@ -21,6 +21,7 @@ ElfFile::ElfFile(ElfContent& data)
     // Process the program headers
     BinaryWriter dataWritePos =  ProcessProgHeaders( data);
 
+    Bootstrap(data);
     
     SLOG_FROM ( 
          LOG_VERY_VERBOSE, 
@@ -339,4 +340,20 @@ void ElfFile::WriteSpecial(ElfContent& data, string name,
 
 void ElfFile::WriteToFile(BinaryWriter& w) {
     this->file.Reader().Read(w,this->file.Size());
+}
+
+void ElfFile::Bootstrap(ElfContent& content) {
+	if ( content.progHeaders.size() > 0)
+	{
+		Symbol* _start = content.GetSymbol("_start");
+		if ( _start != nullptr) {
+			header.EntryAddress() = _start->Value();
+		} else {
+            LOG_FROM (
+                 LOG_WARNING,
+                 "ElfFile::Bootstrap",
+                 "Content has prog headers but no _start function!"
+            )
+		}
+	}
 }

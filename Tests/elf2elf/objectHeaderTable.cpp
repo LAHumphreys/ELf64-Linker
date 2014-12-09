@@ -8,6 +8,8 @@
 #include <elf.h>
 #include "dataLump.h"
 #include "defer.h"
+#include "stdReader.h"
+#include "binaryDescribe.h"
 
 int magic( testLogger& log);
 int headerClass( testLogger& log);
@@ -19,6 +21,9 @@ int te_type(testLogger& log);
 int machine(testLogger& log);
 int HeaderSizes(testLogger& log );
 int HeaderStarts(testLogger& log);
+int Diff(testLogger& log);
+
+string infile= "";
 
 
 ElfParser *p;
@@ -38,6 +43,7 @@ using namespace std;
 int main(int argc, const char *argv[])
 { 
     // Use ourself as the sample binary
+    infile = argv[0];
     ElfFileReader f(argv[0]);
     
     p = new ElfParser(f);
@@ -55,16 +61,17 @@ int main(int argc, const char *argv[])
     BinaryReader(outfile).Read(&hdr,sizeof(Elf64_Ehdr));
     BinaryReader(f).Read(&ohdr,sizeof(Elf64_Ehdr));
 
-    Test("ELF MAGIC",  (loggedTest)magic).RunTest();
-    Test("ELF CLASS",  (loggedTest)headerClass).RunTest();
-    Test("ELF VERSION",  (loggedTest)tEI_VERSION).RunTest();
-    Test("ELF DATA TYPE",  (loggedTest)tEI_DATA).RunTest();
-    Test("ELF OS ABI",  (loggedTest)tEI_OSABI).RunTest();
-    Test("ELF PAD",  (loggedTest)PAD).RunTest();
-    Test("ELF TYPE",  (loggedTest)te_type).RunTest();
-    Test("ELF MACHINE",  (loggedTest)machine).RunTest();
-    Test("ELF HEADERS (SIZES)",  (loggedTest)HeaderSizes).RunTest();
-    Test("ELF HEADERS (STARTS)",  (loggedTest)HeaderStarts).RunTest();
+    Test("ELF MAGIC",  magic).RunTest();
+    Test("ELF CLASS",  headerClass).RunTest();
+    Test("ELF VERSION",  tEI_VERSION).RunTest();
+    Test("ELF DATA TYPE",  tEI_DATA).RunTest();
+    Test("ELF OS ABI",  tEI_OSABI).RunTest();
+    Test("ELF PAD",  PAD).RunTest();
+    Test("ELF TYPE",  te_type).RunTest();
+    Test("ELF MACHINE",  machine).RunTest();
+    Test("ELF HEADERS (SIZES)",  HeaderSizes).RunTest();
+    Test("ELF HEADERS (STARTS)",  HeaderStarts).RunTest();
+    Test("Diffing the headers...", Diff).RunTest();
 
     delete newHeader;
     delete p;
@@ -142,7 +149,7 @@ int PAD (testLogger& log) {
 }
 
 int te_type(testLogger& log) {
-    if ( hdr.e_type != ET_REL ) {
+    if ( hdr.e_type != ET_EXEC ) {
         log << "Invalid type for object file" << endl;
         log << hdr.e_type << " , " << ET_REL  << endl;
         return 1;
@@ -207,5 +214,78 @@ int HeaderStarts(testLogger& log ) {
         log << ohdr.e_phoff << endl;;
         return 1;
     }
+    return 0;
+}
+
+int Diff(testLogger& log) {
+    /*
+     * Read in the original header
+     */
+    Elf64_Ehdr originalHeader;
+    Elf64_Ehdr newHeader;
+    IFStreamReader originalFile(infile.c_str());
+    BinaryReader(originalFile) >> originalHeader;
+    BinaryReader(outfile) >> newHeader;
+
+    if ( newHeader.e_ident[EI_MAG0] != originalHeader.e_ident[EI_MAG0] ) {
+        log << "Differing MAG0" << endl;
+        return 1;
+    }
+
+    if ( newHeader.e_ident[EI_MAG1] != originalHeader.e_ident[EI_MAG1] ) {
+        log << "Differing MAG1" << endl;
+        return 1;
+    }
+
+    if ( newHeader.e_ident[EI_MAG2] != originalHeader.e_ident[EI_MAG2] ) {
+        log << "Differing MAG2" << endl;
+        return 1;
+    }
+
+    if ( newHeader.e_ident[EI_MAG3] != originalHeader.e_ident[EI_MAG3] ) {
+        log << "Differing MAG3" << endl;
+        return 1;
+    }
+
+    if ( newHeader.e_ident[EI_CLASS] != originalHeader.e_ident[EI_CLASS] ) {
+        log << "Differing CLASS" << endl;
+        return 1;
+    }
+
+    if ( newHeader.e_ident[EI_DATA] != originalHeader.e_ident[EI_DATA] ) {
+        log << "Differing DATA" << endl;
+        return 1;
+    }
+
+    if ( newHeader.e_ident[EI_VERSION] != originalHeader.e_ident[EI_VERSION] ) {
+        log << "Differing VERSION" << endl;
+        return 1;
+    }
+
+    if ( newHeader.e_ident[EI_OSABI] != originalHeader.e_ident[EI_OSABI] ) {
+        log << "Differing OSABI" << endl;
+        return 1;
+    }
+
+    if ( newHeader.e_ident[EI_ABIVERSION] != originalHeader.e_ident[EI_ABIVERSION] ) {
+        log << "Differing ABIVERSION" << endl;
+        return 1;
+    }
+
+    if ( newHeader.e_ident[EI_PAD] != originalHeader.e_ident[EI_PAD] ) {
+        log << "Differing PAD" << endl;
+        return 1;
+    }
+
+    if ( newHeader.e_type != originalHeader.e_type) {
+    	log << " Differing types! " << endl;
+    	return 1;
+    }
+
+    if ( newHeader.e_entry != originalHeader.e_entry) {
+    	log << " Differing entry points! " << endl;
+    	return 1;
+    }
+
     return 0;
 }

@@ -58,6 +58,14 @@ protected:
     void WriteProgHeaders ( ElfContent&, vector<ProgramHeader *>& , 
                                          BinaryWriter&);
 
+    /**
+     * If the elf file has been configured to be an executable, set the start
+     * address to be the location of the _start function.
+     *
+     * @param content  The raw file-data
+     */
+    void Bootstrap(ElfContent& content);
+
     BinaryWriter WriteUnloadedDataSections( ElfContent& data,
                                             BinaryWriter& dataWritePos);
 private:

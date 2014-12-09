@@ -9,3 +9,6 @@ Tests/db/
 Tests/elf2elf/out.o
 elf2Link
 elf2elf
+/.cproject
+/.project
+.settings/

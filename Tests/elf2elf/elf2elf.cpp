@@ -27,8 +27,8 @@ int main(int argc, const char *argv[])
     inputFile = "../elf2elf/isYes/isYes.o";
     outputFile = "/tmp/isYes.o";
     Test("Reading small object file",Elf2Elf).RunTest();
-    inputFile = argv[0];
-    outputFile = "/tmp/elf2el";
+    inputFile = "isYes/a.out";
+    outputFile = "/tmp/isYes";
     Test("Reading smallish binary",Elf2Elf).RunTest();
     return 0;
 }
