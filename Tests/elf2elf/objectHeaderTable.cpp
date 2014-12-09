@@ -36,7 +36,8 @@ using namespace std;
  * Validate a basic object file
  */
 int main(int argc, const char *argv[])
-{
+{ 
+    // Use ourself as the sample binary
     ElfFileReader f(argv[0]);
     
     p = new ElfParser(f);
@@ -50,9 +51,9 @@ int main(int argc, const char *argv[])
     // Write out the data
     file.WriteToFile(outfile);
 
-	newHeader = new ElfHeaderX86_64(outfile);
-	BinaryReader(outfile).Read(&hdr,sizeof(Elf64_Ehdr));
-	BinaryReader(f).Read(&ohdr,sizeof(Elf64_Ehdr));
+    newHeader = new ElfHeaderX86_64(outfile);
+    BinaryReader(outfile).Read(&hdr,sizeof(Elf64_Ehdr));
+    BinaryReader(f).Read(&ohdr,sizeof(Elf64_Ehdr));
 
     Test("ELF MAGIC",  (loggedTest)magic).RunTest();
     Test("ELF CLASS",  (loggedTest)headerClass).RunTest();
@@ -65,8 +66,8 @@ int main(int argc, const char *argv[])
     Test("ELF HEADERS (SIZES)",  (loggedTest)HeaderSizes).RunTest();
     Test("ELF HEADERS (STARTS)",  (loggedTest)HeaderStarts).RunTest();
 
-	delete newHeader;
-	delete p;
+    delete newHeader;
+    delete p;
 
     return 0;
 }
@@ -75,58 +76,58 @@ int main(int argc, const char *argv[])
  *
  */
 int magic( testLogger& log) {
-	log << "0: >" << ELFMAG0 << "< , " << hdr.e_ident[0] << endl;
-	log << "1: >" << ELFMAG1 << "< , " << hdr.e_ident[1] << endl;
-	log << "2: >" << ELFMAG2 << "< , " << hdr.e_ident[2] << endl;
-	log << "3: >" << ELFMAG3 << "< , " << hdr.e_ident[3] << endl;
-	if (    ELFMAG0 != hdr.e_ident[0] 
-		 || ELFMAG1 != hdr.e_ident[1] 
-		 || ELFMAG2 != hdr.e_ident[2]  
-		 || ELFMAG3 != hdr.e_ident[3]  ) {
-			log << "MAGIC FAILED!" << endl;
-			return 1;
-	}
-	return 0;
+    log << "0: >" << ELFMAG0 << "< , " << hdr.e_ident[0] << endl;
+    log << "1: >" << ELFMAG1 << "< , " << hdr.e_ident[1] << endl;
+    log << "2: >" << ELFMAG2 << "< , " << hdr.e_ident[2] << endl;
+    log << "3: >" << ELFMAG3 << "< , " << hdr.e_ident[3] << endl;
+    if (    ELFMAG0 != hdr.e_ident[0] 
+         || ELFMAG1 != hdr.e_ident[1] 
+         || ELFMAG2 != hdr.e_ident[2]  
+         || ELFMAG3 != hdr.e_ident[3]  ) {
+            log << "MAGIC FAILED!" << endl;
+            return 1;
+    }
+    return 0;
 }
 
 int headerClass (testLogger& log) {
-	if ( hdr.e_ident[EI_CLASS] != ELFCLASS64 ) {
-		log << "CLASS MISSMATCH" << endl;
-		log << hdr.e_ident[EI_CLASS] << " , " << ELFCLASS64 << endl;
-		return 1;
-	} else {
-	    return 0;
-	}
+    if ( hdr.e_ident[EI_CLASS] != ELFCLASS64 ) {
+        log << "CLASS MISSMATCH" << endl;
+        log << hdr.e_ident[EI_CLASS] << " , " << ELFCLASS64 << endl;
+        return 1;
+    } else {
+        return 0;
+    }
  }
 
 int tEI_DATA (testLogger& log) {
-	if ( hdr.e_ident[EI_DATA] != ELFDATA2LSB ) {
-		log << "DATA MISSMATCH" << endl;
-		log << hdr.e_ident[EI_DATA] << " , " << ELFDATA2LSB << endl;
-		return 1;
-	} else {
-	    return 0;
-	}
+    if ( hdr.e_ident[EI_DATA] != ELFDATA2LSB ) {
+        log << "DATA MISSMATCH" << endl;
+        log << hdr.e_ident[EI_DATA] << " , " << ELFDATA2LSB << endl;
+        return 1;
+    } else {
+        return 0;
+    }
  }
 
 int tEI_VERSION (testLogger& log) {
-	if ( hdr.e_ident[EI_VERSION] != EV_CURRENT ) {
-		log << "VERSION MISSMATCH" << endl;
-		log << hdr.e_ident[EI_VERSION] << " , " << EV_CURRENT << endl;
-		return 1;
-	} else {
-	    return 0;
-	}
+    if ( hdr.e_ident[EI_VERSION] != EV_CURRENT ) {
+        log << "VERSION MISSMATCH" << endl;
+        log << hdr.e_ident[EI_VERSION] << " , " << EV_CURRENT << endl;
+        return 1;
+    } else {
+        return 0;
+    }
  }
 
 int tEI_OSABI (testLogger& log) {
-	if ( hdr.e_ident[EI_OSABI] != ELFOSABI_LINUX ) {
-		log << "APPLICATION BINARY INTERFACE  MISSMATCH" << endl;
-		log << hdr.e_ident[EI_OSABI] << " , " << ELFOSABI_LINUX << endl;
-		return 1;
-	} else {
-	    return 0;
-	}
+    if ( hdr.e_ident[EI_OSABI] != ELFOSABI_LINUX ) {
+        log << "APPLICATION BINARY INTERFACE  MISSMATCH" << endl;
+        log << hdr.e_ident[EI_OSABI] << " , " << ELFOSABI_LINUX << endl;
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 int PAD (testLogger& log) {

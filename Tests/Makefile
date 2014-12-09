@@ -1,6 +1,5 @@
 MAKE_DIRS= StringTable \
-     	   elf2elf \
-		   binaryDescribe
+     	   elf2elf 
 
 
 MODE=CPP
