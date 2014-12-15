@@ -152,7 +152,7 @@ void ElfFile::WriteProgHeaders (
 
         // We need to align the program segment: (see comment in .h)
         // Calculate boundrary location
-        if ( ph->Alignment() != 0 && !ph->IsLoadableSegment()) {
+        if ( ph->Alignment() != 0 && ph->IsLoadableSegment()) {
             dataEnd.Offset() = dataPos.NextBoundrary( ph->Alignment()) 
                              + (ph->Address() % ph->Alignment());
         }
@@ -229,10 +229,12 @@ BinaryWriter ElfFile::WriteUnloadedDataSections( ElfContent& data,
 BinaryWriter ElfFile::WriteDataSections( ElfContent &data, 
                                          ProgramHeader& prog,
                                          BinaryWriter& writer) {
-    BinaryWriter end = writer;
+    long segmentEnd = writer;
     BinaryWriter writePos = writer;
+
     Section * section;
-    for ( auto sname: prog.SectionNames() ) {
+    long segmentStart = writer.Offset();
+    for ( auto& sname: prog.SectionNames() ) {
 
         int sindex = data.sectionMap[sname];
         section = data.sections[sindex];
@@ -267,15 +269,17 @@ BinaryWriter ElfFile::WriteDataSections( ElfContent &data,
                        "I've written this section already, I shan't be writing it again!" 
                 )
             } else {
-                writePos = (long)writer + section->Address() 
-                                        - prog.Address();
+            	long segmentOffset =  section->Address() - prog.Address();
+                writePos = segmentStart + segmentOffset;
 
                 section->DataStart() = writePos;
                 section->WriteRawData(writePos);
-                if (static_cast<size_t>(end) <=  
-                     section->DataSize() + static_cast<size_t>(writePos)) 
+
+                long sectionEnd = section->DataSize() + writePos.Offset();
+
+                if ( segmentEnd <=  sectionEnd )
                 {
-                     end =  section->DataSize() + writePos;
+                     segmentEnd = section->DataSize() + writePos;
                 }
                 dataWritten[sindex] = true;
 
@@ -283,20 +287,20 @@ BinaryWriter ElfFile::WriteDataSections( ElfContent &data,
                      LOG_VERY_VERBOSE, 
                      "ElfFile::WriteDataSections", 
                        "Section Written, end is now: " 
-                       << end.Offset()
+                       << segmentEnd
                 )
             }
 
         } else {
-            writePos = (long)end;
+            writePos = segmentEnd;
             section->DataStart() = writePos;
             section->WriteRawData(writePos);
             // These are not loadable, we have no responsibility to 
             // align them
-            end = section->DataSize() + writePos;
+            segmentEnd = section->DataSize() + writePos;
         }
     }
-    writePos = (long)end;
+    writePos = segmentEnd;
     return writePos;
 }
 

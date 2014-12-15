@@ -152,7 +152,9 @@ const Elf64_Off ProgramHeader::GetAdditionalMemory() const
     return SizeInMemory() - FileSize();
 }
 
-void ProgramHeader::SetFileSize( const Elf64_Off& size ) {
-        RawProgramHeader::SizeInMemory() += size - FileSize();
-        RawProgramHeader::FileSize() = size;
+void ProgramHeader::SetFileSize( const Elf64_Off& fileSize ) {
+
+	Elf64_Off fileSizeDelta = FileSize() - fileSize;
+    RawProgramHeader::SizeInMemory() += fileSizeDelta;
+    RawProgramHeader::FileSize() = fileSize;
 }

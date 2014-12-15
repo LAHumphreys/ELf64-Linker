@@ -114,7 +114,20 @@ public:
     inline void AddAdditionalMemory(const Elf64_Off& space) {
         SetAdditionalMemory(space + GetAdditionalMemory());
     }
-    void SetFileSize(const Elf64_Off& size);
+
+    /**
+     * Update the size of file size of the program header.
+     *
+     * To meet alignment requirements the elf-builder may end up padding
+     * sections. This will change the file size of the program header, and
+     * indeed the size in memory.
+     *
+     * This function re-scales both values based on the new size (in file) of
+     * the program header.
+     *
+     * @param fileSize   The size in file of the segment.
+     */
+    void SetFileSize(const Elf64_Off& fileSize);
 protected:
     static const Flags& TypeFlags();
 
