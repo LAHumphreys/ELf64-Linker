@@ -50,10 +50,10 @@ Archive::Member::Member(const BinaryReader& r): file(NULL) {
     r.Read(&header,sizeof(header));
     file = new SubReader(r, Size());
 
-    char sizebuf[11];
-    sizebuf[11] = name[16] = '\0';
+    char sizebuf[10];
+    sizebuf[9] = name[16] = '\0';
     for (int i=0; i<16; i++) name[i] =  header.name[i];
-    for (int i=0; i<11; i++) sizebuf[i] =  header.size[i];
+    for (int i=0; i<10; i++) sizebuf[i] =  header.size[i];
     fileSize=atol(sizebuf);
 }
 
