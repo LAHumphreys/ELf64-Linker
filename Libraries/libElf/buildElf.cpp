@@ -54,22 +54,27 @@ ElfFile::ElfFile(ElfContent& data)
 }
 
 void ElfFile::InitialiseFile(ElfContent& data) {
-    long sectionDataLength = 0;
     
-    dataSectionStart.Offset() = header.Size();
+    long programHeadersLength =   data.progHeaders.size()
+    		                    * header.ProgramHeaderSize();
+
+    dataSectionStart.Offset() =   header.ProgramHeadersStart()
+    		                    + programHeadersLength;
                          
     // Reserve space for data, plus room for alignment 
     // ( the idea is to allocate too much and resize back down )
+    long sectionDataLength = 0;
 
     // guess the length of the sectionDataLength
     for( auto section : data.sections)
         sectionDataLength += section->Size();
-    // allow room for alignments of loadable segments
-    sectionDataLength += 16 * header.ProgramHeaders();
 
-    file.Resize(  (long) dataSectionStart
+    long sectionHeadersLength =   header.SectionHeaderSize()
+    		                    * header.Sections();
+
+    file.Resize(  dataSectionStart.Offset()
                 + sectionDataLength
-                + header.SectionHeaderSize() * header.Sections());
+                + sectionHeadersLength);
     file.Fill(0,'\0',file.Size());
 }
 
@@ -126,22 +131,25 @@ void ElfFile::WriteProgHeaders (
                      vector<ProgramHeader *>& headers,
                      BinaryWriter&  dataPos)
 {
-    BinaryWriter headerPos = dataPos;
-    BinaryWriter& dataEnd = dataPos;
+    // Track the position at the head of the file to write headers to
+    BinaryWriter headerPos(file,header.ProgramHeadersStart());
+
+	// Track the position (later in the file) we will be writing section data to
+    BinaryWriter dataEnd = dataPos;
 
 
-    auto it = headers.begin();
-    ProgramHeader* ph;
+    vector<ProgramHeader*>::iterator it = headers.begin();
+    ProgramHeader* ph = *it;
 
     // First handle the program-headers header
-    ph = *it;
-    ph->DataStart() = dataPos;
-    ph->SetFileSize(ph->Size() * header.ProgramHeaders());
+    ph->DataStart() = headerPos;
+    long programHeadersLength =   header.ProgramHeaderSize()
+    		                    * header.ProgramHeaders();
+    ph->SetFileSize(programHeadersLength);
     headerPos << ph->RawHeader();
-    
-    // Now iterate through the remaing sections
-    dataPos = ph->DataStart() + ph->FileSize();
-    for (it++; it != headers.end(); ++it) {
+
+    // Now iterate through the remaining sections
+    for (++it; it != headers.end(); ++it) {
         ph = *it;
 
         LOG_FROM ( 
@@ -155,24 +163,25 @@ void ElfFile::WriteProgHeaders (
         if ( ph->Alignment() != 0 && ph->IsLoadableSegment()) {
             dataEnd.Offset() = dataPos.NextBoundrary( ph->Alignment()) 
                              + (ph->Address() % ph->Alignment());
+
+            dataPos.FillTo(dataEnd);
+            dataPos.Offset() = dataEnd;
         }
-        // move to the boundrary
-        dataPos.FillTo(dataEnd);
-        dataPos.Offset() = dataEnd;
 
         // write the section data
         dataEnd.Offset() = WriteDataSections( data, *ph, dataPos);
 
         // Set the file position in the program header
         if ( ph->IsLoadableSegment() && ph->DataStart() == 0 ) {
-            // The first loadable segment load the first block of the file
+            // The first loadable segment loads the first block of the file
         } else {
             ph->DataStart() = dataPos;
         }
+
         ph->SetFileSize(dataEnd - dataPos);
         headerPos << ph->RawHeader();
 
-        dataPos.Offset() += ph->SizeInMemory();
+        dataPos = dataEnd.Offset();
     }
 }
 

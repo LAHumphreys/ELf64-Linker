@@ -55,8 +55,21 @@ protected:
     void InitialiseHeader(ElfContent& data);
     bool IsSpecialSection(Section& s);
     void WriteSpecial(ElfContent&, string name, long&, BinaryWriter&);
-    void WriteProgHeaders ( ElfContent&, vector<ProgramHeader *>& , 
-                                         BinaryWriter&);
+
+    /**
+     * Write the program headers, and their associated data sections to the
+     * output file.
+     *
+     * @param data        The raw-data supplied to the c'tor
+     * @param headers     A list of program headers, in the order in whih they
+     *                    should be written
+     * @param dataStart   The location within the file where the next data
+     *                    section should be written to
+     *
+     */
+    void WriteProgHeaders ( ElfContent& data,
+    		                vector<ProgramHeader *>& headers,
+                            BinaryWriter& dataStart);
 
     /**
      * If the elf file has been configured to be an executable, set the start
