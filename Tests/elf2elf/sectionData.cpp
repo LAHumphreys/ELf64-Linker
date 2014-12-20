@@ -13,7 +13,8 @@
 
 using namespace std;
 
-DataLump<5000> outfile;
+const long MEG=1024*1024;
+DataLump<20*MEG>* outfile;
 FileLikeReader* infile;
 Elf64_Shdr* newSections;
 Elf64_Shdr* oldSections;
@@ -25,7 +26,7 @@ int CompareSections(testLogger& log );
 
 int main(int argc, const char *argv[])
 {
-    ElfFileReader f("../elf2elf/isYes/isYes.o");
+    ElfFileReader f(argv[0]);
     
     ElfParser p(f);
     
@@ -33,10 +34,11 @@ int main(int argc, const char *argv[])
     ElfContent content = p.Content();
 
     ElfFile file( content);
-    file.WriteToFile(outfile);
+    outfile = new DataLump<20*MEG>();
+    file.WriteToFile(*outfile);
     
     // read in the section data
-    ElfHeaderX86_64 header(outfile);
+    ElfHeaderX86_64 header(*outfile);
     ElfHeaderX86_64 oldHeader(f);
     
     newSections = new Elf64_Shdr[header.Sections()];
@@ -50,7 +52,7 @@ int main(int argc, const char *argv[])
 
     infile = &f;
 
-    BinaryReader newReader(outfile,header.SectionTableStart());
+    BinaryReader newReader(*outfile,header.SectionTableStart());
     BinaryReader oldReader(f,oldHeader.SectionTableStart());
 
     for ( int i=0; i< header.Sections(); i++ ) {
@@ -75,20 +77,33 @@ int CompareSections(testLogger& log ) {
             continue;
         }
 
+        if ( !oldHdr.HasFileData())
+        {
+            // Nothing to compare...
+            continue;
+        }
+
+        log << "Section: " << i << endl;
+
         log << "Old Data: " << endl;
         log << BinaryDescribe::Describe( 
                    BinaryReader(*infile,newHdr.DataStart()),
-                   newHdr.DataSize());
+                   100);
         log << "New Data: " << endl;
         log << BinaryDescribe::Describe( 
-                   BinaryReader(outfile,oldHdr.DataStart()),
-                   oldHdr.DataSize());
+                   BinaryReader(*outfile,oldHdr.DataStart()),
+                   100);
 
         for (size_t j = 0; j < oldHdr.DataSize(); j++) {
-            if  (    outfile.Get(j+newHdr.DataStart()) 
+            if  (    outfile->Get(j+newHdr.DataStart())
                   != infile->Get(j+oldHdr.DataStart()) ) 
             {
+            	long oldIdx = j+oldHdr.DataStart();
+            	long newIdx = j+newHdr.DataStart();
+
                 log << "Missmatch at index: " << j << "!" << endl;
+                log << oldIdx << ": " << infile->Get(oldIdx) << " -> "
+                    << newIdx << ": " << outfile->Get(newIdx) << endl;
                 return 1;
             }
         }

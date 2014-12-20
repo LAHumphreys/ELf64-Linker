@@ -12,6 +12,7 @@
 #include <string>
 #include <iomanip>
 #include "logger.h"
+#include <iomanip>
 
 using namespace std;
 
@@ -22,6 +23,7 @@ FileLikeReader* infile;
 RawProgramHeader* newHeaders;
 RawProgramHeader* oldHeaders;
 int headers;
+string pathToBin;
 
 ElfHeaderX86_64 *poldHeader = NULL;
 ElfHeaderX86_64 *pnewHeader = NULL;
@@ -33,7 +35,8 @@ int CompareData (testLogger& log );
 
 int main(int argc, const char *argv[])
 {
-    ElfFileReader f(argv[0]);
+	pathToBin = argv[0];
+    ElfFileReader f(pathToBin.c_str());
     
     infile = &f;
     ElfParser p(f);
@@ -69,11 +72,12 @@ int main(int argc, const char *argv[])
         oldReader >> oldHeaders[i];
     }
 
-    Test("Validate program headers",(loggedTest)CompareHeaders).RunTest();
-    Test("Validate segment data",(loggedTest)CompareData).RunTest();
+    Test("Validate program headers",CompareHeaders).RunTest();
+    Test("Validate segment data",CompareData).RunTest();
 
     return 0;
 }
+
 
 int CheckElfHeader(testLogger& log ) {
     if (   poldHeader->ProgramHeaders() 
@@ -201,21 +205,24 @@ int CompareData (testLogger& log ) {
     for ( int i=0; i< headers; i++ ) {
         const RawProgramHeader& newHdr = newHeaders[i];
         const RawProgramHeader& oldHdr = oldHeaders[i];
+        if ( oldHdr.Size() == 0 || !oldHdr.IsLoadableSegment()) {
+            continue;
+        }
 
         long ostart = oldHdr.DataStart();
         long nstart = newHdr.DataStart();
+        size_t oend = oldHdr.FileSize();
 
-        log << "Header: " << endl << i;
+        log << "Header: " << i << endl;
 
-        if ( oldHdr.Size() == 0 || oldHdr.IsProgramHeaders()) {
-            continue;
-        }
 
         if ( oldHdr.DataStart() == 0 ) {
             // We acknoweldge there may be a difference in the header file secition
             // (data-starts)
             ostart = oldHdr.DataStart() + headers*sizeof(Elf64_Phdr) + sizeof(Elf64_Ehdr);
             nstart = newHdr.DataStart() + headers*sizeof(Elf64_Phdr) + sizeof(Elf64_Ehdr);
+
+            oend = oldHdr.FileSize() - ostart;
         }
 
         LOG( LOG_VERBOSE,
@@ -231,24 +238,39 @@ int CompareData (testLogger& log ) {
                                 oldHdr.FileSize()) 
                  )
 
-        for (size_t j = 0; j + ostart < oldHdr.FileSize(); j++) {
-            if  (    outfile.Get(j+nstart) 
-                  != infile->Get(j+ostart) ) 
+        for (size_t j = 0; j < oend; j++) {
+            if  (    outfile.Get(j+nstart) != infile->Get(j+ostart) )
             {
-                log << hex << "Missmatch at index: " << j << "!" << endl;
+                log << hex << "Missmatch at index: " << j << "(" << hex << j << ")" << "!" << endl;
                 log << hex << "Raw file offset: " << ostart + j;
                 log << ", " << nstart + j <<  endl;
-                log << "Total size of this segment: " << oldHdr.FileSize() << endl;
-                log << "Old Data: " << endl;
-                log << newHdr.Describe() << endl;
-                log << BinaryDescribe::Describe( 
-                           BinaryReader(*infile,ostart),
-                           j);
-                log << "New Data: " << endl;
-                log << oldHdr.Describe() << endl;
-                log << BinaryDescribe::Describe( 
-                           BinaryReader(outfile,nstart),
-                           j);
+                log << "Total size of this segment: " << hex << oldHdr.FileSize() << endl;
+                log << "Diff: " << infile->Get(j+ostart) << " -> " << outfile.Get(j+nstart) << endl;
+                log << "Diff: " << (short) infile->Get(j+ostart) << " -> " << (short) outfile.Get(j+nstart) << endl;
+                if ( j < 100 ) {
+                    log << "Old Data: " << endl;
+                    log << newHdr.Describe() << endl;
+                    log << BinaryDescribe::Describe(
+                               BinaryReader(*infile,ostart),
+                               j);
+                    log << "New Data: " << endl;
+                    log << newHdr.Describe() << endl;
+                    log << BinaryDescribe::Describe(
+                               BinaryReader(outfile,nstart),
+                               j);
+                } else {
+                    log << "Old Data: " << endl;
+                    log << newHdr.Describe() << endl;
+                    log << BinaryDescribe::Describe(
+                               BinaryReader(*infile,ostart+j-100),
+                               105);
+                    log << "New Data: " << endl;
+                    log << newHdr.Describe() << endl;
+                    log << BinaryDescribe::Describe(
+                               BinaryReader(outfile,nstart+j-100),
+                               105);
+
+                }
                 return 1;
             }
         }

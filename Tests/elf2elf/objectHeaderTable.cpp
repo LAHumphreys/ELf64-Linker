@@ -287,5 +287,12 @@ int Diff(testLogger& log) {
     	return 1;
     }
 
+    if ( newHeader.e_shstrndx != originalHeader.e_shstrndx)
+    {
+    	log << "Differing section header string indexes!"
+    		<< originalHeader.e_shstrndx << " -> "
+			<< newHeader.e_shstrndx << endl;
+    	return 1;
+    }
     return 0;
 }

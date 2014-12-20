@@ -43,10 +43,7 @@ public:
     ElfFile(ElfContent &data);
     ElfFile(ElfContent &&data): ElfFile(data){}
     void MakeNewHeader(ElfContent &data);
-    BinaryWriter ProcessProgHeaders(ElfContent& data);
-    BinaryWriter WriteDataSections( ElfContent& data, 
-                                    ProgramHeader& prog, 
-                                    BinaryWriter& writer);
+    void ProcessProgHeaders(ElfContent& data);
     void WriteSectionHeaders(ElfContent& data);
     void WriteToFile(BinaryWriter& w);
     inline void WriteToFile(BinaryWriter&& w) { WriteToFile(w); }
@@ -57,19 +54,14 @@ protected:
     void WriteSpecial(ElfContent&, string name, long&, BinaryWriter&);
 
     /**
-     * Write the program headers, and their associated data sections to the
-     * output file.
+     * Write the program headers
      *
      * @param data        The raw-data supplied to the c'tor
      * @param headers     A list of program headers, in the order in whih they
      *                    should be written
-     * @param dataStart   The location within the file where the next data
-     *                    section should be written to
-     *
      */
     void WriteProgHeaders ( ElfContent& data,
-    		                vector<ProgramHeader *>& headers,
-                            BinaryWriter& dataStart);
+    		                vector<ProgramHeader *>& headers);
 
     /**
      * If the elf file has been configured to be an executable, set the start
@@ -79,9 +71,30 @@ protected:
      */
     void Bootstrap(ElfContent& content);
 
-    BinaryWriter WriteUnloadedDataSections( ElfContent& data,
-                                            BinaryWriter& dataWritePos);
+    BinaryWriter WriteDataSections( ElfContent& data);
 private:
+    class SectionOffsets {
+    public:
+    	SectionOffsets(const ElfContent& content);
+
+    	Elf64_Off AddressToOffset(Elf64_Addr& addr);
+
+    	Elf64_Off EndOfMapped();
+    private:
+
+    	void FindLoadables(const ElfContent& content);
+
+    	struct Region {
+    		Elf64_Addr  startAddr;
+    		Elf64_Addr  endAddr;
+    		Elf64_Off   startOffset;
+    		Elf64_Off   endOffset;
+    	};
+
+    	std::map<Elf64_Addr,Region>    loadedMap;
+
+    } offsets;
+
     ElfHeaderX86_64 header;
 
     //final data
@@ -91,7 +104,6 @@ private:
     long sectionDataLength;
     BinaryWriter dataSectionStart;
     BinaryWriter sectionHeadersStart;
-    vector<bool> dataWritten;
 };
 
 

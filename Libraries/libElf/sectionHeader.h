@@ -50,6 +50,9 @@ public:
     inline Elf64_Off DataEnd() const { 
         return DataStart() + DataSize(); 
     }
+    inline Elf64_Addr AddrEnd() const {
+    	return Address() + DataSize();
+    }
     inline bool HasFileData() const { 
         return sh_type != SHT_NOBITS; 
     }

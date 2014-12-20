@@ -29,6 +29,8 @@ ProgramHeader::ProgramHeader ( BinaryReader& reader,
         }
     }
     InitialiseFlags();
+
+    p_filesz = CalculateFileSize(sections);
 }
 
 Flags::Mask ProgramHeader::Flags_Executable  = Flags::EmptyMask;
@@ -152,9 +154,24 @@ const Elf64_Off ProgramHeader::GetAdditionalMemory() const
     return SizeInMemory() - FileSize();
 }
 
-void ProgramHeader::SetFileSize( const Elf64_Off& fileSize ) {
+Elf64_Off ProgramHeader::CalculateFileSize(const SECTION_ARRAY& sections) const {
+	Elf64_Off size = 0;
 
-	Elf64_Off fileSizeDelta = FileSize() - fileSize;
-    RawProgramHeader::SizeInMemory() += fileSizeDelta;
-    RawProgramHeader::FileSize() = fileSize;
+	for ( const Section* section : sections )
+	{
+        if ( Address() <= section->Address() &&
+             AddrEnd() >= section->AddrEnd() )
+        {
+        	if ( section->HasFileData() )
+        	{
+                Elf64_Off sectionEnd = section->AddrEnd() - Address();
+                if (sectionEnd > size)
+                {
+                    size = sectionEnd;
+                }
+        	}
+        }
+	}
+
+	return size;
 }

@@ -8,6 +8,7 @@
 
 ElfFile::ElfFile(ElfContent& data) 
      : 
+       offsets(data),
        header(data.progHeaders.size() > 0 ? 
                  ElfHeaderX86_64::NewExecutable() :
                  ElfHeaderX86_64::NewObjectFile()),
@@ -19,28 +20,14 @@ ElfFile::ElfFile(ElfContent& data)
     InitialiseFile(data);
       
     // Process the program headers
-    BinaryWriter dataWritePos =  ProcessProgHeaders( data);
+    ProcessProgHeaders( data);
+
+    
+    sectionHeadersStart.Offset() = WriteDataSections(data);
 
     Bootstrap(data);
-    
-    SLOG_FROM ( 
-         LOG_VERY_VERBOSE, 
-         "ElfFile::ElfFile", 
-         "Finsihed writing programHeaders, offset is now: " 
-         <<  dataWritePos.Offset()
-    )
 
-    // Write any additional data, not required at run time
-    sectionHeadersStart = (long)WriteUnloadedDataSections(data, dataWritePos);
-
-    SLOG_FROM ( 
-         LOG_VERY_VERBOSE, 
-         "ElfFile::ElfFile", 
-         "Finsihed writing section data, offset is now: " 
-         <<  sectionHeadersStart.Offset()
-    )
-
-    header.SectionTableStart() = (long)sectionHeadersStart;
+    header.SectionTableStart() = sectionHeadersStart.Offset();
 
 
     WriteSectionHeaders(data);
@@ -56,10 +43,10 @@ ElfFile::ElfFile(ElfContent& data)
 void ElfFile::InitialiseFile(ElfContent& data) {
     
     long programHeadersLength =   data.progHeaders.size()
-    		                    * header.ProgramHeaderSize();
+                                * header.ProgramHeaderSize();
 
     dataSectionStart.Offset() =   header.ProgramHeadersStart()
-    		                    + programHeadersLength;
+                                + programHeadersLength;
                          
     // Reserve space for data, plus room for alignment 
     // ( the idea is to allocate too much and resize back down )
@@ -70,7 +57,7 @@ void ElfFile::InitialiseFile(ElfContent& data) {
         sectionDataLength += section->Size();
 
     long sectionHeadersLength =   header.SectionHeaderSize()
-    		                    * header.Sections();
+                                * header.Sections();
 
     file.Resize(  dataSectionStart.Offset()
                 + sectionDataLength
@@ -90,14 +77,9 @@ void ElfFile::InitialiseHeader(ElfContent &data) {
     } else {
         header.ProgramHeadersStart() = header.Size();
     }
-
-    dataWritten.resize(header.Sections());
-    for ( size_t sec=0; sec<dataWritten.size(); sec++ ) {
-        dataWritten[sec] = false;
-    }
 }
 
-BinaryWriter ElfFile::ProcessProgHeaders(ElfContent &data ) {
+void ElfFile::ProcessProgHeaders(ElfContent &data ) {
 
 
     // we need a local copy to sort
@@ -105,7 +87,7 @@ BinaryWriter ElfFile::ProcessProgHeaders(ElfContent &data ) {
 
     if (codeHeaders.size() == 0 ) {
         // Some elf files have no prog. headers
-        return dataSectionStart;
+        return;
     }
 
     auto lt = [] (ProgramHeader* lhs, ProgramHeader* rhs) -> bool {
@@ -120,103 +102,83 @@ BinaryWriter ElfFile::ProcessProgHeaders(ElfContent &data ) {
               };
     sort(codeHeaders.begin(),codeHeaders.end(),lt);
 
-    BinaryWriter dataPos = dataSectionStart;
-    WriteProgHeaders(data,codeHeaders,dataPos);
-
-    return dataPos;
+    WriteProgHeaders(data,codeHeaders);
 }
 
 void ElfFile::WriteProgHeaders ( 
                      ElfContent& data,
-                     vector<ProgramHeader *>& headers,
-                     BinaryWriter&  dataPos)
+                     vector<ProgramHeader *>& headers)
 {
     // Track the position at the head of the file to write headers to
     BinaryWriter headerPos(file,header.ProgramHeadersStart());
 
-	// Track the position (later in the file) we will be writing section data to
-    BinaryWriter dataEnd = dataPos;
-
-
+    // We're responsible for writing the program headers...
     vector<ProgramHeader*>::iterator it = headers.begin();
     ProgramHeader* ph = *it;
+    ph->FileSize() = headers.size() * ph->Size();
 
-    // First handle the program-headers header
-    ph->DataStart() = headerPos;
-    long programHeadersLength =   header.ProgramHeaderSize()
-    		                    * header.ProgramHeaders();
-    ph->SetFileSize(programHeadersLength);
-    headerPos << ph->RawHeader();
 
-    // Now iterate through the remaining sections
-    for (++it; it != headers.end(); ++it) {
+    for (;
+         it != headers.end();
+         ++it) {
+
         ph = *it;
 
-        LOG_FROM ( 
-             LOG_VERBOSE, 
-             "ElfFile::WriteProgHeaders", 
-             "Handling a new Prog. Header" + ph->RawHeader().Describe()
-        )
+        ph->DataStart() = offsets.AddressToOffset(ph->Address());
 
-        // We need to align the program segment: (see comment in .h)
-        // Calculate boundrary location
-        if ( ph->Alignment() != 0 && ph->IsLoadableSegment()) {
-            dataEnd.Offset() = dataPos.NextBoundrary( ph->Alignment()) 
-                             + (ph->Address() % ph->Alignment());
-
-            dataPos.FillTo(dataEnd);
-            dataPos.Offset() = dataEnd;
-        }
-
-        // write the section data
-        dataEnd.Offset() = WriteDataSections( data, *ph, dataPos);
-
-        // Set the file position in the program header
-        if ( ph->IsLoadableSegment() && ph->DataStart() == 0 ) {
-            // The first loadable segment loads the first block of the file
-        } else {
-            ph->DataStart() = dataPos;
-        }
-
-        ph->SetFileSize(dataEnd - dataPos);
         headerPos << ph->RawHeader();
-
-        dataPos = dataEnd.Offset();
     }
 }
 
-BinaryWriter ElfFile::WriteUnloadedDataSections( ElfContent& data,
-                                                 BinaryWriter& dataWritePos ) 
+BinaryWriter ElfFile::WriteDataSections( ElfContent& data)
 {
-    // Pick up any sections that don't have program headers
-    //  - This may be all in a .o file
+    // First write
+    BinaryWriter dataWritePos(dataSectionStart);
+    dataWritePos.Offset() = offsets.EndOfMapped();
+
     for ( int i =0; i< header.Sections(); i++ ) {
         Section& sec = *(data.sections[i]);
-        if (   !dataWritten[i] 
-            && sec.HasFileData() 
-            && !sec.IsRelocTable())
+        if (   sec.HasFileData()
+        	&& !(sec.IsRelocTable() && sec.Address() ==0) )
         {
             if ( sec.IsNull() ) {
                 sec.DataStart() = 0;
+                SLOG_FROM (LOG_VERBOSE,
+                           "ElfFile::WriteDataSections",
+                           "Not Writing section (no data) : " << i)
             } else {
-                // Align start position
-                if ( sec.Alignment() != 0 )  {
-                    dataWritePos.Offset() = 
-                        dataWritePos.NextBoundrary(sec.Alignment());
+                if ( sec.Address() != 0 )
+                {
+                    sec.DataStart() = offsets.AddressToOffset(sec.Address());
+                    BinaryWriter writePos(dataSectionStart);
+                    writePos.Offset() = sec.DataStart();
+                    sec.WriteRawData(writePos);
+                    SLOG_FROM (LOG_VERBOSE,
+                               "ElfFile::WriteDataSections",
+                               "Writing section (at address ) : " << i)
                 }
-
-                sec.DataStart() = dataWritePos;
-                sec.WriteRawData(dataWritePos);
+                else
+                {
+                    if ( sec.Alignment() != 0 )  {
+                        dataWritePos.Offset() =
+                            dataWritePos.NextBoundrary(sec.Alignment());
+                    }
+                    sec.DataStart() = dataWritePos.Offset();
+                    sec.WriteRawData(dataWritePos);
+                    dataWritePos.Offset() += sec.DataSize();
+                    SLOG_FROM (LOG_VERBOSE,
+                               "ElfFile::WriteDataSections",
+                               "Writing section (tacked on end) : " << i)
+                }
             }
             dataWritePos = (long)dataWritePos + sec.DataSize();
-            dataWritten[i] = true;
         }
     }
 
     // The relocation tables go on the end:
     for ( int i =0; i< header.Sections(); i++ ) {
         Section& sec = *(data.sections[i]);
-        if (   !dataWritten[i] && sec.IsRelocTable())
+        if (sec.IsRelocTable() && sec.Address() == 0)
         {
             // Align start position
             if ( sec.Alignment() != 0 )  {
@@ -226,91 +188,14 @@ BinaryWriter ElfFile::WriteUnloadedDataSections( ElfContent& data,
 
             sec.DataStart() = dataWritePos;
             sec.WriteRawData(dataWritePos);
-            dataWritePos = (long)dataWritePos + sec.DataSize();
-            dataWritten[i] = true;
+            dataWritePos.Offset() = dataWritePos + sec.DataSize();
+            SLOG_FROM (LOG_VERBOSE,
+                       "ElfFile::WriteDataSections",
+                       "Writing reloc table: " << i)
         }
     }
 
     return dataWritePos;
-}
-
-
-BinaryWriter ElfFile::WriteDataSections( ElfContent &data, 
-                                         ProgramHeader& prog,
-                                         BinaryWriter& writer) {
-    long segmentEnd = writer;
-    BinaryWriter writePos = writer;
-
-    Section * section;
-    long segmentStart = writer.Offset();
-    for ( auto& sname: prog.SectionNames() ) {
-
-        int sindex = data.sectionMap[sname];
-        section = data.sections[sindex];
-
-        SLOG_FROM ( 
-             LOG_VERY_VERBOSE, 
-             "ElfFile::WriteDataSections", 
-               "Looking to write section: (" 
-               << sindex << ") " 
-               << sname << "\n" 
-               << section->Descripe()
-        )
-
-        if ( prog.Address() != 0 ) {
-            if ( section->DataSize() == 0 ) { 
-                // don't care
-                continue;
-            }
-            if ( section->Address() == 0 ) {
-                string error = "FATAL ERROR: A section in a ";
-                error += "loadable segment MUST specify a load ";
-                error += "address. Segment table is currupt, I ";
-                error += "cannot continue";
-                error += "( " + sname + " )";
-                throw error;
-            }
-            if ( dataWritten[sindex] ) 
-            { 
-                LOG_FROM ( 
-                     LOG_VERY_VERBOSE, 
-                     "ElfFile::WriteDataSections", 
-                       "I've written this section already, I shan't be writing it again!" 
-                )
-            } else {
-            	long segmentOffset =  section->Address() - prog.Address();
-                writePos = segmentStart + segmentOffset;
-
-                section->DataStart() = writePos;
-                section->WriteRawData(writePos);
-
-                long sectionEnd = section->DataSize() + writePos.Offset();
-
-                if ( segmentEnd <=  sectionEnd )
-                {
-                     segmentEnd = section->DataSize() + writePos;
-                }
-                dataWritten[sindex] = true;
-
-                SLOG_FROM ( 
-                     LOG_VERY_VERBOSE, 
-                     "ElfFile::WriteDataSections", 
-                       "Section Written, end is now: " 
-                       << segmentEnd
-                )
-            }
-
-        } else {
-            writePos = segmentEnd;
-            section->DataStart() = writePos;
-            section->WriteRawData(writePos);
-            // These are not loadable, we have no responsibility to 
-            // align them
-            segmentEnd = section->DataSize() + writePos;
-        }
-    }
-    writePos = segmentEnd;
-    return writePos;
 }
 
 bool ElfFile::IsSpecialSection(Section& s) {
@@ -332,6 +217,9 @@ void ElfFile::WriteSectionHeaders(ElfContent &data ) {
         }
     }
 
+    /**
+     * These have to be in a specific order at the end of the file...
+     */
     WriteSpecial(data, ".shstrtab" ,idx, writer);
     WriteSpecial(data, ".symtab", idx, writer);
     WriteSpecial(data, ".strtab", idx, writer);
@@ -356,17 +244,78 @@ void ElfFile::WriteToFile(BinaryWriter& w) {
 }
 
 void ElfFile::Bootstrap(ElfContent& content) {
-	if ( content.progHeaders.size() > 0)
-	{
-		Symbol* _start = content.GetSymbol("_start");
-		if ( _start != nullptr) {
-			header.EntryAddress() = _start->Value();
-		} else {
+    if ( content.progHeaders.size() > 0)
+    {
+        Symbol* _start = content.GetSymbol("_start");
+        if ( _start != nullptr) {
+            header.EntryAddress() = _start->Value();
+        } else {
             LOG_FROM (
                  LOG_WARNING,
                  "ElfFile::Bootstrap",
                  "Content has prog headers but no _start function!"
             )
-		}
-	}
+        }
+    }
+}
+
+ElfFile::SectionOffsets::SectionOffsets(const ElfContent& content) {
+    FindLoadables(content);
+
+    Elf64_Off fileOffset = 0;
+
+    for ( auto it = loadedMap.begin(); it != loadedMap.end(); ++it )
+    {
+        Region& region = it->second;
+        region.startOffset = fileOffset;
+        region.endOffset += region.startOffset;
+
+        // TODO: do this alignment properly, and stop hacking in an extra 4 bytes
+        fileOffset = region.endOffset + 4;
+    }
+}
+
+
+void ElfFile::SectionOffsets::FindLoadables(const ElfContent& content) {
+    for (const ProgramHeader* header : content.progHeaders)
+    {
+        if ( header->IsLoadableSegment() )
+        {
+            loadedMap[header->Address()] = {
+                header->Address(),
+                header->AddrEnd(),
+                0,
+                header->FileSize()
+            };
+        }
+    }
+}
+
+Elf64_Off ElfFile::SectionOffsets::AddressToOffset(Elf64_Addr& addr) {
+    Elf64_Off offset = 0;
+
+    for ( auto it = loadedMap.begin();
+          it != loadedMap.end() && offset == 0;
+          ++it )
+    {
+        Region& region = it->second;
+        if ( region.startAddr <= addr && region.endAddr >= addr)
+        {
+            Elf64_Off regionOffset = addr - region.startAddr;
+            offset = regionOffset + region.startOffset;
+        }
+    }
+    return offset;
+}
+
+Elf64_Off ElfFile::SectionOffsets::EndOfMapped() {
+    if ( loadedMap.size() > 0)
+    {
+        Region& lastRegion = loadedMap.rbegin()->second;
+        return lastRegion.endOffset;
+    }
+    else
+    {
+        return 0;
+    }
 }

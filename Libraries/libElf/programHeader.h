@@ -65,10 +65,18 @@ public:
 class ProgramHeader: protected RawProgramHeader {
 public:
     typedef std::vector<Section*> SECTION_ARRAY;
+
+    /**
+     * C'tor
+     */
+    ProgramHeader ( BinaryReader&, const SECTION_ARRAY&);
+
+    /**
+     * Handle moved binary readers...by redirecting to the std c'tor
+     */
     ProgramHeader ( BinaryReader&& r, const SECTION_ARRAY& s)
         : ProgramHeader(r,s){};
-    ProgramHeader ( BinaryReader&,
-                    const SECTION_ARRAY&);
+
     virtual ~ProgramHeader (){};
 
 
@@ -88,10 +96,8 @@ public:
     using RawProgramHeader::RemoveExecutable;
     using RawProgramHeader::RemoveReadable;
     using RawProgramHeader::RemoveWriteable;
+    using RawProgramHeader::FileSize;
     // Constant Access
-    inline const Elf64_Xword& FileSize() const { 
-        return RawProgramHeader::FileSize(); 
-    }
     inline const Elf64_Xword& SizeInMemory() const { 
         return RawProgramHeader::SizeInMemory(); 
     }
@@ -105,9 +111,10 @@ public:
     const std::vector<string>& SectionNames(){return sectionNames;}
 
     // Calculated values
-    Elf64_Off DataEnd() { return DataStart() + FileSize(); }
+    Elf64_Off  DataEnd() const { return DataStart() + FileSize(); }
+    Elf64_Addr AddrEnd() const { return Address() + SizeInMemory(); }
 
-    // Don't loose track of implicit memorry when re-sizing in 
+    // Don't loose track of implicit memory when re-sizing in
     // the file
     const Elf64_Off GetAdditionalMemory() const; 
     void SetAdditionalMemory(const Elf64_Off& space);
@@ -115,20 +122,13 @@ public:
         SetAdditionalMemory(space + GetAdditionalMemory());
     }
 
-    /**
-     * Update the size of file size of the program header.
-     *
-     * To meet alignment requirements the elf-builder may end up padding
-     * sections. This will change the file size of the program header, and
-     * indeed the size in memory.
-     *
-     * This function re-scales both values based on the new size (in file) of
-     * the program header.
-     *
-     * @param fileSize   The size in file of the segment.
-     */
-    void SetFileSize(const Elf64_Off& fileSize);
 protected:
+    /*
+     * Calculate size in file, by looking at the size taken up by all sections
+     * within the file..
+     */
+    Elf64_Off CalculateFileSize(const SECTION_ARRAY& sections) const;
+
     static const Flags& TypeFlags();
 
     static Flags::Mask Flags_Executable;
