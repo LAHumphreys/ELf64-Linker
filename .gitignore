@@ -12,3 +12,5 @@ elf2elf
 /.cproject
 /.project
 .settings/
+/OverviewLog_20*
+/FullLog_20*

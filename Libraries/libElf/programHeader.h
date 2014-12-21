@@ -37,6 +37,7 @@ public:
     const bool IsDynamicLinking() const { return p_type == PT_DYNAMIC;}
     const bool IsInterpreter() const { return p_type == PT_INTERP;}
     const bool IsNote() const { return p_type == PT_NOTE;}
+    const bool IsProgHeaders() const { return p_type == PT_PHDR; }
 
     /* Entry for the prog headers themselves! */
     const bool IsProgramHeaders() const { return p_type == PT_PHDR;}
@@ -88,6 +89,7 @@ public:
     using RawProgramHeader::IsNull;
     using RawProgramHeader::IsExecutable;
     using RawProgramHeader::IsLoadableSegment;
+    using RawProgramHeader::IsProgramHeaders;
     using RawProgramHeader::IsReadable;
     using RawProgramHeader::IsWriteable;
     using RawProgramHeader::AddExecutable;

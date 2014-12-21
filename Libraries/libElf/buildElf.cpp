@@ -91,10 +91,21 @@ void ElfFile::ProcessProgHeaders(ElfContent &data ) {
     }
 
     auto lt = [] (ProgramHeader* lhs, ProgramHeader* rhs) -> bool {
-                  int lrank = lhs->RawHeader().FileRank();
                   int rrank = rhs->RawHeader().FileRank();
+                  int lrank = lhs->RawHeader().FileRank();
                   if ( lrank == rrank ) {
-                      return lhs->Address() < rhs->Address();
+                	  if (lhs->Address() == 0 && rhs->Address() != 0)
+                	  {
+                		  return rhs;
+                	  }
+                	  else if ( rhs->Address() == 0 && lhs->Address() != 0)
+                	  {
+                		  return lhs;
+                	  }
+                	  else
+                	  {
+                          return lhs->Address() < rhs->Address();
+                	  }
                   } else {
                       return lrank < rrank;
                   }
@@ -115,7 +126,10 @@ void ElfFile::WriteProgHeaders (
     // We're responsible for writing the program headers...
     vector<ProgramHeader*>::iterator it = headers.begin();
     ProgramHeader* ph = *it;
-    ph->FileSize() = headers.size() * ph->Size();
+    if ( ph->IsProgramHeaders())
+    {
+        ph->FileSize() = headers.size() * ph->Size();
+    }
 
 
     for (;

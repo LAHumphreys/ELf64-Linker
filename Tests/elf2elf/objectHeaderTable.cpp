@@ -43,8 +43,8 @@ using namespace std;
 int main(int argc, const char *argv[])
 { 
     // Use ourself as the sample binary
-    infile = argv[0];
-    ElfFileReader f(argv[0]);
+    infile = "isYes/a.out";
+    ElfFileReader f(infile);
     
     p = new ElfParser(f);
     
@@ -56,6 +56,9 @@ int main(int argc, const char *argv[])
     
     // Write out the data
     file.WriteToFile(outfile);
+
+    OFStreamWriter tmp("/tmp/output");
+    file.WriteToFile(tmp);
 
     newHeader = new ElfHeaderX86_64(outfile);
     BinaryReader(outfile).Read(&hdr,sizeof(Elf64_Ehdr));
@@ -284,6 +287,8 @@ int Diff(testLogger& log) {
 
     if ( newHeader.e_entry != originalHeader.e_entry) {
     	log << " Differing entry points! " << endl;
+    	SPRINT ( " new: " << hex << newHeader.e_entry);
+    	SPRINT ( " old: " << hex << originalHeader.e_entry);
     	return 1;
     }
 

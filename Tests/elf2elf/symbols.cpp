@@ -17,7 +17,7 @@ int main(int argc, const char *argv[])
 
 int BinaryComp(testLogger& log ) {
 
-    ElfFileReader f("../elf2elf/isYes/isYes.o");
+    ElfFileReader f("../elf2elf/isYes/a.out");
 
     ElfParser p(f);
 
@@ -33,16 +33,19 @@ int BinaryComp(testLogger& log ) {
     
     // OK now we re-build a new file
     ElfFile file( p.Content());
-    DataLump<5000> outfile;
+    const int MEG = 1024*1024;
+    DataLump<20*MEG>* outfile = new DataLump<20*MEG>;
 
-    file.WriteToFile(outfile);
+    DEFER(delete outfile;)
+
+    file.WriteToFile(*outfile);
 
     Section& nsymTab = *p.Content().GetSection(".symtab");
 
     RawSymbol* newSymbols = new RawSymbol[nsymTab.NumItems()];
     DEFER(delete [] newSymbols;)
 
-    BinaryReader newReader(outfile, nsymTab.DataStart());
+    BinaryReader newReader(*outfile, nsymTab.DataStart());
     for (size_t i=0; i< symTab.NumItems(); i++ ) {
         newReader >> newSymbols[i];
         string name = p.Content().symbols[i]->Name();

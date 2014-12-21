@@ -26,7 +26,7 @@ int CompareSections(testLogger& log );
 
 int main(int argc, const char *argv[])
 {
-    ElfFileReader f(argv[0]);
+    ElfFileReader f("isYes/a.out");
     
     ElfParser p(f);
     
@@ -85,14 +85,14 @@ int CompareSections(testLogger& log ) {
 
         log << "Section: " << i << endl;
 
-        log << "Old Data: " << endl;
-        log << BinaryDescribe::Describe( 
-                   BinaryReader(*infile,newHdr.DataStart()),
-                   100);
         log << "New Data: " << endl;
         log << BinaryDescribe::Describe( 
-                   BinaryReader(*outfile,oldHdr.DataStart()),
-                   100);
+                   BinaryReader(*outfile,newHdr.DataStart()),
+                   newHdr.DataSize()> 100 ? 100 : newHdr.DataSize());
+        log << "Old Data: " << endl;
+        log << BinaryDescribe::Describe( 
+                   BinaryReader(*infile,oldHdr.DataStart()),
+                   oldHdr.DataSize()> 100 ? 100 : oldHdr.DataSize());
 
         for (size_t j = 0; j < oldHdr.DataSize(); j++) {
             if  (    outfile->Get(j+newHdr.DataStart())

@@ -27,7 +27,7 @@ int main(int argc, const char *argv[])
     /*
      * Tests to validate the string table written by ElfFile
      */
-    ElfFileReader f(argv[0]);
+    ElfFileReader f("isYes/a.out");
     
     ElfParser p(f);
     

@@ -132,6 +132,8 @@ int RawProgramHeader::FileRank() const {
         return 40;
     } else if ( IsNote() ) {
         return 50;
+    } else if ( IsThreadLocalStorage() ) {
+        return 60;
     } else if ( GNUIsExceptionFrame() ) {
         return 1000;
     } else if ( GNUIsExecutable() ) {
@@ -159,12 +161,12 @@ Elf64_Off ProgramHeader::CalculateFileSize(const SECTION_ARRAY& sections) const 
 
 	for ( const Section* section : sections )
 	{
-        if ( Address() <= section->Address() &&
-             AddrEnd() >= section->AddrEnd() )
+        if ( DataStart() <= section->DataStart() &&
+             DataEnd() >= section->DataEnd() )
         {
         	if ( section->HasFileData() )
         	{
-                Elf64_Off sectionEnd = section->AddrEnd() - Address();
+                Elf64_Off sectionEnd = section->DataEnd() - DataStart();
                 if (sectionEnd > size)
                 {
                     size = sectionEnd;

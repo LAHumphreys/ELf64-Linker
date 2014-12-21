@@ -35,7 +35,7 @@ int CompareData (testLogger& log );
 
 int main(int argc, const char *argv[])
 {
-	pathToBin = argv[0];
+	pathToBin = "isYes/a.out";
     ElfFileReader f(pathToBin.c_str());
     
     infile = &f;
@@ -47,6 +47,9 @@ int main(int argc, const char *argv[])
     ElfFile file( content);
     file.WriteToFile(outfile);
     
+    OFStreamWriter tmp("/tmp/output");
+    file.WriteToFile(tmp);
+
     // read in the section data
     ElfHeaderX86_64 header(outfile);
     ElfHeaderX86_64 oldHeader(f);
@@ -118,6 +121,8 @@ int CompareHeaders(testLogger& log ) {
 
         if ( newHdr.FileSize() != oldHdr.FileSize() ) { 
             log << "Missmatch in FileSize for program headers: " << i << endl;
+            SPRINT ( "old: " << hex << oldHdr.FileSize());
+            SPRINT ( "new: " << hex << newHdr.FileSize());
             return 1;
         } 
 
